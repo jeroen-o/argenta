@@ -792,7 +792,7 @@ function bereken() {
     if (!nhg && idx > 1 && idx <= RATES.klassen.length + 1) {
       for (let doelIdx = idx - 1; doelIdx >= 1; doelIdx--) {
         const nieuw = tarief(hoofd.d, doelIdx);
-        if (hoofd.rente - nieuw >= 0.05 - 1e-9) {
+        if (hoofd.rente - nieuw >= 0.01 - 1e-9) {
           const extraEigen = Math.ceil(totaal - mw * RATES.klassen[doelIdx - 1] / 100);
           if (extraEigen > 0 && extraEigen < hoofd.d.bedrag) {
             const rest = x => x.d.bedrag - (x === hoofd ? extraEigen : 0);
