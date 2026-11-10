@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Offertevoorstel Argenta hypotheek (indicatief)</title>
+<title>Conceptofferte Argenta hypotheek (indicatief)</title>
 <style>
   :root {
     /* Huisstijl-tokens: pas hier aan voor een andere huisstijl */
@@ -15,6 +15,7 @@
     --lijn: #d5dce4;
     --vlak: #f5f7f6;
     --wit: #ffffff;
+    --grijs: #8a9199;
     --fout: #b3261e;
     --fout-vlak: #fdecea;
     --letop: #7a5200;
@@ -23,18 +24,28 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; color: var(--tekst); background: var(--vlak); font-size: 15px; line-height: 1.45; }
-  header { background: var(--primair); color: var(--wit); padding: 18px 16px; border-bottom: 4px solid var(--accent); }
-  header .in, main { max-width: 1220px; margin: 0 auto; }
-  header h1 { margin: 0; font-size: 21px; font-weight: 600; }
-  header p { margin: 4px 0 0; opacity: .9; font-size: 13.5px; }
-  main { padding: 16px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-  @media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+  header { background: var(--primair); color: var(--wit); padding: 14px 16px; border-bottom: 4px solid var(--accent); }
+  .in { max-width: 1180px; margin: 0 auto; }
+  header .in { display: flex; gap: 18px; align-items: center; }
+  header svg { height: 54px; width: auto; flex: none; }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 3px 0 0; opacity: .9; font-size: 13px; }
+  nav.stappen { background: var(--wit); border-bottom: 1px solid var(--lijn); padding: 12px 16px; }
+  nav.stappen ol { list-style: none; margin: 0 auto; padding: 0; max-width: 1180px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  nav.stappen button { width: 100%; border: none; background: none; padding: 0; text-align: left; color: var(--grijs); font-size: 13px; border-top: 4px solid var(--lijn); padding-top: 6px; border-radius: 0; }
+  nav.stappen button b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  nav.stappen li.gedaan button { border-color: var(--accent); color: var(--primair); }
+  nav.stappen li.actief button { border-color: var(--primair); color: var(--tekst); font-weight: 600; }
+  main { padding: 16px; }
+  .stap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .stap.breed { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 900px) { .stap { grid-template-columns: minmax(0, 1fr); } header p { display: none; } nav.stappen span { display: none; } }
   section { background: var(--wit); border: 1px solid var(--lijn); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-  h2 { margin: 0 0 12px; font-size: 16px; color: var(--primair); }
+  h2 { margin: 0 0 12px; font-size: 16px; color: var(--primair); text-transform: uppercase; letter-spacing: .03em; }
   h3 { margin: 14px 0 6px; font-size: 13.5px; color: var(--primair); }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px; align-items: end; }
   label { display: block; font-size: 12.5px; color: var(--tekst-zacht); margin-bottom: 3px; }
-  input[type=text], select { width: 100%; padding: 8px 9px; border: 1px solid var(--lijn); border-radius: 6px; font: inherit; color: inherit; background: var(--wit); }
+  input[type=text], input[type=date], select { width: 100%; padding: 8px 9px; border: 1px solid var(--lijn); border-radius: 6px; font: inherit; color: inherit; background: var(--wit); }
   input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
   .euro { position: relative; }
   .euro span { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--tekst-zacht); }
@@ -43,11 +54,21 @@
   .check input { width: 16px; height: 16px; accent-color: var(--primair); flex: none; }
   .deel { border: 1px solid var(--lijn); border-left: 4px solid var(--accent); border-radius: 6px; padding: 12px; margin-bottom: 10px; background: var(--vlak); }
   .deel-kop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-  button { font: inherit; cursor: pointer; border-radius: 6px; padding: 9px 14px; border: 1px solid var(--primair); background: var(--wit); color: var(--primair); }
+  button { font: inherit; cursor: pointer; border-radius: 6px; padding: 9px 16px; border: 1px solid var(--primair); background: var(--wit); color: var(--primair); }
   button.primair { background: var(--primair); color: var(--wit); font-weight: 600; }
   button.klein { padding: 3px 9px; font-size: 12.5px; border-color: var(--lijn); color: var(--tekst-zacht); }
   button:hover { filter: brightness(.95); }
-  .kern { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .navknoppen { display: flex; justify-content: space-between; gap: 10px; max-width: 1180px; margin: 0 auto 24px; }
+  /* Kostenboom */
+  .boom { display: grid; gap: 8px; }
+  .boom .blok { border: 1px solid var(--lijn); border-radius: 6px; padding: 9px 12px; }
+  .boom .regel { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding: 2px 0; }
+  .boom .regel span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .boom .som { font-weight: 600; color: var(--primair); border-top: 1px solid var(--lijn); margin-top: 4px; padding-top: 5px; }
+  .boom .groen { background: var(--accent); border-color: var(--accent); color: #062a18; font-weight: 600; }
+  .boom .grijs { background: var(--grijs); border-color: var(--grijs); color: var(--wit); font-weight: 600; }
+  .boom .grijs .groot, .boom .groen .groot { font-size: 17px; }
+  .kern { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
   .kern div { background: var(--primair-licht); border-radius: 6px; padding: 10px 12px; }
   .kern small { display: block; color: var(--tekst-zacht); font-size: 12px; }
   .kern b { font-size: 18px; color: var(--primair); font-variant-numeric: tabular-nums; }
@@ -63,135 +84,211 @@
   .melding.letop { background: var(--letop-vlak); color: var(--letop); }
   .melding.ok { background: var(--primair-licht); color: var(--goed); }
   .klein-tekst { font-size: 12.5px; color: var(--tekst-zacht); }
-  .acties { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
   details { border-top: 1px solid var(--lijn); padding: 8px 0; }
   details summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--primair); }
   details ul { margin: 6px 0; padding-left: 18px; font-size: 13.5px; }
+  .klaar { text-align: center; padding: 26px 16px; }
+  .klaar .bedrag { font-size: 22px; color: var(--primair); font-weight: 700; margin: 4px 0; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <header>
   <div class="in">
-    <h1>Offertevoorstel Argenta hypotheek <span style="font-weight:400">(indicatief)</span></h1>
-    <p>Hulpmiddel voor hypotheekadviseurs – geen product of document van Argenta en geen renteaanbod of bindende offerte.
-       Tarieven vast: <span id="datumVast"></span> · variabel: <span id="datumVar"></span> · leennormen <span id="normJaar"></span> · hypotheekgids augustus 2026.</p>
+    <svg role="img" aria-label="Argenta" height="114" viewBox="0 0 241 114" width="241" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m58.975 82.069v13.701l4.0087293-.0016488c2.5818489-.0349086 9.3562707-.518505 9.3562707-7.0173512 0-3.003-2.019-6.682-7.884-6.682zm11.828 31.04-11.733-16.609h-.096v16.608h-5.193v-35.834h11.01c5 0 7.597 1.21 9.471 3 2.26 2.18 3.27 5.474 3.27 8.478 0 9.492-7.885 10.99-10.193 10.99l9.953 13.367zm41.489-26.829h-6.059l-.351307-.3850871c-1.586896-1.7182764-4.502181-4.5049129-9.359693-4.5049129-7.403 0-13.172 6.392-13.172 13.898 0 7.784361 6.3109742 13.544154 12.9406979 13.702647l.5750647-.000622c1.7540942-.048803 8.7828454-.687633 11.9652374-8.907025h-16.587v-4.795h22.5c-.192 12.011-9.712 18.499-18.365 18.499-10.385 0-18.222-8.474-18.222-18.499 0-10.316 7.934-18.69 18.174-18.69 6.056 0 12.5 3.244 15.961 9.682zm4.231 26.829v-35.835h19.177v4.794h-13.988v10.556h13.988v4.796h-13.988v10.895h13.988v4.794zm45.477 0-17.595-27.701h-.098v27.7h-5.193v-35.833h5.675l17.308 27.264h.095v-27.265h5.193v35.835zm13.27 0v-31.04h-6.828v-4.795h18.847v4.794h-6.827v31.04zm19.457-15.681v-13.241l17.013 13.174zm-.007-20.214h-5.619v36.187h5.626v-10.918l23.658.025 14.065 10.892h8.03zm-148.969 20.216-17.01-.068 17.01-13.174zm.008-20.216-45.759 36.187h8.029l14.066-10.893 23.656-.025v10.918h5.627v-36.187zm63.865-56.869h11.853l-26.072 20.658.001-9.393zm29.506 45.992h-11.85l26.07-20.656v9.39zm.002-45.992 6.346 5.027-43.777 34.686-6.295-4.987v-11.571l29.223-23.155zm7.922 6.275 6.296 4.99v11.57l-29.226 23.156h-14.5l-6.347-5.029zm-18.584-9.318 14.533-11.516h27.194l-14.531 11.516zm-3.153-14.979 2.933-2.323v14.979l-2.933 2.323z"/></svg>
+    <div>
+      <h1>Conceptofferte Argenta hypotheek <span style="font-weight:400">(indicatief)</span></h1>
+      <p>Rekentool voor hypotheekadviseurs – geen renteaanbod of bindende offerte van Argenta.
+         Tarieven vast: <span id="datumVast"></span> · variabel: <span id="datumVar"></span> · leennormen <span id="normJaar"></span>.</p>
+    </div>
   </div>
 </header>
 
+<nav class="stappen" aria-label="Stappen">
+  <ol id="stappen">
+    <li><button type="button" data-naar="1"><b>Stap 1</b><span>Start de conceptaanvraag</span></button></li>
+    <li><button type="button" data-naar="2"><b>Stap 2</b><span>Bereken de kosten</span></button></li>
+    <li><button type="button" data-naar="3"><b>Stap 3</b><span>Kan dit bedrag geleend worden?</span></button></li>
+    <li><button type="button" data-naar="4"><b>Stap 4</b><span>Overzicht en conceptofferte</span></button></li>
+  </ol>
+</nav>
+
 <main>
-  <div>
-    <section>
-      <h2>Dossier</h2>
-      <div class="grid">
-        <div><label for="kantoor">Advieskantoor</label><input type="text" id="kantoor" autocomplete="off"></div>
-        <div><label for="adviseur">Adviseur</label><input type="text" id="adviseur" autocomplete="off"></div>
-        <div><label for="dossier">Dossiernummer</label><input type="text" id="dossier" autocomplete="off"></div>
-        <div><label for="klant1">Aanvrager 1</label><input type="text" id="klant1" autocomplete="off"></div>
-        <div><label for="klant2">Aanvrager 2 (optioneel)</label><input type="text" id="klant2" autocomplete="off"></div>
-        <div><label for="adres">Adres woning</label><input type="text" id="adres" autocomplete="off"></div>
-      </div>
-    </section>
+<div class="in">
 
-    <section>
-      <h2>Woning en uitgangspunten</h2>
-      <div class="grid">
-        <div><label for="marktwaarde">Marktwaarde (na evt. verbouwing)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="marktwaarde" data-euro value="400.000"></div></div>
-        <div><label for="label">Energielabel</label>
-          <select id="label">
-            <option value="0">A++++ met EPG (&gt; 10 jaar)</option><option value="1">A++++</option><option value="2">A+++</option>
-            <option value="3">A+ of A++</option><option value="4">A</option><option value="5">B</option>
-            <option value="6" selected>C of D</option><option value="7">E, F of G</option><option value="8">Geen (geldig) label</option>
-          </select></div>
-        <div><label for="doel">Financieringsdoel</label>
-          <select id="doel"><option value="bestaand">Aankoop bestaande woning</option><option value="nieuwbouw">Aankoop nieuwbouw</option><option value="oversluiten">Oversluiting</option><option value="verbouwing">Verbouwing / verhoging</option><option value="uitkoop">Verkrijgen volledig eigendom (verdeling)</option><option value="erfpacht">Afkoop erfpacht(canon)</option></select></div>
-        <div><label for="taxatie">Waardebepaling</label>
-          <select id="taxatie"><option value="nwwi">Taxatierapport (NWWI)</option><option value="desktop">Calcasa Desktop Taxatie</option><option value="desktopplus">Calcasa Desktop Taxatie Plus</option></select></div>
-        <div><label for="maatregelen">Energiebesparende maatregelen (EBV/EBB)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="maatregelen" data-euro></div></div>
-      </div>
-      <div class="grid" style="margin-top:6px">
-        <label class="check"><input type="checkbox" id="nhg"> Met NHG</label>
-        <label class="check"><input type="checkbox" id="starter"> Koopstarter (≤ 35 jaar, eerste koopwoning)</label>
-        <label class="check"><input type="checkbox" id="appartement"> Appartement</label>
-        <label class="check"><input type="checkbox" id="erfpachtgrond"> Erfpacht</label>
-      </div>
-    </section>
-
-    <section>
-      <h2>Leningdelen</h2>
-      <div id="delen"></div>
-      <button type="button" id="voegToe">+ Leningdeel toevoegen</button>
-    </section>
-
-    <section>
-      <h2>Overbrugging</h2>
-      <label class="check" style="padding-top:0"><input type="checkbox" id="ovbAan"> Overbruggingshypotheek opnemen</label>
-      <div class="grid" id="ovbVelden" hidden>
-        <div style="grid-column: 1 / -1"><label for="ovbSituatie">Situatie huidige woning</label>
-          <select id="ovbSituatie">
-            <option value="a">Verkocht, ontbindende voorwaarden verstreken</option>
-            <option value="b">Verkocht, ontbindende voorwaarden niet verstreken</option>
-            <option value="c">Niet verkocht, met taxatierapport</option>
-            <option value="d">Niet verkocht, met Calcasa Desktop Taxatie</option>
-          </select></div>
-        <div><label for="ovbWaarde">Verkoopprijs / marktwaarde</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbWaarde" data-euro></div></div>
-        <div><label for="ovbRestschuld">Restschuld huidige hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbRestschuld" data-euro></div></div>
-        <div><label for="ovbBedrag">Gewenste overbrugging</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbBedrag" data-euro></div></div>
-      </div>
-    </section>
-
-    <section>
-      <h2>Inkomen en lasten <span class="klein-tekst" style="font-weight:400">– leennormen <span id="normJaar2"></span></span></h2>
-      <div class="grid">
-        <div><label for="ink1">Toetsinkomen aanvrager 1 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink1" data-euro></div></div>
-        <div><label for="ink2">Toetsinkomen aanvrager 2 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink2" data-euro></div></div>
-        <div><label for="aftrek">Partneralimentatie + erfpachtcanon (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="aftrek" data-euro></div></div>
-        <div><label for="verplichtingen">Financiële verplichtingen (per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="verplichtingen" data-euro></div></div>
-        <div><label for="studie">Studielening DUO (termijnbedrag per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="studie" data-euro></div></div>
-        <div><label for="toetsrente">Toetsrente bij rentevast &lt; 10 jaar (%)</label><input type="text" inputmode="decimal" id="toetsrente" value="5,00" style="text-align:right"></div>
-      </div>
-      <div class="grid" style="margin-top:6px">
-        <label class="check"><input type="checkbox" id="aow"> Aanvrager met hoogste inkomen is AOW-gerechtigd</label>
-        <label class="check"><input type="checkbox" id="alleenstaand"> Alleenstaande aanvrager</label>
-      </div>
-      <p class="klein-tekst" style="margin:6px 0 0">Verplichtingen: doorlopend krediet/verzendhuiskrediet 2% van de limiet per maand; aflopend krediet en operational lease op werkelijke last.
-        De toetsrente voor rentevast korter dan 10 jaar wordt per kwartaal door de AFM vastgesteld – controleer de actuele waarde.</p>
-    </section>
+  <!-- ===== Stap 1 ===== -->
+  <div class="stap" data-stap="1">
+    <div>
+      <section>
+        <h2>Woning</h2>
+        <div class="grid">
+          <div><label for="doel">Financieringsdoel</label>
+            <select id="doel"><option value="bestaand">Aankoop bestaande woning</option><option value="nieuwbouw">Aankoop nieuwbouw</option><option value="oversluiten">Oversluiting</option><option value="verbouwing">Verbouwing / verhoging</option><option value="uitkoop">Verkrijgen volledig eigendom (verdeling)</option><option value="erfpacht">Afkoop erfpacht(canon)</option></select></div>
+          <div><label for="koopsom" id="koopsomLabel">Koopsom</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="koopsom" data-euro value="400.000"></div></div>
+          <div><label for="marktwaarde">Marktwaarde (na evt. verbouwing)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="marktwaarde" data-euro value="400.000"></div></div>
+          <div><label for="label">Energielabel</label>
+            <select id="label">
+              <option value="0">A++++ met EPG (&gt; 10 jaar)</option><option value="1">A++++</option><option value="2">A+++</option>
+              <option value="3">A+ of A++</option><option value="4">A</option><option value="5">B</option>
+              <option value="6" selected>C of D</option><option value="7">E, F of G</option><option value="8">Geen (geldig) label</option>
+            </select></div>
+          <div><label for="taxatie">Waardebepaling</label>
+            <select id="taxatie"><option value="nwwi">Taxatierapport (NWWI)</option><option value="desktop">Calcasa Desktop Taxatie</option><option value="desktopplus">Calcasa Desktop Taxatie Plus</option></select></div>
+          <div><label for="adres">Adres woning</label><input type="text" id="adres" autocomplete="off"></div>
+        </div>
+        <div class="grid" style="margin-top:6px">
+          <label class="check"><input type="checkbox" id="starter"> Koopstarter (≤ 35 jaar, eerste koopwoning)</label>
+          <label class="check"><input type="checkbox" id="appartement"> Appartement</label>
+          <label class="check"><input type="checkbox" id="erfpachtgrond"> Erfpacht</label>
+        </div>
+      </section>
+    </div>
+    <div>
+      <section>
+        <h2>Aanvragers en adviseur</h2>
+        <div class="grid">
+          <div><label for="klant1">Aanvrager 1</label><input type="text" id="klant1" autocomplete="off"></div>
+          <div><label for="geb1">Geboortedatum aanvrager 1</label><input type="date" id="geb1"></div>
+          <div><label for="klant2">Aanvrager 2 (optioneel)</label><input type="text" id="klant2" autocomplete="off"></div>
+          <div><label for="geb2">Geboortedatum aanvrager 2</label><input type="date" id="geb2"></div>
+          <div><label for="kantoor">Advieskantoor</label><input type="text" id="kantoor" autocomplete="off"></div>
+          <div><label for="adviseur">Adviseur</label><input type="text" id="adviseur" autocomplete="off"></div>
+          <div><label for="afmnr">AFM-vergunningnummer kantoor</label><input type="text" id="afmnr" autocomplete="off"></div>
+          <div><label for="dossier">Dossiernummer</label><input type="text" id="dossier" autocomplete="off"></div>
+        </div>
+      </section>
+    </div>
   </div>
 
-  <div>
-    <section>
-      <h2>Resultaat</h2>
-      <div class="kern">
-        <div><small>Totale hoofdsom</small><b id="kHoofdsom">–</b></div>
-        <div><small>LTV / tariefklasse</small><b id="kLtv">–</b></div>
-        <div><small>Bruto maandlast (1e maand)</small><b id="kMaand">–</b></div>
-        <div><small>Maximaal op inkomen</small><b id="kMax">–</b></div>
-      </div>
-      <div class="tabel-wrap">
-        <table>
+  <!-- ===== Stap 2 ===== -->
+  <div class="stap" data-stap="2" hidden>
+    <div>
+      <section>
+        <h2>Totale kosten</h2>
+        <div class="grid">
+          <div><label for="verbouwing">Verbouwing</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="verbouwing" data-euro></div></div>
+          <div><label for="maatregelen">waarvan energiebesparende maatregelen (EBV/EBB)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="maatregelen" data-euro></div></div>
+          <div><label for="ovb_pct">Overdrachtsbelasting</label>
+            <select id="ovb_pct"><option value="2">2% (eigen woning)</option><option value="0">0% (startersvrijstelling / n.v.t.)</option></select></div>
+          <div><label for="notLevering">Notariskosten leveringsakte</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="notLevering" data-euro value="650"></div></div>
+          <div><label for="notHypotheek">Notariskosten hypotheekakte</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="notHypotheek" data-euro value="650"></div></div>
+          <div><label for="taxKosten">Taxatiekosten</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="taxKosten" data-euro value="500"></div></div>
+          <div><label for="advKosten">Advies- en bemiddelingskosten</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="advKosten" data-euro value="2.500"></div></div>
+          <div><label for="eigenGeld">Eigen geld</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="eigenGeld" data-euro></div></div>
+        </div>
+        <div class="grid" style="margin-top:6px">
+          <label class="check"><input type="checkbox" id="nhg"> Nationale Hypotheek Garantie</label>
+        </div>
+        <p class="klein-tekst" style="margin:6px 0 0">Notaris-, taxatie- en advieskosten zijn indicaties; vul de werkelijke bedragen in. Zolang het veld eigen geld niet is aangepast,
+          vult de tool het bedrag in dat minimaal nodig is om binnen de marktwaarde te blijven.</p>
+      </section>
+    </div>
+    <div><section><h2>Opbouw</h2><div class="boom" id="boom2"></div></section></div>
+  </div>
+
+  <!-- ===== Stap 3 ===== -->
+  <div class="stap" data-stap="3" hidden>
+    <div>
+      <section>
+        <h2>Leningdelen</h2>
+        <div id="delen"></div>
+        <button type="button" id="voegToe">+ Leningdeel toevoegen</button>
+      </section>
+      <section>
+        <h2>Inkomen en lasten</h2>
+        <div class="grid">
+          <div><label for="ink1">Toetsinkomen aanvrager 1 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink1" data-euro></div></div>
+          <div><label for="ink2">Toetsinkomen aanvrager 2 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink2" data-euro></div></div>
+          <div><label for="aftrek">Partneralimentatie + erfpachtcanon (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="aftrek" data-euro></div></div>
+          <div><label for="verplichtingen">Financiële verplichtingen (per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="verplichtingen" data-euro></div></div>
+          <div><label for="studie">Studielening DUO (termijnbedrag per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="studie" data-euro></div></div>
+          <div><label for="toetsrente">Toetsrente bij rentevast &lt; 10 jaar (%)</label><input type="text" inputmode="decimal" id="toetsrente" value="5,00" style="text-align:right"></div>
+        </div>
+        <div class="grid" style="margin-top:6px">
+          <label class="check"><input type="checkbox" id="aow"> Aanvrager met hoogste inkomen is AOW-gerechtigd</label>
+          <label class="check"><input type="checkbox" id="alleenstaand"> Alleenstaande aanvrager</label>
+        </div>
+        <p class="klein-tekst" style="margin:6px 0 0">Verplichtingen: doorlopend krediet/verzendhuiskrediet 2% van de limiet per maand; aflopend krediet en operational lease op werkelijke last.
+          De toetsrente voor rentevast korter dan 10 jaar stelt de AFM per kwartaal vast – controleer de actuele waarde.</p>
+      </section>
+      <section>
+        <h2>Overbrugging</h2>
+        <label class="check" style="padding-top:0"><input type="checkbox" id="ovbAan"> Overbruggingshypotheek opnemen</label>
+        <div class="grid" id="ovbVelden" hidden>
+          <div style="grid-column: 1 / -1"><label for="ovbSituatie">Situatie huidige woning</label>
+            <select id="ovbSituatie">
+              <option value="a">Verkocht, ontbindende voorwaarden verstreken</option>
+              <option value="b">Verkocht, ontbindende voorwaarden niet verstreken</option>
+              <option value="c">Niet verkocht, met taxatierapport</option>
+              <option value="d">Niet verkocht, met Calcasa Desktop Taxatie</option>
+            </select></div>
+          <div><label for="ovbWaarde">Verkoopprijs / marktwaarde</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbWaarde" data-euro></div></div>
+          <div><label for="ovbRestschuld">Restschuld huidige hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbRestschuld" data-euro></div></div>
+          <div><label for="ovbBedrag">Gewenste overbrugging</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbBedrag" data-euro></div></div>
+        </div>
+      </section>
+    </div>
+    <div>
+      <section><h2>Haalbaarheid</h2><div class="boom" id="boom3"></div></section>
+      <section>
+        <h2>Maandlast (indicatie)</h2>
+        <div class="tabel-wrap"><table>
+          <thead><tr><th>#</th><th>Vorm</th><th class="r">Bedrag</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto p/m</th></tr></thead>
+          <tbody id="resRijen3"></tbody>
+        </table></div>
+        <table class="kv" style="margin-top:8px" id="kvMaand"></table>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===== Stap 4 ===== -->
+  <div class="stap" data-stap="4" hidden>
+    <div>
+      <section class="klaar">
+        <h2>De conceptofferte staat klaar</h2>
+        <div class="bedrag" id="klaarBedrag"></div>
+        <div class="bedrag" id="klaarMaand"></div>
+        <p><button type="button" class="primair" id="print">Download conceptofferte (afdrukken / PDF)</button></p>
+        <p class="klein-tekst" style="margin:0">Indicatief. Argenta beoordeelt elke aanvraag zelf. Alleen het renteaanbod en de bindende offerte van Argenta zijn leidend; de aanvraag loopt via HDN.</p>
+      </section>
+      <section>
+        <h2>Toetsing</h2>
+        <div class="kern">
+          <div><small>Totale hoofdsom</small><b id="kHoofdsom">–</b></div>
+          <div><small>LTV / tariefklasse</small><b id="kLtv">–</b></div>
+          <div><small>Jaarlijks kostenpercentage</small><b id="kJkp">–</b></div>
+          <div><small>Maximaal op inkomen</small><b id="kMax">–</b></div>
+        </div>
+        <div id="meldingen"></div>
+        <div id="inkomenBlok"></div>
+      </section>
+    </div>
+    <div>
+      <section>
+        <h2>Leningdelen</h2>
+        <div class="tabel-wrap"><table>
           <thead><tr><th>#</th><th>Vorm</th><th class="r">Bedrag</th><th class="r">Looptijd</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto p/m</th></tr></thead>
           <tbody id="resRijen"></tbody>
           <tfoot><tr><td colspan="2">Totaal</td><td class="r" id="tBedrag"></td><td></td><td></td><td class="r" id="tRente"></td><td class="r" id="tMaand"></td></tr></tfoot>
-        </table>
-      </div>
-      <div id="inkomenBlok"></div>
-      <div id="meldingen" style="margin-top:12px"></div>
-      <div class="acties">
-        <button type="button" class="primair" id="print">Offertevoorstel afdrukken / opslaan als PDF</button>
-      </div>
-      <p class="klein-tekst" style="margin-bottom:0">
-        Indicatief. Argenta beoordeelt elke aanvraag zelf en kan afwijken van de gids. Aan deze berekening kunnen geen rechten worden ontleend;
-        alleen het renteaanbod en de bindende offerte van Argenta zijn leidend. De aanvraag loopt via HDN.
-      </p>
-    </section>
-
-    <section>
-      <h2>Voorwaarden Argenta in het kort</h2>
-      <div id="voorwaarden"></div>
-      <p class="klein-tekst" style="margin-bottom:0">Samenvatting van de Argenta hypotheekgids (augustus 2026). De gids en de voorwaarden op argenta.nl zijn leidend.</p>
-    </section>
+        </table></div>
+      </section>
+      <section>
+        <h2>Eisen aan een hypotheekofferte</h2>
+        <div id="eisen"></div>
+      </section>
+      <section>
+        <h2>Voorwaarden Argenta in het kort</h2>
+        <div id="voorwaarden"></div>
+        <p class="klein-tekst" style="margin-bottom:0">Samenvatting van de Argenta hypotheekgids (augustus 2026) en de voorwaarden Argenta hypotheek (juli 2025). De originele documenten zijn leidend.</p>
+      </section>
+    </div>
   </div>
+
+</div>
+<div class="navknoppen">
+  <button type="button" id="terug">‹ Terug</button>
+  <button type="button" class="primair" id="verder">Verder ›</button>
+</div>
 </main>
 
 <script>
@@ -280,6 +377,39 @@ const VOORWAARDEN = [
   ]]
 ];
 
+/* Kredietgever: bron voorwaarden Argenta hypotheek, juli 2025 (begrippenlijst en hoofdstuk 8) */
+const ARGENTA = {
+  naam: 'Argenta Spaarbank NV, bijkantoor Nederland',
+  adres: 'Stadionstraat 2, Breda (maatschappelijke zetel: Belgiëlei 49-53, B-2018 Antwerpen)',
+  afm: '12000720',
+  toezicht: 'Autoriteit Financiële Markten (nummer 12000720), De Nederlandsche Bank en de Nationale Bank van België',
+  klachten: 'klachten@argenta.nl of het klachtenformulier op argenta.nl; daarna Kifid (www.kifid.nl)'
+};
+/* Wettelijke eisen aan het aanbod voor hypothecair krediet (art. 4:33 Wft en het BGfo; ESIS = bijlage II bij richtlijn 2014/17/EU) */
+const EISEN = [
+  ['Wat de wet van een offerte vraagt', [
+    'Een bindend aanbod komt van de kredietgever (Argenta), niet van de adviseur of bemiddelaar.',
+    'Bij het bindend aanbod hoort een gepersonaliseerd ESIS (Europees gestandaardiseerd informatieblad) met 15 vaste onderdelen.',
+    'De consument krijgt minimaal 14 dagen bedenktijd waarin het aanbod geldig blijft.',
+    'Verplicht vermeld: totale kredietbedrag, looptijd, debetrentevoet en rentevaste periode, jaarlijks kostenpercentage (JKP), totale kosten en totaal te betalen bedrag, aantal en hoogte van de termijnen.',
+    'Ook verplicht: aanvullende verplichtingen (verzekeringen), voorwaarden voor vervroegd aflossen, gevolgen van niet-nakoming, klachtenprocedure en toezichthouder.'
+  ]],
+  ['Hoe deze conceptofferte daarmee omgaat', [
+    'De conceptofferte volgt de indeling van het ESIS en toont JKP, totale kosten en totaal te betalen bedrag, zodat de klant weet wat in de echte offerte komt te staan.',
+    'Het document is uitdrukkelijk geen renteaanbod, geen bindend aanbod en geen ESIS; de bedenktijd gaat pas lopen bij het bindend aanbod van Argenta.',
+    'Het JKP is berekend met de ingevulde kosten (hypotheekakte, taxatie, advies en bemiddeling, NHG) en de aanname dat de rente de hele looptijd gelijk blijft.',
+    'Het document is geen adviesrapport: inventarisatie, analyse en onderbouwing van de passendheid legt de adviseur apart vast.'
+  ]]
+];
+VOORWAARDEN.push(['Tijdens de looptijd', [
+  'Opstalverzekering tegen herbouwwaarde is verplicht.',
+  'Vergoedingsvrij aflossen tot 15%; daarboven geen vergoeding bij onder meer aflossen uit eigen middelen, verkoop van de woning of als de marktrente hoger is dan de contractrente.',
+  'Overbruggingshypotheek mag altijd zonder vergoeding worden afgelost.',
+  'Tussentijds een andere rentevaste periode kiezen kan, meestal tegen een vergoeding.',
+  'Klachten: eerst bij Argenta (bevestiging binnen 2 werkdagen, antwoord binnen 10 werkdagen), daarna Kifid.'
+]]);
+const LOGO = `<svg role="img" aria-label="Argenta" height="114" viewBox="0 0 241 114" width="241" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m58.975 82.069v13.701l4.0087293-.0016488c2.5818489-.0349086 9.3562707-.518505 9.3562707-7.0173512 0-3.003-2.019-6.682-7.884-6.682zm11.828 31.04-11.733-16.609h-.096v16.608h-5.193v-35.834h11.01c5 0 7.597 1.21 9.471 3 2.26 2.18 3.27 5.474 3.27 8.478 0 9.492-7.885 10.99-10.193 10.99l9.953 13.367zm41.489-26.829h-6.059l-.351307-.3850871c-1.586896-1.7182764-4.502181-4.5049129-9.359693-4.5049129-7.403 0-13.172 6.392-13.172 13.898 0 7.784361 6.3109742 13.544154 12.9406979 13.702647l.5750647-.000622c1.7540942-.048803 8.7828454-.687633 11.9652374-8.907025h-16.587v-4.795h22.5c-.192 12.011-9.712 18.499-18.365 18.499-10.385 0-18.222-8.474-18.222-18.499 0-10.316 7.934-18.69 18.174-18.69 6.056 0 12.5 3.244 15.961 9.682zm4.231 26.829v-35.835h19.177v4.794h-13.988v10.556h13.988v4.796h-13.988v10.895h13.988v4.794zm45.477 0-17.595-27.701h-.098v27.7h-5.193v-35.833h5.675l17.308 27.264h.095v-27.265h5.193v35.835zm13.27 0v-31.04h-6.828v-4.795h18.847v4.794h-6.827v31.04zm19.457-15.681v-13.241l17.013 13.174zm-.007-20.214h-5.619v36.187h5.626v-10.918l23.658.025 14.065 10.892h8.03zm-148.969 20.216-17.01-.068 17.01-13.174zm.008-20.216-45.759 36.187h8.029l14.066-10.893 23.656-.025v10.918h5.627v-36.187zm63.865-56.869h11.853l-26.072 20.658.001-9.393zm29.506 45.992h-11.85l26.07-20.656v9.39zm.002-45.992 6.346 5.027-43.777 34.686-6.295-4.987v-11.571l29.223-23.155zm7.922 6.275 6.296 4.99v11.57l-29.226 23.156h-14.5l-6.347-5.029zm-18.584-9.318 14.533-11.516h27.194l-14.531 11.516zm-3.153-14.979 2.933-2.323v14.979l-2.933 2.323z"/></svg>`;
+
 /* ---------- Nederlandse notatie ---------- */
 const fmtEuro0 = n => (n < 0 ? '-' : '') + '€ ' + Math.abs(Math.round(n)).toLocaleString('nl-NL');
 const fmtEuro2 = n => (n < 0 ? '-' : '') + '€ ' + Math.abs(n).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -290,10 +420,12 @@ const fmtInvoer = n => n ? n.toLocaleString('nl-NL') : '';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const $ = id => document.getElementById(id);
 const euro = id => parseEuro($(id).value);
+const datumNl = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('nl-NL') : '';
 
 /* ---------- State (in-memory; geen localStorage i.v.m. embed in Google Sites) ---------- */
-let volgnr = 1;
-const delen = [{ id: volgnr++, vorm: 'ann', bedrag: 360000, looptijd: 30, rvp: '10', consumptief: false }];
+let stap = 1, volgnr = 1;
+const auto = { marktwaarde: true, eigenGeld: true };
+const delen = [{ id: volgnr++, vorm: 'ann', bedrag: 0, looptijd: 30, rvp: '10', consumptief: false, auto: true }];
 
 function rvpOpties(d) {
   if (VORMEN[d.vorm].groen) return REGELS.groenPerioden.map(j => [String(j), j + ' jaar']);
@@ -341,12 +473,6 @@ function klasseNaam(idx) {
   return idx <= RATES.klassen.length ? '≤ ' + RATES.klassen[idx - 1] + '%' : '> 106%';
 }
 const annFactor = (rentePct, jaren) => { const r = rentePct / 100 / 12, n = jaren * 12; return r === 0 ? 1 / n : r / (1 - Math.pow(1 + r, -n)); };
-function maandlast(vorm, bedrag, rentePct, jaren) {
-  const r = rentePct / 100 / 12, n = jaren * 12;
-  if (vorm === 'av') return bedrag * r;
-  if (vorm === 'lin' || vorm === 'groenLin') return bedrag / n + bedrag * r;
-  return bedrag * annFactor(rentePct, jaren);
-}
 function normKolom(rente) { const i = NORMEN.grenzen.findIndex(g => rente <= g + 1e-9); return i === -1 ? NORMEN.grenzen.length : i; }
 function normPct(tabel, inkomen, kol) {
   const t = NORMEN[tabel];
@@ -354,12 +480,57 @@ function normPct(tabel, inkomen, kol) {
   return t[rij][kol] / 1000;
 }
 
+/* Maandschema per leningdeel bij gelijkblijvende rente: [{rente, aflossing, rest}] */
+function schema(vorm, bedrag, rentePct, jaren) {
+  const r = rentePct / 100 / 12, n = jaren * 12, uit = [];
+  let rest = bedrag;
+  const ann = bedrag * annFactor(rentePct, jaren);
+  for (let m = 1; m <= n; m++) {
+    const rente = rest * r;
+    let afl = vorm === 'av' ? (m === n ? rest : 0) : (vorm === 'lin' || vorm === 'groenLin') ? bedrag / n : ann - rente;
+    if (m === n) afl = rest;
+    rest -= afl;
+    uit.push({ rente, afl, rest: Math.max(0, rest) });
+  }
+  return uit;
+}
+
+/* Jaarlijks kostenpercentage: effectieve jaarrente waarbij netto ontvangen bedrag gelijk is aan de contante waarde van alle termijnen */
+function jkp(netto, termijnen) {
+  if (netto <= 0 || !termijnen.length) return null;
+  const cw = i => termijnen.reduce((s, t, k) => s + t / Math.pow(1 + i, k + 1), 0);
+  let lo = 0, hi = 0.05;
+  for (let k = 0; k < 60; k++) { const mid = (lo + hi) / 2; if (cw(mid) > netto) lo = mid; else hi = mid; }
+  return (Math.pow(1 + (lo + hi) / 2, 12) - 1) * 100;
+}
+
+function kosten() {
+  const doel = $('doel').value, koopsom = euro('koopsom'), verbouwing = euro('verbouwing'), nhg = $('nhg').checked;
+  const ovb = doel === 'bestaand' ? Math.round(koopsom * (+$('ovb_pct').value) / 100) : 0;
+  const levering = (doel === 'bestaand' || doel === 'nieuwbouw' || doel === 'uitkoop') ? euro('notLevering') : 0;
+  const aankoop = ovb + levering;
+  const hypKostenExcl = euro('notHypotheek') + euro('taxKosten') + euro('advKosten');
+  const exclNhg = koopsom + verbouwing + aankoop + hypKostenExcl;
+  const mw = euro('marktwaarde');
+  if (auto.eigenGeld) {
+    /* Minimaal benodigd eigen geld: wat boven de marktwaarde uitkomt (de NHG-provisie wordt meegefinancierd) */
+    const maxLening = nhg ? Math.min(mw, NHG.grens) : mw;
+    const nodig = nhg ? Math.ceil(exclNhg - maxLening * (1 - NHG.provisiePct / 100)) : exclNhg - maxLening;
+    $('eigenGeld').value = fmtInvoer(Math.max(0, nodig));
+  }
+  const eigen = euro('eigenGeld');
+  const nhgKosten = nhg ? Math.round(Math.max(0, exclNhg - eigen) * (NHG.provisiePct / 100) / (1 - NHG.provisiePct / 100)) : 0;
+  const hypKosten = hypKostenExcl + nhgKosten;
+  const totaal = exclNhg + nhgKosten;
+  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: euro('notHypotheek'), tax: euro('taxKosten'), adv: euro('advKosten'), nhgKosten, hypKosten, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
+}
+
 function inkomenstoets(rijen, totaal, labelIdx) {
   const i1 = euro('ink1'), i2 = euro('ink2');
   if (i1 + i2 === 0 || totaal === 0) return null;
   const aow = $('aow').checked, alleen = $('alleenstaand').checked;
   const toetsKort = parseDec($('toetsrente').value);
-  const inkomen = Math.max(0, i1 * NORMEN.factorHoog + i2 * NORMEN.factorLaag - euro('aftrek'));
+  const inkomen = Math.max(0, Math.max(i1, i2) * NORMEN.factorHoog + Math.min(i1, i2) * NORMEN.factorLaag - euro('aftrek'));
   rijen.forEach(x => { x.toets = (x.d.rvp === 'var' || +x.d.rvp < 10) ? toetsKort : (x.rente || 0); });
   const gemToets = rijen.reduce((s, x) => s + x.toets * x.d.bedrag, 0) / totaal;
   const kol = normKolom(gemToets);
@@ -378,14 +549,17 @@ function inkomenstoets(rijen, totaal, labelIdx) {
   if (alleen && inkomen > NORMEN.start) vrij.push(['Alleenstaande aanvrager', NORMEN.alleenstaandBedrag]);
   const vrijTotaal = vrij.reduce((s, v) => s + v[1], 0);
   const maxHyp = Math.max(0, toegestaan) / (toetslast / totaal) + vrijTotaal;
-  return { inkomen, gemToets, pct, toegestaan, toetslast, studieBruto, brutering, vrij, vrijTotaal, maxHyp, ruimte: maxHyp - totaal, aow };
+  return { inkomen, gemToets, pct, toegestaan, studieBruto, brutering, vrij, vrijTotaal, maxHyp, ruimte: maxHyp - totaal, aow };
 }
 
 function bereken() {
+  const k = kosten();
+  if (auto.marktwaarde && document.activeElement !== $('marktwaarde')) $('marktwaarde').value = fmtInvoer(k.koopsom + 0);
+  if (delen.length === 1 && delen[0].auto) delen[0].bedrag = k.teFinancieren;
   const mw = euro('marktwaarde');
   const nhg = $('nhg').checked, starter = $('starter').checked, app = $('appartement').checked, erfpacht = $('erfpachtgrond').checked;
   const labelIdx = +$('label').value, label = LABELS[labelIdx];
-  const doel = $('doel').value, taxatie = $('taxatie').value;
+  const doel = k.doel, taxatie = $('taxatie').value;
   const totaal = delen.reduce((s, d) => s + d.bedrag, 0);
   const ltv = mw > 0 ? totaal / mw * 100 : 0;
   const idx = klasseIndex(ltv, nhg);
@@ -402,10 +576,11 @@ function bereken() {
       if (d.consumptief) rente += RATES.consumptiefOpslag;
       rente = Math.round((rente - korting) * 100) / 100;
     }
-    const pm = rente != null && d.bedrag > 0 ? maandlast(d.vorm, d.bedrag, rente, d.looptijd) : 0;
+    const sch = rente != null && d.bedrag > 0 ? schema(d.vorm, d.bedrag, rente, d.looptijd) : [];
+    const pm = sch.length ? sch[0].rente + sch[0].afl : 0;
     if (d.bedrag <= 0) fouten.push(`Leningdeel ${i + 1}: vul een bedrag in.`);
     if (d.rvp !== 'var' && +d.rvp > d.looptijd) letop.push(`Leningdeel ${i + 1}: rentevaste periode is langer dan de looptijd.`);
-    return { nr: i + 1, d, naam: v.naam + (d.consumptief ? ' (consumptief)' : ''), rente, pm };
+    return { nr: i + 1, d, naam: v.naam + (d.consumptief ? ' (consumptief)' : ''), rente, pm, sch };
   });
 
   const som = f => delen.filter(f).reduce((s, d) => s + d.bedrag, 0);
@@ -423,21 +598,23 @@ function bereken() {
   }
   const totaalIncl = totaal + (ovb ? ovb.bedrag : 0);
 
+  if (Math.abs(totaal - k.teFinancieren) > 1) letop.push(`De leningdelen (${fmtEuro0(totaal)}) wijken af van het te financieren bedrag uit stap 2 (${fmtEuro0(k.teFinancieren)}).`);
   if (mw > 0 && mw < REGELS.minMarktwaarde) fouten.push(`Minimale marktwaarde is ${fmtEuro0(REGELS.minMarktwaarde)}.`);
   if (mw <= 0) fouten.push('Vul de marktwaarde in.');
   if (totaal > 0 && totaal < REGELS.minHoofdsom) fouten.push(`Minimale hoofdsom is ${fmtEuro0(REGELS.minHoofdsom)}.`);
   if (totaalIncl > REGELS.maxHoofdsom) fouten.push(`Maximale hoofdsom is ${fmtEuro0(REGELS.maxHoofdsom)} (inclusief overbrugging en verhogingen).`);
   if (totaal > REGELS.grensGroot && ltv > REGELS.maxLtvGroot) fouten.push(`Bij een hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} geldt een maximale verstrekking van ${REGELS.maxLtvGroot}% van de marktwaarde.`);
   if (ovb && totaalIncl > REGELS.grensGroot && $('ovbSituatie').value >= 'c') letop.push(`Hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} inclusief overbrugging op een onverkochte woning: individuele beoordeling, langere doorlooptijd.`);
+  const energie = groen + euro('maatregelen');
   if (mw > 0) {
     if (!nhg && ltv > REGELS.maxLtv) fouten.push('Zonder NHG is de verstrekking maximaal 100% van de marktwaarde.');
     if (nhg && ltv > REGELS.maxLtvNhgGroen) fouten.push('Met NHG is de verstrekking maximaal 106% van de marktwaarde (alleen met EBB/EBV).');
-    else if (nhg && ltv > REGELS.maxLtv && groen + euro('maatregelen') === 0) fouten.push('Boven 100% van de marktwaarde kan alleen met NHG in combinatie met energiebesparende maatregelen (EBB/EBV).');
+    else if (nhg && ltv > REGELS.maxLtv && energie === 0) fouten.push('Boven 100% van de marktwaarde kan alleen met NHG in combinatie met energiebesparende maatregelen (EBB/EBV).');
   }
   if (nhg) {
     if (totaal > NHG.grensEnergie) fouten.push(`Met NHG is de lening maximaal ${fmtEuro0(NHG.grensEnergie)} (NHG-grens inclusief energiebesparende maatregelen).`);
-    else if (totaal > NHG.grens && groen + euro('maatregelen') < totaal - NHG.grens) fouten.push(`De NHG-grens is ${fmtEuro0(NHG.grens)}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
-    letop.push(`NHG: borgtochtprovisie ${fmtPct(NHG.provisiePct, 1)} = ${fmtEuro0(totaal * NHG.provisiePct / 100)} (bij aankoop over de volledige lening). De NHG-grens is hier vereenvoudigd getoetst op de hoofdsom; NHG toetst op de kosten voor de woning. Controleer de grens die geldt op de datum van het bindend aanbod.`);
+    else if (totaal > NHG.grens && energie < totaal - NHG.grens) fouten.push(`De NHG-grens is ${fmtEuro0(NHG.grens)}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
+    letop.push('NHG: de NHG-grens is vereenvoudigd getoetst op de hoofdsom; NHG toetst op de kosten voor de woning. Controleer de grens die geldt op de datum van het bindend aanbod.');
   }
   if (av > 0) {
     if (starter) fouten.push('Aflossingsvrij is niet mogelijk voor koopstarters (35 jaar of jonger, eerste koopwoning).');
@@ -464,7 +641,10 @@ function bereken() {
     if (mw > REGELS.desktopMaxWaarde) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot een woningwaarde van ${fmtEuro0(REGELS.desktopMaxWaarde)}.`);
     letop.push(`Desktop Taxatie: minimale betrouwbaarheid ${nhg ? '5,0 (NHG)' : '4,0'}; op datum bindende offerte maximaal 6 maanden oud.`);
   }
+  if (doel === 'bestaand' && $('ovb_pct').value === '0') letop.push('Overdrachtsbelasting 0%: controleer of de klant aan de voorwaarden van de startersvrijstelling voldoet.');
   if (doel === 'nieuwbouw') letop.push('Nieuwbouw: waarborgcertificaat (keurmerk Stichting GarantieWoning), (voorlopig) energielabel en bij passeren een onherroepelijke omgevingsvergunning.');
+  if (k.verbouwing >= REGELS.bouwdepotVrij || (nhg && k.verbouwing > 0)) letop.push('Verbouwing: het bedrag wordt in een bouwdepot gestort (24 maanden, rentevergoeding gelijk aan de hypotheekrente).');
+  if (k.eigen >= REGELS.eigenMiddelenBewijs) letop.push(`Eigen middelen vanaf ${fmtEuro0(REGELS.eigenMiddelenBewijs)}: herkomst aantonen met bewijsstukken.`);
   if (erfpacht) letop.push('Erfpacht: overheidserfpacht volgens NHG-regels; particuliere erfpacht afhankelijk van vestigingsdatum (erfpachtopinie of bancaire richtlijn). Canon komt in mindering op het toetsinkomen.');
   if (korting) letop.push('De duurzaamheidskorting vereist een geldig geregistreerd energielabel en geldt alleen tijdens de eerste rentevaste periode.');
   if (rijen.some(r => r.d.rvp === 'var')) letop.push('Variabele rente: de klant krijgt de rente die geldt op het moment van passeren; de rente staat 3 maanden vast.');
@@ -473,23 +653,50 @@ function bereken() {
   if (toets) {
     if (toets.ruimte < 0) fouten.push(`De hoofdsom is ${fmtEuro0(-toets.ruimte)} hoger dan de maximale hypotheek op inkomen (${fmtEuro0(toets.maxHyp)}).`);
     if (toets.aow) letop.push('Vanaf de AOW-gerechtigde leeftijd mag op werkelijke last worden getoetst; deze tool rekent met de AOW-tabel op annuïtaire toetslast.');
-    letop.push(`Inkomenstoets op basis van de leennormen ${NORMEN.jaar} (gelden vanaf 1 januari ${NORMEN.jaar}); voor aanvragen daarvoor gelden de normen van ${NORMEN.jaar - 1}.`);
   } else letop.push('Geen toetsinkomen ingevuld: de maximale hypotheek op inkomen is niet getoetst.');
 
-  const maand = rijen.reduce((s, r) => s + r.pm, 0) + (ovb ? ovb.pm : 0);
+  /* Verloop per jaar en kosten van het krediet (exclusief overbrugging) */
+  const maanden = Math.max(0, ...rijen.map(r => r.sch.length));
+  const termijnen = Array.from({ length: maanden }, (_, m) => rijen.reduce((s, r) => s + (r.sch[m] ? r.sch[m].rente + r.sch[m].afl : 0), 0));
+  const jaren = [];
+  for (let j = 0; j < maanden / 12; j++) {
+    let rente = 0, afl = 0, rest = 0;
+    rijen.forEach(r => { for (let m = j * 12; m < j * 12 + 12 && m < r.sch.length; m++) { rente += r.sch[m].rente; afl += r.sch[m].afl; } const e = r.sch[Math.min(j * 12 + 11, r.sch.length - 1)]; if (e && j * 12 < r.sch.length) rest += e.rest; });
+    jaren.push({ jaar: j + 1, rest, rente, afl, pm: termijnen[j * 12] });
+  }
+  const renteTotaal = jaren.reduce((s, j) => s + j.rente, 0);
+  const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten;
+  const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
-  return { mw, nhg, label, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente };
+  return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm] };
 }
 
+/* ---------- Weergave ---------- */
 const rvpTekst = d => d.rvp === 'var' ? 'Variabel' : d.rvp + ' jaar';
-const rijHtml = (x, lang) => `<tr><td>${x.nr}</td><td>${esc(x.naam)}</td><td class="r">${fmtEuro0(x.d.bedrag)}</td><td class="r">${x.d.looptijd} ${lang ? 'jaar' : 'jr'}</td><td class="r">${rvpTekst(x.d)}</td><td class="r">${x.rente != null ? fmtPct(x.rente) : '–'}</td><td class="r">${fmtEuro2(x.pm)}</td></tr>`;
-const ovbHtml = o => o ? `<tr><td>O</td><td>Overbrugging</td><td class="r">${fmtEuro0(o.bedrag)}</td><td class="r">${o.looptijd} mnd</td><td class="r">–</td><td class="r">${fmtPct(o.rente)}</td><td class="r">${fmtEuro2(o.pm)}</td></tr>` : '';
+const rijHtml = (x, kort) => `<tr><td>${x.nr}</td><td>${esc(x.naam)}</td><td class="r">${fmtEuro0(x.d.bedrag)}</td>${kort ? '' : `<td class="r">${x.d.looptijd} jaar</td>`}<td class="r">${rvpTekst(x.d)}</td><td class="r">${x.rente != null ? fmtPct(x.rente) : '–'}</td><td class="r">${fmtEuro2(x.pm)}</td></tr>`;
+const ovbHtml = (o, kort) => o ? `<tr><td>O</td><td>Overbrugging</td><td class="r">${fmtEuro0(o.bedrag)}</td>${kort ? '' : `<td class="r">${o.looptijd} mnd</td>`}<td class="r">–</td><td class="r">${fmtPct(o.rente)}</td><td class="r">${fmtEuro2(o.pm)}</td></tr>` : '';
+const regel = (a, b, kl = '') => `<div class="regel ${kl}"><span>${esc(a)}</span><span>${b}</span></div>`;
+function boomHtml(r, metHaalbaar) {
+  const k = r.k;
+  return `<div class="blok">${regel('Koopsom / af te lossen bedrag', fmtEuro0(k.koopsom))}${regel('Verbouwing', fmtEuro0(k.verbouwing))}</div>
+    <div class="blok">${regel('Overdrachtsbelasting', fmtEuro0(k.ovb))}${regel('Notariskosten leveringsakte', fmtEuro0(k.levering))}${regel('Kosten aankoop woning', fmtEuro0(k.aankoop), 'som')}</div>
+    <div class="blok">${regel('Notariskosten hypotheekakte', fmtEuro0(k.notHyp))}${regel('Taxatiekosten', fmtEuro0(k.tax))}${regel('Advies- en bemiddelingskosten', fmtEuro0(k.adv))}${regel('Nationale Hypotheek Garantie', fmtEuro0(k.nhgKosten))}${regel('Hypotheekkosten', fmtEuro0(k.hypKosten), 'som')}</div>
+    <div class="blok groen">${regel('Totale kosten', fmtEuro0(k.totaal))}${regel('Aftrek eigen geld', fmtEuro0(k.eigen))}</div>
+    <div class="blok grijs">${regel('Te financieren', fmtEuro0(k.teFinancieren), 'groot')}</div>` +
+    (metHaalbaar ? `<div class="blok grijs">${regel('Financieel haalbaar', r.toets ? fmtEuro0(r.toets.maxHyp) : 'vul inkomen in', 'groot')}${regel('Extra ruimte voor EBV', fmtEuro0(r.extraEbv))}</div>` : '');
+}
+function kvMaandHtml(r) {
+  const t = (a, b) => `<tr><td>${esc(a)}</td><td>${b}</td></tr>`;
+  return t('Totale lening', fmtEuro0(r.totaal)) + t('Gemiddelde rente', fmtPct(r.gewRente)) + t('Bruto maandbedrag (1e maand)', '<b>' + fmtEuro2(r.maand) + '</b>') +
+    t('Looptijd van de lening', r.maanden + ' maanden') + t('Totale kosten van het krediet', fmtEuro0(r.renteTotaal + r.kredietKosten)) +
+    t('Totaal te betalen bedrag', fmtEuro0(r.totaalTeBetalen)) + t('Jaarlijks kostenpercentage (JKP)', r.jkp != null ? '<b>' + fmtPct(r.jkp) + '</b>' : '–');
+}
 function toetsHtml(t) {
   if (!t) return '';
   const r = (a, b) => `<tr><td>${esc(a)}</td><td>${b}</td></tr>`;
   return `<h3>Inkomenstoets (leennormen ${NORMEN.jaar})</h3><table class="kv">` +
-    r('Toetsinkomen', fmtEuro0(t.inkomen)) +
-    r('Gewogen toetsrente', fmtPct(t.gemToets)) +
+    r('Toetsinkomen', fmtEuro0(t.inkomen)) + r('Gewogen toetsrente', fmtPct(t.gemToets)) +
     r('Financieringslastpercentage' + (t.aow ? ' (AOW)' : ''), fmtPct(t.pct * 100, 1)) +
     r('Toegestane maandlast na verplichtingen', fmtEuro2(t.toegestaan)) +
     (t.studieBruto ? r('waarvan studielening gebruteerd (factor ' + t.brutering.toLocaleString('nl-NL') + ')', fmtEuro2(t.studieBruto)) : '') +
@@ -500,15 +707,25 @@ function toetsHtml(t) {
 
 function toon() {
   $('ovbVelden').hidden = !$('ovbAan').checked;
+  const doel = $('doel').value;
+  $('koopsomLabel').textContent = doel === 'oversluiten' ? 'Af te lossen hypotheek' : doel === 'verbouwing' ? 'Bestaande hypotheek (0 bij verhoging)' : doel === 'uitkoop' ? 'Uitkoopsom + over te nemen schuld' : doel === 'erfpacht' ? 'Afkoopsom erfpacht' : 'Koopsom';
+  $('ovb_pct').disabled = doel !== 'bestaand';
   const r = bereken();
+  if (delen.length === 1 && delen[0].auto) { const inp = document.querySelector('.deel [data-veld=bedrag]'); if (inp && document.activeElement !== inp) inp.value = fmtInvoer(delen[0].bedrag); }
+  $('boom2').innerHTML = boomHtml(r, false);
+  $('boom3').innerHTML = boomHtml(r, true);
+  $('resRijen3').innerHTML = r.rijen.map(x => rijHtml(x, true)).join('') + ovbHtml(r.ovb, true);
+  $('kvMaand').innerHTML = kvMaandHtml(r);
+  $('klaarBedrag').textContent = 'Hypotheekbedrag: ' + fmtEuro0(r.totaal);
+  $('klaarMaand').textContent = 'Bruto maandlast: ' + fmtEuro0(r.maand);
   $('kHoofdsom').textContent = fmtEuro0(r.totaalIncl);
   $('kLtv').textContent = r.mw > 0 ? fmtPct(r.ltv, 1) + ' · ' + klasseNaam(r.idx) : '–';
-  $('kMaand').textContent = fmtEuro2(r.maand);
+  $('kJkp').textContent = r.jkp != null ? fmtPct(r.jkp) : '–';
   $('kMax').textContent = r.toets ? fmtEuro0(r.toets.maxHyp) : '–';
   $('resRijen').innerHTML = r.rijen.map(x => rijHtml(x)).join('') + ovbHtml(r.ovb);
   $('tBedrag').textContent = fmtEuro0(r.totaalIncl);
   $('tRente').textContent = r.totaal > 0 ? fmtPct(r.gewRente) : '';
-  $('tMaand').textContent = fmtEuro2(r.maand);
+  $('tMaand').textContent = fmtEuro2(r.maand + (r.ovb ? r.ovb.pm : 0));
   $('inkomenBlok').innerHTML = toetsHtml(r.toets);
   $('meldingen').innerHTML =
     r.fouten.map(m => `<div class="melding fout"><b>Niet mogelijk:</b> ${esc(m)}</div>`).join('') +
@@ -517,73 +734,208 @@ function toon() {
   return r;
 }
 
-/* ---------- Afdrukken: altijd via window.open (window.print in een iframe wordt geblokkeerd) ---------- */
+function naarStap(n) {
+  stap = Math.max(1, Math.min(4, n));
+  document.querySelectorAll('.stap').forEach(e => { e.hidden = +e.dataset.stap !== stap; });
+  document.querySelectorAll('#stappen li').forEach((li, i) => { li.className = i + 1 === stap ? 'actief' : i + 1 < stap ? 'gedaan' : ''; });
+  $('terug').style.visibility = stap === 1 ? 'hidden' : 'visible';
+  $('verder').style.visibility = stap === 4 ? 'hidden' : 'visible';
+  toon();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Conceptofferte: altijd via window.open (window.print in een iframe wordt geblokkeerd) ---------- */
 function printDocument() {
   const r = toon();
-  if (r.fouten.length && !confirm('Het voorstel past niet binnen de getoetste regels. Toch afdrukken?')) return;
+  if (r.fouten.length && !confirm('De aanvraag past niet binnen de getoetste regels. Toch een conceptofferte maken?')) return;
   const v = id => esc($(id).value.trim());
   const keuze = id => esc($(id).selectedOptions[0].textContent);
   const vandaag = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
-  const meld = [...r.fouten.map(m => 'Niet mogelijk: ' + m), ...r.letop].map(m => `<li>${esc(m)}</li>`).join('');
   const css = getComputedStyle(document.documentElement);
   const kleur = n => css.getPropertyValue(n).trim();
-  const html = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Offertevoorstel Argenta hypotheek${v('dossier') ? ' ' + v('dossier') : ''}</title><style>
-    @page { size: A4; margin: 16mm 15mm; }
-    body { font-family: "Segoe UI", Arial, sans-serif; color: #1c2733; font-size: 10.5pt; line-height: 1.4; margin: 0; }
-    .kop { border-bottom: 3px solid ${kleur('--accent')}; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
-    h1 { font-size: 17pt; margin: 0; color: ${kleur('--primair')}; } h2, h3 { font-size: 11.5pt; color: ${kleur('--primair')}; margin: 14px 0 5px; }
-    .sub { color: #5b6875; font-size: 9pt; }
-    table { width: 100%; border-collapse: collapse; } th, td { padding: 4px 6px; border-bottom: 1px solid #d5dce4; text-align: left; font-size: 9.5pt; }
-    th { color: #5b6875; font-size: 8.5pt; } .r { text-align: right; } tfoot td { font-weight: 700; border-top: 2px solid ${kleur('--primair')}; border-bottom: none; }
-    .kv td { border: none; padding: 2px 6px 2px 0; } .kv td:first-child { color: #5b6875; width: 55%; } .kv td:last-child { text-align: right; }
-    .twee { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; } .twee .kv td:last-child { text-align: left; } .twee .kv td:first-child { width: 40%; }
-    ul { margin: 4px 0; padding-left: 18px; font-size: 9.5pt; }
-    .disc { margin-top: 14px; padding: 9px 11px; border: 1px solid #d5dce4; background: #f5f7f6; font-size: 8.5pt; color: #3b4753; break-inside: avoid; }
+  const k = r.k;
+  const aanvragers = [[v('klant1'), datumNl($('geb1').value)], [v('klant2'), datumNl($('geb2').value)]].filter(a => a[0]).map(a => a[0] + (a[1] ? ' (' + a[1] + ')' : '')).join(' en ') || '–';
+  const li = a => '<ul>' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>';
+  const kv = rows => '<table class="kv">' + rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('') + '</table>';
+  const delenTekst = r.rijen.map(x => `${esc(x.naam)} ${fmtEuro0(x.d.bedrag)}, ${x.d.looptijd} jaar`).join('<br>');
+  const renteTekst = r.rijen.map(x => `Leningdeel ${x.nr}: ${x.rente != null ? fmtPct(x.rente) : '–'}, ${x.d.rvp === 'var' ? 'variabel (3 maanden)' : x.d.rvp + ' jaar vast'}`).join('<br>');
+  const meld = [...r.fouten.map(m => 'Niet mogelijk: ' + m), ...r.letop];
+  let pagina = 0;
+  const voet = () => `<div class="voet"><span>Conceptofferte Argenta hypotheek | ${vandaag}${v('dossier') ? ' | dossier ' + v('dossier') : ''}</span><span>pagina ${++pagina}</span></div>`;
+  const esis = [
+    ['1. Kredietgever', `${esc(ARGENTA.naam)}<br>${esc(ARGENTA.adres)}`],
+    ['2. Kredietbemiddelaar / adviseur', [v('kantoor'), v('adviseur'), v('afmnr') ? 'AFM-vergunningnummer ' + v('afmnr') : ''].filter(Boolean).join('<br>') || '–'],
+    ['3. Hoofdkenmerken van de lening', `Bedrag: ${fmtEuro0(r.totaal)}${r.ovb ? ' + overbrugging ' + fmtEuro0(r.ovb.bedrag) : ''}<br>${delenTekst}<br>Totaal te betalen bedrag: ${fmtEuro0(r.totaalTeBetalen)}<br>Aangenomen waarde van de woning: ${fmtEuro0(r.mw)} (verstrekking ${fmtPct(r.ltv, 1)})<br>Zekerheid: recht van eerste hypotheek op de woning${r.nhg ? '; Nationale Hypotheek Garantie' : ''}`],
+    ['4. Rentevoet en andere kosten', `${renteTekst}<br>Jaarlijks kostenpercentage (JKP): ${r.jkp != null ? fmtPct(r.jkp) : '–'}<br>In het JKP opgenomen eenmalige kosten: notariskosten hypotheekakte ${fmtEuro0(k.notHyp)}, taxatie ${fmtEuro0(k.tax)}, advies en bemiddeling ${fmtEuro0(k.adv)}${k.nhgKosten ? ', NHG ' + fmtEuro0(k.nhgKosten) : ''}<br>Niet opgenomen: kosten van de aankoop (overdrachtsbelasting, leveringsakte) en verzekeringen`],
+    ['5. Frequentie en aantal betalingen', `Maandelijks, ${r.maanden} termijnen`],
+    ['6. Bedrag van elke termijn', `${fmtEuro2(r.maand)} bruto in de eerste maand. Het bedrag wijzigt na afloop van de rentevaste periode${r.rijen.some(x => /lin/i.test(x.d.vorm)) ? ' en daalt bij een lineair leningdeel elke maand' : ''}.`],
+    ['7. Illustratieve aflossingstabel', 'Zie “Verloop restschuld en maandlasten”.'],
+    ['8. Aanvullende verplichtingen', 'Opstalverzekering tegen herbouwwaarde. Geen verplichting om andere producten bij Argenta af te nemen.'],
+    ['9. Vervroegde aflossing', 'Tot 15% zonder vergoeding. Geen vergoeding bij aflossen uit eigen middelen, bij verkoop van de woning of als de marktrente hoger is dan de contractrente; in andere gevallen kan een vergoeding gelden.'],
+    ['10. Flexibele kenmerken', 'Verhuisregeling: rente en resterende hoofdsom binnen 12 maanden meenemen naar een nieuwe woning. Tussentijds een andere rentevaste periode kiezen is mogelijk, meestal tegen een vergoeding.'],
+    ['11. Andere rechten van de kredietnemer', 'Na ontvangst van het bindend aanbod van Argenta geldt een wettelijke bedenktijd van ten minste 14 dagen.'],
+    ['12. Klachten', esc(ARGENTA.klachten)],
+    ['13. Niet-naleving van verplichtingen', 'Bij betalingsachterstand brengt Argenta kosten in rekening, kan een registratie bij BKR volgen en kan de woning uiteindelijk gedwongen worden verkocht.'],
+    ['14. Aanvullende informatie', 'Voorwaarden Argenta hypotheek (juli 2025) en de Argenta hypotheekgids (augustus 2026), beschikbaar op argenta.nl.'],
+    ['15. Toezichthouder', esc(ARGENTA.toezicht)]
+  ];
+  const html = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Conceptofferte Argenta hypotheek${v('dossier') ? ' ' + v('dossier') : ''}</title><style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    body { font-family: "Segoe UI", Arial, sans-serif; color: #1c2733; font-size: 9.5pt; line-height: 1.4; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .pag { width: 210mm; min-height: 297mm; padding: 16mm 16mm 20mm; position: relative; page-break-after: always; break-after: page; }
+    .pag:last-child { page-break-after: auto; break-after: auto; }
+    .cover { background: ${kleur('--primair')}; color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 22mm 18mm; }
+    .cover svg { width: 62mm; height: auto; }
+    .cover h1 { font-size: 30pt; line-height: 1.1; margin: 0 0 4mm; color: #fff; text-transform: uppercase; letter-spacing: .02em; }
+    .cover .pill { background: rgba(255,255,255,.14); border-radius: 3mm; padding: 4mm 6mm; font-size: 14pt; margin-top: 3mm; display: flex; justify-content: space-between; }
+    .cover .concept { border: 1px solid rgba(255,255,255,.6); display: inline-block; padding: 1.5mm 4mm; border-radius: 2mm; letter-spacing: .12em; font-size: 10pt; margin-bottom: 6mm; }
+    h1 { font-size: 15pt; margin: 0 0 3mm; color: ${kleur('--primair')}; } h2, h3 { font-size: 11pt; color: ${kleur('--primair')}; margin: 6mm 0 2mm; text-transform: uppercase; letter-spacing: .03em; }
+    h2:first-child { margin-top: 0; }
+    p { margin: 0 0 2.5mm; }
+    .sub { color: #5b6875; font-size: 8.5pt; }
+    table { width: 100%; border-collapse: collapse; } th, td { padding: 1.3mm 2mm; border-bottom: 1px solid #d5dce4; text-align: left; vertical-align: top; }
+    th { color: #5b6875; font-size: 8pt; } .r { text-align: right; white-space: nowrap; } tfoot td { font-weight: 700; border-top: 2px solid ${kleur('--primair')}; border-bottom: none; }
+    .kv td { border: none; padding: .7mm 2mm .7mm 0; } .kv td:first-child { color: #5b6875; width: 46%; } .kv td:last-child { text-align: right; }
+    .links .kv td:last-child { text-align: left; } .links .kv td:first-child { width: 34%; }
+    .twee { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }
+    .stappen4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; margin: 2mm 0 5mm; }
+    .stappen4 div { background: ${kleur('--primair-licht')}; border-radius: 2mm; padding: 3mm; font-size: 8.5pt; }
+    .stappen4 b { display: block; color: ${kleur('--primair')}; font-size: 10pt; margin-bottom: 1mm; }
+    .boom { display: grid; gap: 2mm; } .boom .blok { border: 1px solid #d5dce4; border-radius: 2mm; padding: 2mm 3mm; }
+    .boom .regel { display: flex; justify-content: space-between; gap: 4mm; } .boom .som { font-weight: 600; color: ${kleur('--primair')}; border-top: 1px solid #d5dce4; margin-top: 1mm; padding-top: 1mm; }
+    .boom .groen { background: ${kleur('--accent')}; border-color: ${kleur('--accent')}; font-weight: 600; } .boom .grijs { background: #8a9199; border-color: #8a9199; color: #fff; font-weight: 600; }
+    ul { margin: 1mm 0 2.5mm; padding-left: 5mm; } li { margin-bottom: .8mm; }
+    .kader { padding: 3mm 4mm; border: 1px solid #d5dce4; background: #f5f7f6; font-size: 8.5pt; color: #3b4753; border-radius: 2mm; }
+    .verloop td, .verloop th { padding: .75mm 2mm; font-size: 8.5pt; }
+    .esis td:first-child { width: 32%; font-weight: 600; color: ${kleur('--primair')}; }
+    .voet { position: absolute; left: 16mm; right: 16mm; bottom: 9mm; border-top: 1px solid #d5dce4; padding-top: 2mm; display: flex; justify-content: space-between; color: #5b6875; font-size: 8pt; }
+    @media screen { body { background: #e9ecee; } .pag { background: #fff; margin: 6mm auto; box-shadow: 0 1px 6px rgba(0,0,0,.15); } .cover { background: ${kleur('--primair')}; } }
   </style></head><body>
-  <div class="kop"><div><h1>Offertevoorstel Argenta hypotheek</h1><div class="sub">Indicatieve berekening van uw adviseur · geen renteaanbod of bindende offerte van Argenta</div></div>
-    <div class="sub" style="text-align:right">${v('kantoor') ? '<b>' + v('kantoor') + '</b><br>' : ''}${v('adviseur') ? v('adviseur') + '<br>' : ''}${vandaag}</div></div>
-  <div class="twee">
-    <div><h2>Dossier</h2><table class="kv">
-      <tr><td>Aanvrager(s)</td><td>${[v('klant1'), v('klant2')].filter(Boolean).join(' en ') || '–'}</td></tr>
-      <tr><td>Dossiernummer</td><td>${v('dossier') || '–'}</td></tr>
-      <tr><td>Adres woning</td><td>${v('adres') || '–'}</td></tr>
-      <tr><td>Financieringsdoel</td><td>${keuze('doel')}</td></tr>
-      <tr><td>Waardebepaling</td><td>${keuze('taxatie')}</td></tr></table></div>
-    <div><h2>Uitgangspunten</h2><table class="kv">
-      <tr><td>Marktwaarde</td><td>${fmtEuro0(r.mw)}</td></tr>
-      <tr><td>Hoofdsom${r.ovb ? ' (excl. overbrugging)' : ''}</td><td>${fmtEuro0(r.totaal)}</td></tr>
-      <tr><td>LTV / tariefklasse</td><td>${fmtPct(r.ltv, 1)} / ${klasseNaam(r.idx)}</td></tr>
-      <tr><td>NHG</td><td>${r.nhg ? 'Ja' : 'Nee'}</td></tr>
-      <tr><td>Energielabel</td><td>${esc(r.label.naam)}</td></tr></table></div>
+
+  <div class="pag cover">
+    <div>${LOGO}</div>
+    <div>
+      <div class="concept">CONCEPT · INDICATIEF</div>
+      <h1>Uw persoonlijke<br>hypotheekberekening</h1>
+      <div style="font-size:13pt">${vandaag}</div>
+      <div style="margin-top:10mm">
+        <div class="pill"><span>Hypotheekbedrag</span><b>${fmtEuro0(r.totaal)}</b></div>
+        <div class="pill"><span>Bruto maandlast</span><b>${fmtEuro0(r.maand)}</b></div>
+      </div>
+    </div>
+    <div style="font-size:9.5pt; opacity:.92">${aanvragers !== '–' ? 'Opgesteld voor ' + aanvragers + '<br>' : ''}${[v('kantoor'), v('adviseur')].filter(Boolean).join(' · ')}
+      <div style="margin-top:3mm; font-size:8.5pt">Dit is een conceptberekening van uw adviseur op basis van de gepubliceerde tarieven en voorwaarden van de Argenta hypotheek. Het is geen renteaanbod of bindende offerte van Argenta.</div></div>
   </div>
-  <h2>Leningdelen</h2>
-  <table><thead><tr><th>#</th><th>Aflosvorm</th><th class="r">Bedrag</th><th class="r">Looptijd</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto per maand*</th></tr></thead>
-    <tbody>${r.rijen.map(x => rijHtml(x, true)).join('')}${ovbHtml(r.ovb)}</tbody>
-    <tfoot><tr><td colspan="2">Totaal</td><td class="r">${fmtEuro0(r.totaalIncl)}</td><td></td><td></td><td class="r">${fmtPct(r.gewRente)}</td><td class="r">${fmtEuro2(r.maand)}</td></tr></tfoot></table>
-  <div class="sub">* Bruto maandlast in de eerste maand (rente en aflossing), exclusief fiscaal effect en verzekeringen. Rentes inclusief eventuele duurzaamheidskorting en opslag consumptief. Totaalrente: gewogen gemiddelde exclusief overbrugging.</div>
-  ${toetsHtml(r.toets)}
-  ${meld ? '<h2>Aandachtspunten</h2><ul>' + meld + '</ul>' : ''}
-  <h2>Kenmerken offertetraject Argenta</h2>
-  <ul>${VOORWAARDEN[0][1].slice(3).map(t => '<li>' + esc(t) + '</li>').join('')}</ul>
-  <div class="disc"><b>Belangrijk.</b> Dit is een indicatieve berekening van uw adviseur en geen aanbod of document van Argenta. De berekening is gebaseerd op de door Argenta gepubliceerde tarieven
-    (vaste rente per ${esc(RATES.datumVast)}, variabele rente per ${esc(RATES.datumVariabel)}), de Argenta hypotheekgids van augustus 2026 en de leennormen ${NORMEN.jaar} uit de Tijdelijke regeling hypothecair krediet.
-    Tarieven, normen en voorwaarden kunnen wijzigen. Inkomen, financiële verplichtingen (BKR), onderpand en NHG-voorwaarden zijn niet door Argenta beoordeeld. Aan deze berekening kunnen geen rechten worden ontleend;
-    uitsluitend het renteaanbod en de bindende offerte van Argenta zijn leidend. Dit document is geen adviesrapport.</div>
+
+  <div class="pag">
+    <h2>Wat moet u doen?</h2>
+    <div class="stappen4">
+      <div><b>Stap 1</b>Lees deze conceptofferte rustig door</div>
+      <div><b>Stap 2</b>Bespreek de berekening en uw vragen met uw hypotheekadviseur</div>
+      <div><b>Stap 3</b>Uw adviseur vraagt het renteaanbod aan bij Argenta</div>
+      <div><b>Stap 4</b>Argenta brengt na beoordeling de bindende offerte uit</div>
+    </div>
+    <h2>Wat is dit voor document?</h2>
+    <p>Deze conceptofferte laat zien hoe uw hypotheek bij Argenta eruit zou kunnen zien: de kosten, de rente, de maandlast en de belangrijkste voorwaarden. De berekening is gemaakt met de gegevens die u aan uw adviseur heeft gegeven en met de tarieven en voorwaarden die Argenta publiceert.</p>
+    <p>U kunt aan dit document geen rechten ontlenen. Het is geen renteaanbod, geen bindend aanbod en geen uitnodiging om een overeenkomst aan te gaan. Argenta heeft uw gegevens niet ontvangen en niet beoordeeld. Het document is ook geen adviesrapport: uw adviseur legt het advies en de onderbouwing daarvan apart vast.</p>
+    <h2>Wat u van de echte offerte mag verwachten</h2>
+    ${li(EISEN[0][1])}
+    <p>Deze conceptofferte volgt daarom dezelfde indeling als het ESIS, zodat u de echte offerte straks eenvoudig kunt vergelijken.</p>
+    <h2>Kenmerken van de Argenta hypotheek</h2>
+    ${li(['Offerte 3 maanden geldig; verlenging met 9 maanden mogelijk zonder bereidstellingskosten.',
+      'Is de rente bij passeren (binnen 3 maanden) lager dan in het renteaanbod, dan krijgt u de lagere rente.',
+      'Korting op de rente bij een geregistreerd energielabel A (of beter) of B.',
+      'Onbeperkt aflossen uit eigen middelen zonder vergoeding.',
+      'Verhuisregeling: u kunt uw rente binnen 12 maanden meenemen naar een nieuwe woning.',
+      'Lagere rente met Argenta groen lenen voor het verduurzamen van de woning.'])}
+    <h2>Uw gegevens</h2>
+    <div class="twee links">
+      ${kv([['Aanvrager(s)', aanvragers], ['Adres woning', v('adres') || '–'], ['Financieringsdoel', keuze('doel')], ['Waardebepaling', keuze('taxatie')]])}
+      ${kv([['Marktwaarde', fmtEuro0(r.mw)], ['Energielabel', esc(r.label.naam)], ['NHG', r.nhg ? 'Ja' : 'Nee'], ['Verstrekking / tariefklasse', fmtPct(r.ltv, 1) + ' / ' + klasseNaam(r.idx)]])}
+    </div>
+    ${voet()}
+  </div>
+
+  <div class="pag">
+    <h2>Totale kosten (indicatie)</h2>
+    <div class="twee">
+      <div class="boom">${boomHtml(r, false)}</div>
+      <div class="boom"><div class="blok grijs">${regel('Financieel haalbaar', r.toets ? fmtEuro0(r.toets.maxHyp) : 'niet getoetst')}${regel('Extra ruimte voor EBV', fmtEuro0(r.extraEbv))}</div>
+        <div class="kader">Notaris-, taxatie- en advieskosten zijn indicaties; de werkelijke kosten kunnen afwijken. De extra ruimte voor EBV is alleen te gebruiken voor energiebesparende maatregelen.</div></div>
+    </div>
+    <h2>Uw maandlast (indicatie)</h2>
+    <table><thead><tr><th>#</th><th>Aflosvorm</th><th class="r">Bedrag</th><th class="r">Looptijd</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto per maand</th></tr></thead>
+      <tbody>${r.rijen.map(x => rijHtml(x)).join('')}${ovbHtml(r.ovb)}</tbody>
+      <tfoot><tr><td colspan="2">Totaal</td><td class="r">${fmtEuro0(r.totaalIncl)}</td><td></td><td></td><td class="r">${fmtPct(r.gewRente)}</td><td class="r">${fmtEuro2(r.maand + (r.ovb ? r.ovb.pm : 0))}</td></tr></tfoot></table>
+    <div style="margin-top:4mm" class="twee">
+      ${kv([['Totale lening', fmtEuro0(r.totaal)], ['Looptijd van de lening', r.maanden + ' maanden'], ['Bruto maandbedrag (1e maand)', '<b>' + fmtEuro2(r.maand) + '</b>']])}
+      ${kv([['Totale kosten van het krediet', fmtEuro0(r.renteTotaal + r.kredietKosten)], ['Totaal te betalen bedrag', fmtEuro0(r.totaalTeBetalen)], ['Jaarlijks kostenpercentage (JKP)', '<b>' + (r.jkp != null ? fmtPct(r.jkp) : '–') + '</b>']])}
+    </div>
+    <ul class="sub" style="margin-top:3mm">
+      <li>Aanname: de rente van de gekozen rentevaste periode blijft de hele looptijd gelijk. Na de rentevaste periode kan de rente hoger of lager zijn.</li>
+      <li>De getoonde maandlast is bruto. Mogelijk heeft u recht op hypotheekrenteaftrek; uw adviseur berekent de netto maandlast.</li>
+      <li>Het JKP bevat de rente en de eenmalige kosten voor hypotheekakte, taxatie, advies en bemiddeling${k.nhgKosten ? ' en NHG' : ''}. Kosten van de aankoop en verzekeringen zijn niet meegenomen.</li>
+      <li>Rentes zijn inclusief een eventuele duurzaamheidskorting en opslag. De overbrugging telt niet mee in het JKP en het totaal te betalen bedrag.</li>
+    </ul>
+    ${voet()}
+  </div>
+
+  <div class="pag">
+    <h2>Verloop restschuld en maandlasten (indicatie)</h2>
+    <p class="sub">Hoeveel betaalt u aan rente en aflossing tijdens de looptijd? Het overzicht geldt alleen als er de komende jaren niets verandert.</p>
+    <table class="verloop"><thead><tr><th>Jaar</th><th class="r">Schuldrest einde jaar</th><th class="r">Rente in het jaar</th><th class="r">Aflossing in het jaar</th><th class="r">Bruto maandlast</th></tr></thead>
+      <tbody>${r.jaren.map(j => `<tr><td>${j.jaar}</td><td class="r">${fmtEuro0(j.rest)}</td><td class="r">${fmtEuro0(j.rente)}</td><td class="r">${fmtEuro0(j.afl)}</td><td class="r">${fmtEuro0(j.pm)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Totaal</td><td></td><td class="r">${fmtEuro0(r.renteTotaal)}</td><td class="r">${fmtEuro0(r.totaal)}</td><td class="r">${fmtEuro0(r.renteTotaal + r.totaal)}</td></tr></tfoot></table>
+    <h2>Toelichting</h2>
+    <p>Bij een annuïteitenhypotheek betaalt u elke maand hetzelfde bruto bedrag; eerst vooral rente, later vooral aflossing. Bij een lineaire hypotheek lost u elke maand een vast bedrag af en daalt de maandlast. Een aflossingsvrij leningdeel lost u tijdens de looptijd niet af; aan het einde van de looptijd moet het bedrag in één keer worden terugbetaald.</p>
+    <p>De rente hangt af van de verhouding tussen uw lening en de waarde van de woning. Heeft u afgelost of is de woning meer waard geworden, dan kan de rente mogelijk worden verlaagd; in dit overzicht is daar niet mee gerekend.</p>
+    ${voet()}
+  </div>
+
+  <div class="pag">
+    <h2>Overzicht volgens de indeling van het ESIS</h2>
+    <p class="sub">Het ESIS (Europees gestandaardiseerd informatieblad) ontvangt u van Argenta bij het bindend aanbod. Onderstaand overzicht gebruikt dezelfde 15 onderdelen, ingevuld met de gegevens van deze conceptberekening.</p>
+    <table class="esis"><tbody>${esis.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table>
+    ${voet()}
+  </div>
+
+  <div class="pag">
+    ${toetsHtml(r.toets).replace('<h3>', '<h2>').replace('</h3>', '</h2>')}
+    ${meld.length ? '<h2>Aandachtspunten bij deze aanvraag</h2>' + li(meld) : ''}
+    <h2>Het renteaanbod en de bindende offerte van Argenta</h2>
+    ${li(['Uw adviseur dient de aanvraag in bij Argenta. Argenta beoordeelt de aanvraag en brengt een renteaanbod uit.',
+      'Het renteaanbod stuurt u binnen 3 weken terug; daarna levert u via uw adviseur de gevraagde documenten aan.',
+      'Na beoordeling van de documenten ontvangt u de bindende offerte met het ESIS. Deze stuurt u binnen 2 weken (digitaal) getekend terug.',
+      'De offerte is 3 maanden geldig en kan met 9 maanden worden verlengd. Annuleert u in de verlengingsperiode, dan betaalt u € 500 annuleringskosten.',
+      'Argenta kan afwijken van deze berekening, bijvoorbeeld na beoordeling van inkomen, BKR-registraties of de woning.'])}
+    <h2>Waar u rekening mee moet houden</h2>
+    ${li(['Uw woonlasten kunnen stijgen, bijvoorbeeld door een hogere rente na afloop van de rentevaste periode.',
+      'Het kan moeilijk worden de hypotheeklasten te betalen als uw overige uitgaven stijgen of uw inkomen daalt, bijvoorbeeld door ziekte, arbeidsongeschiktheid, werkloosheid, pensionering, scheiding of overlijden.',
+      'Als de opbrengst bij verkoop lager is dan de hypotheekschuld, houdt u een restschuld over.',
+      'Betaalt u niet op tijd, dan kan dat leiden tot extra kosten, een BKR-registratie en uiteindelijk gedwongen verkoop van uw woning.'])}
+    <div class="kader"><b>Belangrijk.</b> Dit is een conceptberekening van uw adviseur en geen aanbod van Argenta. De berekening is gebaseerd op de door Argenta gepubliceerde tarieven
+      (vaste rente per ${esc(RATES.datumVast)}, variabele rente per ${esc(RATES.datumVariabel)}), de Argenta hypotheekgids van augustus 2026, de voorwaarden Argenta hypotheek van juli 2025 en de leennormen ${NORMEN.jaar} uit de Tijdelijke regeling hypothecair krediet.
+      Tarieven, normen en voorwaarden kunnen wijzigen. Inkomen, financiële verplichtingen (BKR), woning en NHG-voorwaarden zijn niet door Argenta beoordeeld. Aan deze berekening kunnen geen rechten worden ontleend;
+      uitsluitend het renteaanbod en de bindende offerte van Argenta zijn leidend.${v('kantoor') ? ' Deze berekening is opgesteld door ' + v('kantoor') + (v('afmnr') ? ' (AFM-vergunningnummer ' + v('afmnr') + ')' : '') + '.' : ''}</div>
+    ${voet()}
+  </div>
   </body></html>`;
   const w = window.open('', '_blank');
-  if (!w) { alert('Het afdrukvenster is geblokkeerd. Sta pop-ups toe voor deze pagina.'); return; }
+  if (!w) { alert('Het venster met de conceptofferte is geblokkeerd. Sta pop-ups toe voor deze pagina.'); return; }
   w.document.open(); w.document.write(html); w.document.close(); w.focus();
-  setTimeout(() => w.print(), 300);
+  setTimeout(() => w.print(), 400);
 }
 
 /* ---------- Events ---------- */
 function verwerk(e) {
   const t = e.target;
   if (t.matches('[data-euro]')) t.value = fmtInvoer(parseEuro(t.value));
+  if (e.type === 'input') { if (t.id === 'marktwaarde') auto.marktwaarde = false; if (t.id === 'eigenGeld') auto.eigenGeld = false; }
   const kaart = t.closest('.deel');
   if (kaart && t.dataset.veld) {
     const d = delen.find(x => x.id === +kaart.dataset.id), veld = t.dataset.veld;
-    if (veld === 'bedrag') d.bedrag = parseEuro(t.value);
+    if (veld === 'bedrag') { d.bedrag = parseEuro(t.value); if (e.type === 'input') d.auto = false; }
     else if (veld === 'looptijd') d.looptijd = +t.value;
     else if (veld === 'consumptief') d.consumptief = t.checked;
     else d[veld] = t.value;
@@ -594,20 +946,22 @@ function verwerk(e) {
 document.addEventListener('input', verwerk);
 document.addEventListener('change', verwerk);
 document.addEventListener('click', e => {
-  if (e.target.matches('[data-weg]')) {
-    const id = +e.target.closest('.deel').dataset.id;
-    delen.splice(delen.findIndex(x => x.id === id), 1);
-    tekenDelen(); toon();
-  }
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.matches('[data-weg]')) { const id = +t.closest('.deel').dataset.id; delen.splice(delen.findIndex(x => x.id === id), 1); tekenDelen(); toon(); }
+  if (t.dataset.naar) naarStap(+t.dataset.naar);
 });
-$('voegToe').addEventListener('click', () => { delen.push({ id: volgnr++, vorm: 'ann', bedrag: 0, looptijd: 30, rvp: '10', consumptief: false }); tekenDelen(); toon(); });
+$('voegToe').addEventListener('click', () => { delen.forEach(d => { d.auto = false; }); delen.push({ id: volgnr++, vorm: 'ann', bedrag: 0, looptijd: 30, rvp: '10', consumptief: false }); tekenDelen(); toon(); });
 $('print').addEventListener('click', printDocument);
+$('terug').addEventListener('click', () => naarStap(stap - 1));
+$('verder').addEventListener('click', () => naarStap(stap + 1));
 
 $('datumVast').textContent = RATES.datumVast;
 $('datumVar').textContent = RATES.datumVariabel;
-$('normJaar').textContent = $('normJaar2').textContent = NORMEN.jaar;
-$('voorwaarden').innerHTML = VOORWAARDEN.map(([kop, punten]) => `<details><summary>${esc(kop)}</summary><ul>${punten.map(p => '<li>' + esc(p) + '</li>').join('')}</ul></details>`).join('');
-tekenDelen(); toon();
+$('normJaar').textContent = NORMEN.jaar;
+const lijst = blokken => blokken.map(([kop, punten]) => `<details><summary>${esc(kop)}</summary><ul>${punten.map(p => '<li>' + esc(p) + '</li>').join('')}</ul></details>`).join('');
+$('voorwaarden').innerHTML = lijst(VOORWAARDEN);
+$('eisen').innerHTML = lijst(EISEN);
+tekenDelen(); naarStap(1);
 </script>
 </body>
 </html>

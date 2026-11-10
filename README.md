@@ -1,20 +1,35 @@
-# Offertevoorstel Argenta hypotheek (indicatief)
+# Conceptofferte Argenta hypotheek (indicatief)
 
 Standalone tool (`index.html`, één bestand, geen build-step, geen externe API's) waarmee hypotheekadviseurs een
-indicatief offertevoorstel voor de Argenta hypotheek opstellen en afdrukken.
+indicatieve conceptofferte voor de Argenta hypotheek opstellen en afdrukken. De opzet volgt de rekentool van
+MUNT Hypotheken (munt.hypotheekbond.nl): een wizard in vier stappen met een rapport als resultaat.
 
 > **Geen product of document van Argenta.** De tool levert geen renteaanbod of bindende offerte; die brengt alleen
 > Argenta uit na een aanvraag via HDN. Het resultaat is ook geen adviesrapport.
 
 ## Wat de tool doet
 
-- Rente per leningdeel uit de tariefkaart: aflosvorm, rentevaste periode, NHG of risicoklasse (LTV),
-  duurzaamheidskorting, opslag consumptief, groen lenen, variabele rente, overbrugging.
-- Toetsing van de productregels uit de hypotheekgids: hoofdsom, LTV, aflossingsvrij (30% / € 150.000, koopstarters),
-  consumptieve hypotheek, groen lenen, Desktop Taxatie, overbrugging, NHG-grens.
-- Inkomenstoets volgens de Tijdelijke regeling hypothecair krediet (leennormen 2027): financieringslastpercentages,
-  toetsrente, studielening (bruteringsfactor), extra leenruimte energielabel en alleenstaanden.
-- Afdrukbaar offertevoorstel (via `window.open`, werkt ook in een iframe / Google Sites). Geen `localStorage`.
+1. **Start** – woning, aanvragers en adviseur.
+2. **Kosten** – koopsom, verbouwing, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG, eigen geld → te financieren.
+3. **Kan dit bedrag geleend worden?** – leningdelen met rente uit de tariefkaart, inkomenstoets (leennormen 2027),
+   overbrugging; toont financieel haalbaar bedrag, extra ruimte voor EBV, maandlast, totaal te betalen bedrag en JKP.
+4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (6 pagina's A4):
+   voorblad, toelichting, kosten en maandlast, verloop restschuld per jaar, overzicht volgens de indeling van het ESIS,
+   aandachtspunten en het vervolgtraject bij Argenta.
+
+Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`.
+
+## Eisen aan een hypotheekofferte
+
+Een bindend aanbod komt van de kredietgever, met een gepersonaliseerd ESIS en minimaal 14 dagen bedenktijd
+(art. 4:33 Wft, BGfo, richtlijn 2014/17/EU). De conceptofferte neemt de verplichte onderdelen over (kredietbedrag,
+looptijd, rente en rentevaste periode, JKP, totale kosten, totaal te betalen bedrag, termijnen, aanvullende
+verplichtingen, vervroegd aflossen, klachten, toezichthouder), maar is zelf geen renteaanbod, bindend aanbod of ESIS.
+Laat compliance de teksten toetsen voordat de tool naar adviseurs gaat.
+
+## Logo
+
+Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraagt toestemming van Argenta.
 
 ## Bronnen
 
@@ -23,6 +38,7 @@ indicatief offertevoorstel voor de Argenta hypotheek opstellen en afdrukken.
 | Tarieven | Tariefkaart Argenta, argenta.nl/hypotheek-argenta/hypotheekrente-overzicht | vast 28-10-2026, variabel 9-11-2026 |
 | Acceptatie | Argenta hypotheekgids | augustus 2026 |
 | Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
+| Kredietgever, aflossen, klachten | Voorwaarden Argenta hypotheek | juli 2025 |
 | NHG-grens, provisie | nhg.nl/voorwaarden-en-normen | geraadpleegd 10-11-2026 |
 
 Argenta heeft geen API; wijzigingen komen via de nieuwsbrief en de adviseurspagina. Tarieven moeten dus handmatig
@@ -52,3 +68,5 @@ Productregels (`REGELS`, `VOORWAARDEN`) en NHG-parameters (`NHG`) staan als cons
 - De NHG-grens is vereenvoudigd getoetst op de hoofdsom, niet op de kosten voor de woning.
 - Niet getoetst: BKR, dubbele lasten bij overbrugging, werkelijke-lastentoets voor AOW-gerechtigden, tijdelijk-tekortregeling,
   erfpacht- en VvE-beoordeling. Geen netto maandlast.
+- Het JKP en het verloop gaan uit van een gelijkblijvende rente over de hele looptijd; de overbrugging telt niet mee.
+- Kostenposten (notaris, taxatie, advies) zijn invulbare indicaties; overdrachtsbelasting alleen 2% of 0%.
