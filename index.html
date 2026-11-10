@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offertevoorstel Argenta hypotheek (indicatief)</title>
+<style>
+  :root {
+    /* Huisstijl-tokens: pas hier aan voor een andere huisstijl */
+    --primair: #00703f;
+    --primair-licht: #e6f4ed;
+    --accent: #00a35f;
+    --tekst: #1c2733;
+    --tekst-zacht: #5b6875;
+    --lijn: #d5dce4;
+    --vlak: #f5f7f6;
+    --wit: #ffffff;
+    --fout: #b3261e;
+    --fout-vlak: #fdecea;
+    --letop: #7a5200;
+    --letop-vlak: #fff4dd;
+    --goed: #1b6e3c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; color: var(--tekst); background: var(--vlak); font-size: 15px; line-height: 1.45; }
+  header { background: var(--primair); color: var(--wit); padding: 18px 16px; border-bottom: 4px solid var(--accent); }
+  header .in, main { max-width: 1220px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 21px; font-weight: 600; }
+  header p { margin: 4px 0 0; opacity: .9; font-size: 13.5px; }
+  main { padding: 16px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+  section { background: var(--wit); border: 1px solid var(--lijn); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  h2 { margin: 0 0 12px; font-size: 16px; color: var(--primair); }
+  h3 { margin: 14px 0 6px; font-size: 13.5px; color: var(--primair); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px; align-items: end; }
+  label { display: block; font-size: 12.5px; color: var(--tekst-zacht); margin-bottom: 3px; }
+  input[type=text], select { width: 100%; padding: 8px 9px; border: 1px solid var(--lijn); border-radius: 6px; font: inherit; color: inherit; background: var(--wit); }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+  .euro { position: relative; }
+  .euro span { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--tekst-zacht); }
+  .euro input { padding-left: 24px; text-align: right; font-variant-numeric: tabular-nums; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--tekst); margin: 0; padding: 8px 0; }
+  .check input { width: 16px; height: 16px; accent-color: var(--primair); flex: none; }
+  .deel { border: 1px solid var(--lijn); border-left: 4px solid var(--accent); border-radius: 6px; padding: 12px; margin-bottom: 10px; background: var(--vlak); }
+  .deel-kop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+  button { font: inherit; cursor: pointer; border-radius: 6px; padding: 9px 14px; border: 1px solid var(--primair); background: var(--wit); color: var(--primair); }
+  button.primair { background: var(--primair); color: var(--wit); font-weight: 600; }
+  button.klein { padding: 3px 9px; font-size: 12.5px; border-color: var(--lijn); color: var(--tekst-zacht); }
+  button:hover { filter: brightness(.95); }
+  .kern { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .kern div { background: var(--primair-licht); border-radius: 6px; padding: 10px 12px; }
+  .kern small { display: block; color: var(--tekst-zacht); font-size: 12px; }
+  .kern b { font-size: 18px; color: var(--primair); font-variant-numeric: tabular-nums; }
+  .tabel-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { padding: 7px 8px; border-bottom: 1px solid var(--lijn); text-align: left; white-space: nowrap; }
+  th { font-size: 12px; color: var(--tekst-zacht); font-weight: 600; }
+  td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  tfoot td { font-weight: 700; border-bottom: none; border-top: 2px solid var(--primair); }
+  table.kv td { white-space: normal; } table.kv td:last-child { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .melding { border-radius: 6px; padding: 8px 10px; margin: 6px 0; font-size: 13.5px; }
+  .melding.fout { background: var(--fout-vlak); color: var(--fout); }
+  .melding.letop { background: var(--letop-vlak); color: var(--letop); }
+  .melding.ok { background: var(--primair-licht); color: var(--goed); }
+  .klein-tekst { font-size: 12.5px; color: var(--tekst-zacht); }
+  .acties { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  details { border-top: 1px solid var(--lijn); padding: 8px 0; }
+  details summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--primair); }
+  details ul { margin: 6px 0; padding-left: 18px; font-size: 13.5px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="in">
+    <h1>Offertevoorstel Argenta hypotheek <span style="font-weight:400">(indicatief)</span></h1>
+    <p>Hulpmiddel voor hypotheekadviseurs – geen product of document van Argenta en geen renteaanbod of bindende offerte.
+       Tarieven vast: <span id="datumVast"></span> · variabel: <span id="datumVar"></span> · leennormen <span id="normJaar"></span> · hypotheekgids augustus 2026.</p>
+  </div>
+</header>
+
+<main>
+  <div>
+    <section>
+      <h2>Dossier</h2>
+      <div class="grid">
+        <div><label for="kantoor">Advieskantoor</label><input type="text" id="kantoor" autocomplete="off"></div>
+        <div><label for="adviseur">Adviseur</label><input type="text" id="adviseur" autocomplete="off"></div>
+        <div><label for="dossier">Dossiernummer</label><input type="text" id="dossier" autocomplete="off"></div>
+        <div><label for="klant1">Aanvrager 1</label><input type="text" id="klant1" autocomplete="off"></div>
+        <div><label for="klant2">Aanvrager 2 (optioneel)</label><input type="text" id="klant2" autocomplete="off"></div>
+        <div><label for="adres">Adres woning</label><input type="text" id="adres" autocomplete="off"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Woning en uitgangspunten</h2>
+      <div class="grid">
+        <div><label for="marktwaarde">Marktwaarde (na evt. verbouwing)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="marktwaarde" data-euro value="400.000"></div></div>
+        <div><label for="label">Energielabel</label>
+          <select id="label">
+            <option value="0">A++++ met EPG (&gt; 10 jaar)</option><option value="1">A++++</option><option value="2">A+++</option>
+            <option value="3">A+ of A++</option><option value="4">A</option><option value="5">B</option>
+            <option value="6" selected>C of D</option><option value="7">E, F of G</option><option value="8">Geen (geldig) label</option>
+          </select></div>
+        <div><label for="doel">Financieringsdoel</label>
+          <select id="doel"><option value="bestaand">Aankoop bestaande woning</option><option value="nieuwbouw">Aankoop nieuwbouw</option><option value="oversluiten">Oversluiting</option><option value="verbouwing">Verbouwing / verhoging</option><option value="uitkoop">Verkrijgen volledig eigendom (verdeling)</option><option value="erfpacht">Afkoop erfpacht(canon)</option></select></div>
+        <div><label for="taxatie">Waardebepaling</label>
+          <select id="taxatie"><option value="nwwi">Taxatierapport (NWWI)</option><option value="desktop">Calcasa Desktop Taxatie</option><option value="desktopplus">Calcasa Desktop Taxatie Plus</option></select></div>
+        <div><label for="maatregelen">Energiebesparende maatregelen (EBV/EBB)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="maatregelen" data-euro></div></div>
+      </div>
+      <div class="grid" style="margin-top:6px">
+        <label class="check"><input type="checkbox" id="nhg"> Met NHG</label>
+        <label class="check"><input type="checkbox" id="starter"> Koopstarter (≤ 35 jaar, eerste koopwoning)</label>
+        <label class="check"><input type="checkbox" id="appartement"> Appartement</label>
+        <label class="check"><input type="checkbox" id="erfpachtgrond"> Erfpacht</label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Leningdelen</h2>
+      <div id="delen"></div>
+      <button type="button" id="voegToe">+ Leningdeel toevoegen</button>
+    </section>
+
+    <section>
+      <h2>Overbrugging</h2>
+      <label class="check" style="padding-top:0"><input type="checkbox" id="ovbAan"> Overbruggingshypotheek opnemen</label>
+      <div class="grid" id="ovbVelden" hidden>
+        <div style="grid-column: 1 / -1"><label for="ovbSituatie">Situatie huidige woning</label>
+          <select id="ovbSituatie">
+            <option value="a">Verkocht, ontbindende voorwaarden verstreken</option>
+            <option value="b">Verkocht, ontbindende voorwaarden niet verstreken</option>
+            <option value="c">Niet verkocht, met taxatierapport</option>
+            <option value="d">Niet verkocht, met Calcasa Desktop Taxatie</option>
+          </select></div>
+        <div><label for="ovbWaarde">Verkoopprijs / marktwaarde</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbWaarde" data-euro></div></div>
+        <div><label for="ovbRestschuld">Restschuld huidige hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbRestschuld" data-euro></div></div>
+        <div><label for="ovbBedrag">Gewenste overbrugging</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbBedrag" data-euro></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Inkomen en lasten <span class="klein-tekst" style="font-weight:400">– leennormen <span id="normJaar2"></span></span></h2>
+      <div class="grid">
+        <div><label for="ink1">Toetsinkomen aanvrager 1 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink1" data-euro></div></div>
+        <div><label for="ink2">Toetsinkomen aanvrager 2 (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ink2" data-euro></div></div>
+        <div><label for="aftrek">Partneralimentatie + erfpachtcanon (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="aftrek" data-euro></div></div>
+        <div><label for="verplichtingen">Financiële verplichtingen (per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="verplichtingen" data-euro></div></div>
+        <div><label for="studie">Studielening DUO (termijnbedrag per maand)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="studie" data-euro></div></div>
+        <div><label for="toetsrente">Toetsrente bij rentevast &lt; 10 jaar (%)</label><input type="text" inputmode="decimal" id="toetsrente" value="5,00" style="text-align:right"></div>
+      </div>
+      <div class="grid" style="margin-top:6px">
+        <label class="check"><input type="checkbox" id="aow"> Aanvrager met hoogste inkomen is AOW-gerechtigd</label>
+        <label class="check"><input type="checkbox" id="alleenstaand"> Alleenstaande aanvrager</label>
+      </div>
+      <p class="klein-tekst" style="margin:6px 0 0">Verplichtingen: doorlopend krediet/verzendhuiskrediet 2% van de limiet per maand; aflopend krediet en operational lease op werkelijke last.
+        De toetsrente voor rentevast korter dan 10 jaar wordt per kwartaal door de AFM vastgesteld – controleer de actuele waarde.</p>
+    </section>
+  </div>
+
+  <div>
+    <section>
+      <h2>Resultaat</h2>
+      <div class="kern">
+        <div><small>Totale hoofdsom</small><b id="kHoofdsom">–</b></div>
+        <div><small>LTV / tariefklasse</small><b id="kLtv">–</b></div>
+        <div><small>Bruto maandlast (1e maand)</small><b id="kMaand">–</b></div>
+        <div><small>Maximaal op inkomen</small><b id="kMax">–</b></div>
+      </div>
+      <div class="tabel-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Vorm</th><th class="r">Bedrag</th><th class="r">Looptijd</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto p/m</th></tr></thead>
+          <tbody id="resRijen"></tbody>
+          <tfoot><tr><td colspan="2">Totaal</td><td class="r" id="tBedrag"></td><td></td><td></td><td class="r" id="tRente"></td><td class="r" id="tMaand"></td></tr></tfoot>
+        </table>
+      </div>
+      <div id="inkomenBlok"></div>
+      <div id="meldingen" style="margin-top:12px"></div>
+      <div class="acties">
+        <button type="button" class="primair" id="print">Offertevoorstel afdrukken / opslaan als PDF</button>
+      </div>
+      <p class="klein-tekst" style="margin-bottom:0">
+        Indicatief. Argenta beoordeelt elke aanvraag zelf en kan afwijken van de gids. Aan deze berekening kunnen geen rechten worden ontleend;
+        alleen het renteaanbod en de bindende offerte van Argenta zijn leidend. De aanvraag loopt via HDN.
+      </p>
+    </section>
+
+    <section>
+      <h2>Voorwaarden Argenta in het kort</h2>
+      <div id="voorwaarden"></div>
+      <p class="klein-tekst" style="margin-bottom:0">Samenvatting van de Argenta hypotheekgids (augustus 2026). De gids en de voorwaarden op argenta.nl zijn leidend.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+/* Tarieven: bijwerken met tools/update_rates.py. Leennormen: bijwerken met tools/update_normen.py. */
+const RATES = /*RATES_START*/{"datumVast":"28 oktober 2026","klassen":[50,60,70,80,85,90,95,100,106],"annuitair":{"1":[4.13,4.28,4.3,4.34,4.34,4.36,4.36,4.41,4.42,4.77,4.88],"2":[4.14,4.29,4.31,4.35,4.35,4.37,4.37,4.42,4.43,4.78,4.89],"3":[4.19,4.34,4.36,4.4,4.4,4.42,4.42,4.47,4.48,4.83,4.94],"4":[4.23,4.38,4.4,4.44,4.44,4.46,4.46,4.51,4.52,4.87,4.98],"5":[4.24,4.39,4.41,4.45,4.45,4.47,4.47,4.52,4.53,4.88,4.99],"6":[4.29,4.44,4.46,4.5,4.5,4.52,4.52,4.57,4.58,4.93,5.04],"7":[4.29,4.44,4.46,4.5,4.5,4.52,4.52,4.57,4.58,4.93,5.04],"8":[4.3,4.45,4.47,4.51,4.51,4.53,4.53,4.58,4.59,4.94,5.05],"9":[4.3,4.45,4.47,4.51,4.51,4.53,4.53,4.58,4.59,4.94,5.05],"10":[4.34,4.49,4.51,4.55,4.55,4.57,4.57,4.62,4.63,4.98,5.09],"11":[4.34,4.49,4.51,4.55,4.55,4.57,4.57,4.62,4.63,4.98,5.09],"12":[4.34,4.49,4.51,4.55,4.55,4.57,4.57,4.62,4.63,4.98,5.09],"13":[4.53,4.68,4.7,4.74,4.74,4.76,4.76,4.81,4.82,5.17,5.28],"14":[4.53,4.68,4.7,4.74,4.74,4.76,4.76,4.81,4.82,5.17,5.28],"15":[4.53,4.68,4.7,4.74,4.74,4.76,4.76,4.81,4.82,5.17,5.28],"16":[4.55,4.7,4.72,4.76,4.76,4.78,4.78,4.83,4.84,5.19,5.3],"17":[4.55,4.7,4.72,4.76,4.76,4.78,4.78,4.83,4.84,5.19,5.3],"18":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"19":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"20":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"21":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"22":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"23":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"24":[4.56,4.71,4.73,4.77,4.77,4.79,4.79,4.84,4.85,5.2,5.31],"25":[4.57,4.72,4.74,4.78,4.78,4.8,4.8,4.85,4.86,5.21,5.32],"26":[4.58,4.73,4.75,4.79,4.79,4.81,4.81,4.86,4.87,5.22,5.33],"27":[4.58,4.73,4.75,4.79,4.79,4.81,4.81,4.86,4.87,5.22,5.33],"28":[4.58,4.73,4.75,4.79,4.79,4.81,4.81,4.86,4.87,5.22,5.33],"29":[4.58,4.73,4.75,4.79,4.79,4.81,4.81,4.86,4.87,5.22,5.33],"30":[4.58,4.73,4.75,4.79,4.79,4.81,4.81,4.86,4.87,5.22,5.33]},"aflossingsvrij":{"1":[4.63,4.78,4.8,4.84,4.89,4.95,4.98,5.54,5.54,5.64,5.69],"2":[4.64,4.79,4.81,4.85,4.9,4.96,4.99,5.55,5.55,5.65,5.7],"3":[4.69,4.84,4.86,4.9,4.95,5.01,5.04,5.6,5.6,5.7,5.75],"4":[4.73,4.88,4.9,4.94,4.99,5.05,5.08,5.64,5.64,5.74,5.79],"5":[4.74,4.89,4.91,4.95,5.0,5.06,5.09,5.65,5.65,5.75,5.8],"6":[4.79,4.94,4.96,5.0,5.05,5.11,5.14,5.7,5.7,5.8,5.85],"7":[4.79,4.94,4.96,5.0,5.05,5.11,5.14,5.7,5.7,5.8,5.85],"8":[4.8,4.95,4.97,5.01,5.06,5.12,5.15,5.71,5.71,5.81,5.86],"9":[4.8,4.95,4.97,5.01,5.06,5.12,5.15,5.71,5.71,5.81,5.86],"10":[4.84,4.99,5.01,5.05,5.1,5.16,5.19,5.75,5.75,5.85,5.9],"11":[4.84,4.99,5.01,5.05,5.1,5.16,5.19,5.75,5.75,5.85,5.9],"12":[4.84,4.99,5.01,5.05,5.1,5.16,5.19,5.75,5.75,5.85,5.9],"13":[5.03,5.18,5.2,5.24,5.29,5.35,5.38,5.94,5.94,6.04,6.09],"14":[5.03,5.18,5.2,5.24,5.29,5.35,5.38,5.94,5.94,6.04,6.09],"15":[5.03,5.18,5.2,5.24,5.29,5.35,5.38,5.94,5.94,6.04,6.09],"16":[5.05,5.2,5.22,5.26,5.31,5.37,5.4,5.96,5.96,6.06,6.11],"17":[5.05,5.2,5.22,5.26,5.31,5.37,5.4,5.96,5.96,6.06,6.11],"18":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"19":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"20":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"21":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"22":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"23":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"24":[5.06,5.21,5.23,5.27,5.32,5.38,5.41,5.97,5.97,6.07,6.12],"25":[5.07,5.22,5.24,5.28,5.33,5.39,5.42,5.98,5.98,6.08,6.13],"26":[5.08,5.23,5.25,5.29,5.34,5.4,5.43,5.99,5.99,6.09,6.14],"27":[5.08,5.23,5.25,5.29,5.34,5.4,5.43,5.99,5.99,6.09,6.14],"28":[5.08,5.23,5.25,5.29,5.34,5.4,5.43,5.99,5.99,6.09,6.14],"29":[5.08,5.23,5.25,5.29,5.34,5.4,5.43,5.99,5.99,6.09,6.14],"30":[5.08,5.23,5.25,5.29,5.34,5.4,5.43,5.99,5.99,6.09,6.14]},"groen":{"5":[3.74,3.95],"10":[3.84,4.05],"15":[4.03,4.24],"20":[4.06,4.27],"25":[4.07,4.28],"30":[4.08,4.29]},"consumptiefOpslag":0.05,"korting":{"A":0.1,"B":0.05,"C":0},"overbrugging":4.92,"datumVariabel":"9 november 2026","variabel":[4.87,4.82,4.82,4.82,5.07,5.07,5.37,5.37,5.37,5.37,5.57]}/*RATES_END*/;
+const NORMEN = /*NORMEN_START*/{"jaar":2027,"grenzen":[1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5],"start":31000,"nietAOW":[[168,178,188,198,207,215,223,229,236,241,246,250],[174,186,197,207,216,225,234,241,248,254,259,264],[178,190,201,211,221,231,241,250,258,264,270,276],[180,190,201,211,221,231,241,250,259,268,278,286],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,190,201,211,221,231,241,250,259,268,278,287],[180,191,201,211,221,231,241,250,259,268,278,287],[181,191,201,211,221,231,241,250,259,268,278,287],[181,191,202,211,221,231,241,250,259,268,278,287],[181,192,202,212,221,231,241,250,259,268,278,287],[182,192,202,212,222,231,241,250,259,268,278,287],[182,193,203,213,222,232,241,250,259,268,278,287],[184,194,204,214,224,233,242,251,260,269,278,287],[185,196,206,216,226,235,244,253,262,271,279,287],[187,197,208,218,228,237,246,255,263,272,281,289],[188,199,210,220,230,239,248,257,265,274,282,290],[190,201,211,222,232,241,250,259,267,275,284,292],[192,203,213,224,234,243,252,261,269,277,286,294],[193,204,215,226,236,245,255,263,272,280,287,296],[195,206,217,228,238,248,257,266,274,282,289,297],[197,208,219,229,240,250,259,268,276,284,292,299],[198,209,220,231,242,251,261,270,279,287,294,301],[199,211,222,233,243,253,263,272,281,289,296,303],[201,212,223,235,245,255,265,274,283,291,299,306],[202,213,225,236,246,257,266,276,284,292,300,307],[203,215,226,237,248,258,268,277,286,294,302,309],[204,215,227,238,249,259,269,278,287,295,303,311],[204,216,228,239,249,260,270,279,288,296,304,312],[205,217,228,239,250,260,270,280,289,297,305,312],[205,217,228,240,250,261,271,280,289,298,306,313],[206,217,229,240,251,261,271,280,290,298,306,313],[206,217,229,240,251,261,271,281,290,298,306,314],[206,218,229,240,251,262,272,281,290,299,307,314],[207,218,230,241,252,262,272,281,290,299,307,315],[208,219,230,241,252,262,272,282,291,299,307,315],[208,219,230,241,252,263,273,282,291,300,308,315],[209,220,231,242,252,263,273,282,291,300,308,316],[209,220,231,242,253,263,273,283,292,300,308,316],[210,221,231,242,253,264,274,283,292,301,309,316],[211,221,232,243,253,264,274,283,292,301,309,316],[211,222,233,243,254,264,274,284,293,301,309,317],[212,223,233,243,254,264,274,284,293,301,310,317],[213,223,234,244,254,265,275,284,293,302,310,317],[213,224,235,245,255,265,275,284,294,302,310,318],[214,225,235,245,255,265,275,285,294,302,310,318],[214,225,236,246,256,266,276,285,294,303,311,318],[215,226,236,247,256,266,276,285,294,303,311,319],[215,226,237,247,257,267,276,286,295,303,311,319],[216,227,238,248,258,267,276,286,295,303,312,319],[216,227,238,248,258,268,277,286,295,304,312,319],[217,228,239,249,259,268,277,286,295,304,312,320],[217,228,239,250,259,269,278,287,295,304,312,320],[218,229,240,250,260,269,278,287,296,304,312,320],[218,229,240,251,261,270,279,288,296,305,313,320],[219,230,241,251,261,271,280,288,297,305,313,320],[219,230,241,251,262,271,280,289,297,305,313,321],[220,231,242,252,262,272,281,289,297,305,313,321],[220,231,242,252,262,272,281,290,298,306,314,321],[220,232,243,253,263,273,282,290,298,306,314,322],[221,232,243,253,263,273,282,291,299,307,314,322],[221,233,243,254,264,274,283,291,300,307,315,322],[222,233,244,254,264,274,283,292,300,308,315,322],[222,233,244,255,265,275,284,293,301,308,316,323],[223,234,245,255,265,275,284,293,301,309,316,323],[223,234,245,256,266,276,285,294,302,309,317,323],[223,235,246,256,266,276,285,294,302,310,317,324],[223,235,246,257,267,277,286,294,303,310,318,324],[223,235,247,257,267,277,286,295,303,311,318,325],[223,236,247,258,268,277,287,295,303,311,319,325],[224,236,247,258,268,278,287,296,304,312,319,326],[225,236,248,258,269,278,288,296,304,312,320,326]],"welAOW":[[196,199,202,205,207,210,212,214,217,218,220,222],[209,213,214,219,222,225,228,230,233,235,237,239],[214,221,227,232,235,238,241,244,246,249,251,252],[218,225,231,237,242,247,251,254,257,260,263,265],[221,229,236,242,248,253,257,261,264,267,270,273],[224,233,241,247,253,259,264,268,271,275,278,280],[226,236,244,252,258,264,269,274,278,281,284,287],[227,238,247,255,262,268,274,279,283,287,290,293],[228,239,249,258,265,272,278,283,288,292,296,299],[229,240,250,260,268,275,282,287,292,297,301,304],[230,241,251,261,270,278,285,291,296,301,305,309],[231,241,252,262,271,280,287,294,299,304,309,313],[231,242,253,263,272,281,289,296,302,308,312,316],[232,243,253,263,273,282,290,298,305,311,316,320],[233,244,254,264,274,283,291,299,307,313,318,323],[233,245,255,265,275,284,292,300,308,315,321,326],[234,245,256,266,276,285,294,302,309,316,323,328],[234,246,257,267,277,286,295,303,310,317,324,330],[235,246,257,268,278,287,296,304,311,318,325,331],[236,247,259,269,279,289,298,306,313,321,327,333],[238,250,261,271,282,291,300,309,316,324,330,337],[242,252,264,274,285,295,304,312,320,328,334,341],[245,256,267,278,288,298,308,316,324,331,338,345],[249,260,270,281,291,302,311,320,328,336,343,349],[252,263,274,284,295,305,315,324,332,340,347,354],[255,267,278,288,299,309,319,328,336,345,352,358],[258,271,281,292,302,313,323,332,340,348,356,363],[259,274,285,296,306,316,326,335,344,352,360,367],[261,276,289,299,310,319,330,339,348,356,364,371],[262,277,291,303,314,323,333,343,352,360,368,375],[264,279,294,306,317,327,336,346,355,364,372,379],[265,281,296,309,320,331,340,350,359,367,375,383],[266,282,297,312,324,334,344,353,362,371,379,386],[267,284,299,314,327,337,347,356,365,374,382,390],[267,285,301,315,329,341,350,360,369,377,386,393],[267,286,302,317,331,344,353,363,371,380,389,397],[267,286,303,319,333,346,357,366,375,383,392,400],[268,286,304,320,335,348,360,369,378,386,395,403],[268,286,305,321,336,350,362,372,381,389,397,406],[268,286,305,322,337,352,365,375,384,393,400,408],[268,286,305,323,339,353,367,378,387,396,403,411],[269,287,305,323,340,354,368,380,390,398,406,413],[269,287,305,323,341,356,369,382,392,401,409,416],[269,287,305,323,341,356,370,383,395,403,412,419],[269,287,305,323,341,356,371,384,397,406,414,422],[270,288,305,323,341,356,371,384,397,408,416,424],[270,288,305,323,341,356,371,384,397,409,419,426],[271,288,306,323,341,356,371,384,397,409,420,429],[272,288,306,323,341,356,371,384,397,409,420,431],[273,289,306,324,341,356,371,384,397,409,420,432],[275,290,307,324,341,356,371,384,397,409,420,432],[276,291,307,325,342,356,371,384,397,409,420,432],[277,292,308,325,342,356,371,384,397,409,420,432],[278,293,308,325,342,356,371,384,397,409,420,432],[279,294,309,325,342,356,371,384,397,409,420,432],[280,295,310,325,342,356,371,384,397,409,420,432],[281,296,311,326,342,356,371,384,397,409,420,432],[282,297,312,326,342,356,371,384,397,409,420,432],[282,298,312,327,342,356,371,384,397,409,420,432],[283,298,313,327,342,356,371,384,397,409,420,432],[283,298,313,328,342,356,371,384,397,409,420,432],[283,299,314,328,342,356,371,384,397,409,420,432],[284,299,314,328,342,356,371,384,397,409,420,432],[284,299,314,329,343,356,371,384,397,409,420,432],[285,300,315,329,343,356,371,384,397,409,420,432],[285,300,315,330,343,357,371,384,397,409,420,432],[286,301,315,330,344,357,371,384,397,409,420,432],[286,301,316,330,344,358,371,384,397,409,420,432],[287,301,316,331,345,358,371,384,397,409,420,432],[287,302,317,331,345,358,371,384,397,409,420,432],[288,302,317,331,345,359,372,384,397,409,420,432],[288,303,317,332,346,359,372,384,397,409,420,432],[289,303,318,332,346,360,372,384,397,409,420,432],[289,304,318,333,347,360,373,385,397,409,420,432],[290,304,319,333,347,360,373,385,397,409,420,432],[290,305,319,333,347,361,373,386,397,409,420,432],[291,305,320,334,348,361,374,386,397,409,420,432],[291,306,320,334,348,361,374,386,398,409,420,432],[292,306,321,335,348,362,375,387,398,409,420,432],[292,307,321,335,349,362,375,387,399,409,420,432]],"box3nietAOW":[[152,154,157,159,161,163,165,167,169,170,172,173],[157,159,162,164,166,168,170,172,174,175,177,178],[160,163,165,168,170,172,174,176,178,179,181,182],[163,166,168,171,173,175,177,179,181,183,184,186],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,174,177,179,181,182,184,186,187],[164,167,170,172,175,177,179,181,183,184,186,187],[165,168,170,173,175,177,179,181,183,185,186,188],[165,168,170,173,175,177,179,181,183,185,186,188],[165,168,171,173,175,178,180,182,183,185,187,188],[165,168,171,173,176,178,180,182,184,185,187,188],[166,169,171,174,176,178,180,182,184,186,187,189],[166,169,172,174,176,179,181,183,184,186,188,189],[166,169,172,174,177,179,181,183,185,186,188,190],[167,170,172,175,177,179,181,183,185,187,188,190],[167,170,173,175,178,180,182,184,186,187,189,190],[168,171,173,176,178,180,182,184,186,188,189,191],[168,171,174,176,179,181,183,185,187,188,190,191],[169,172,175,177,180,182,184,186,188,190,191,193],[170,174,176,179,181,184,186,188,189,191,193,194],[172,175,178,181,183,185,187,189,191,193,195,196],[173,176,179,182,184,187,189,191,193,195,196,198],[175,178,181,184,186,188,190,193,194,196,198,199],[176,179,182,185,188,190,192,194,196,198,200,201],[178,181,184,187,189,192,194,196,198,200,201,203],[179,183,185,188,191,193,196,198,200,202,203,205],[181,184,187,190,193,195,197,199,201,203,205,206],[182,186,189,191,194,197,199,201,203,205,207,208],[184,187,190,193,195,198,200,203,205,206,208,210],[185,188,191,194,197,199,202,204,206,208,210,211],[186,190,193,196,198,201,203,206,208,209,211,213],[187,191,194,197,200,202,205,207,209,211,213,214],[188,192,195,198,201,203,206,208,210,212,214,216],[189,193,196,199,202,204,207,209,211,213,215,217],[190,194,197,200,203,205,208,210,212,214,216,218],[191,195,198,201,204,206,209,211,213,215,217,219],[192,195,199,202,205,207,210,212,214,216,218,220],[193,196,199,203,205,208,210,213,215,217,219,221],[193,197,200,203,206,209,211,213,216,218,220,221],[194,198,201,204,207,209,212,214,216,219,220,222],[195,198,201,205,208,210,213,215,217,219,221,223],[195,199,202,205,208,211,213,216,218,220,222,224],[196,200,203,206,209,212,214,216,219,221,223,224],[197,200,203,207,210,212,215,217,219,221,223,225],[197,201,204,207,210,213,215,218,220,222,224,226],[198,201,205,208,211,214,216,219,221,223,225,227],[198,202,205,208,211,214,217,219,221,223,225,227],[199,203,206,209,212,215,217,220,222,224,226,228],[199,203,207,210,213,215,218,220,223,225,227,228],[200,204,207,210,213,216,219,221,223,225,227,229],[201,204,208,211,214,217,219,222,224,226,228,230],[201,205,208,211,214,217,220,222,224,227,229,230],[202,205,209,212,215,218,220,223,225,227,229,231],[202,206,209,212,215,218,221,223,226,228,230,232],[203,206,210,213,216,219,221,224,226,228,230,232],[203,207,210,213,216,219,222,224,227,229,231,233],[204,207,211,214,217,220,222,225,227,229,231,233],[204,208,211,214,217,220,223,225,228,230,232,234],[205,208,212,215,218,221,223,226,228,230,232,234],[205,209,212,215,218,221,224,226,228,230,232,234],[205,209,212,216,219,221,224,226,228,230,232,234],[206,209,213,216,219,221,224,226,228,230,232,234],[206,210,213,216,219,221,224,226,228,230,232,234],[206,210,213,216,219,221,224,226,228,230,232,234],[207,210,213,216,219,221,224,226,228,230,232,234],[207,210,213,216,219,222,224,226,229,230,233,234],[207,210,213,217,219,222,224,226,229,231,233,235],[208,211,214,217,220,223,225,227,230,231,234,235],[208,212,215,217,221,223,225,228,230,232,234,236],[209,212,216,218,222,224,226,229,231,233,235,237],[209,213,216,219,222,225,227,230,232,234,236,237],[210,213,217,220,223,226,228,230,232,234,236,238],[210,214,217,221,223,226,229,231,233,235,237,239],[210,214,217,221,224,227,229,232,233,236,238,239],[211,214,218,221,224,227,230,232,234,237,238,240],[211,215,218,221,225,228,230,233,235,237,239,241],[211,215,218,222,225,228,231,233,236,238,240,242]],"box3welAOW":[[195,198,201,204,207,209,212,214,216,218,220,221],[202,206,209,212,215,217,220,222,224,226,228,230],[206,209,213,216,219,221,224,226,228,230,232,234],[208,212,215,218,221,224,227,229,231,233,235,237],[210,214,217,220,223,226,228,231,233,235,237,239],[211,215,218,221,224,227,230,232,235,237,239,240],[212,216,219,223,226,228,231,233,236,238,240,242],[213,217,221,224,227,230,232,235,237,239,241,243],[214,218,221,224,227,230,233,235,238,240,242,244],[215,219,222,225,228,231,234,236,239,241,243,245],[216,219,223,226,229,232,234,237,239,241,243,245],[216,220,223,227,230,233,235,238,240,242,244,246],[217,220,224,227,230,233,236,238,241,243,245,247],[217,221,224,228,231,234,236,239,241,243,245,247],[218,221,225,228,231,234,237,239,242,244,246,248],[218,222,225,229,232,235,237,240,242,244,246,248],[219,223,226,229,232,235,238,241,243,245,247,249],[220,224,227,230,233,236,239,242,244,246,248,250],[221,225,228,232,235,238,240,243,245,247,250,252],[222,227,230,234,237,240,242,245,247,250,252,254],[225,229,233,236,239,242,245,248,250,252,255,257],[228,232,236,240,243,246,249,251,254,256,258,260],[231,235,239,242,245,249,251,254,257,259,261,263],[232,236,240,244,247,250,253,256,258,261,263,265],[234,238,242,246,249,252,255,258,260,262,265,267],[235,240,243,247,251,254,257,259,262,264,267,269],[237,241,245,249,252,255,258,261,264,266,268,270],[238,242,246,250,254,257,260,263,265,268,270,272],[239,243,247,251,255,258,261,264,266,269,271,273],[240,244,248,252,255,259,262,264,267,270,272,274],[240,244,248,252,255,259,262,265,267,270,272,274],[240,244,248,252,256,259,262,265,268,270,272,274],[240,245,249,252,256,259,262,265,268,270,273,275],[240,245,249,252,256,259,262,265,268,270,273,275],[240,245,249,253,256,259,262,266,268,271,273,275],[241,245,249,253,257,260,263,266,269,271,273,276],[241,246,250,254,257,260,263,267,269,272,274,276],[242,246,250,254,258,261,264,267,270,272,275,277],[242,246,251,255,258,261,264,267,270,273,275,277],[243,247,251,255,259,262,265,268,270,273,276,278],[243,247,251,256,259,262,265,268,271,274,276,278],[244,248,252,256,260,263,266,269,272,274,277,279],[245,249,253,257,261,264,267,270,273,275,278,280],[246,250,254,258,262,265,268,271,274,277,279,281],[247,252,256,260,263,267,270,273,276,278,281,283],[248,253,257,261,265,268,271,274,277,280,282,284],[250,254,258,262,266,269,273,276,279,281,284,286],[251,255,260,264,267,271,274,277,280,282,285,287],[252,257,261,265,269,272,275,278,281,284,286,289],[253,258,262,266,270,273,277,280,283,285,288,290],[255,259,263,268,271,275,278,281,284,287,289,291],[256,260,265,269,273,276,279,282,285,288,291,293],[257,261,266,270,274,277,281,284,287,289,292,294],[258,263,267,271,275,279,282,285,288,291,293,296],[259,264,268,272,276,280,283,286,289,292,294,297],[260,265,269,273,277,281,284,287,290,293,296,298],[261,266,270,274,278,282,285,288,291,294,297,299],[262,267,271,275,279,283,286,289,292,295,298,300],[263,267,272,276,280,284,287,290,293,296,299,301],[264,268,273,277,281,285,288,291,294,297,300,302],[264,269,274,278,282,285,289,292,295,298,300,303],[265,270,274,278,282,286,290,293,296,299,301,304],[266,270,275,279,283,287,290,293,296,299,302,304],[266,271,275,280,283,287,290,294,297,300,302,305],[267,271,276,280,284,288,291,295,298,300,303,305],[267,272,276,281,285,288,292,295,298,301,304,306],[268,272,277,281,285,289,292,296,299,302,304,307],[268,273,277,282,286,289,293,296,299,302,305,307],[269,274,278,282,286,290,293,297,300,303,305,308],[269,274,279,283,287,291,294,297,301,303,306,308],[270,275,279,283,287,291,295,298,301,304,307,309],[270,275,280,284,288,292,295,298,301,304,307,310],[271,276,280,284,288,292,296,299,302,305,308,310],[271,276,281,285,289,293,296,299,302,306,308,311],[272,277,281,285,289,293,297,300,303,306,309,311],[272,277,282,286,290,293,297,300,303,306,309,312],[273,277,282,286,290,294,298,301,304,307,310,312],[273,278,282,287,291,294,298,301,304,307,310,313],[273,278,283,287,291,295,299,302,305,308,311,313],[274,279,283,288,292,295,299,302,305,308,311,314]],"labelExtra":[0,5000,10000,20000,25000,30000,40000,0],"verbouwExtra":[20000,15000,10000,10000,0,0,0,10000],"brutering":[1.05,1.05,1.1,1.15,1.2,1.2,1.25,1.3,1.3,1.35,1.4,1.4],"factorHoog":1,"factorLaag":1,"alleenstaandBedrag":18000}/*NORMEN_END*/;
+
+/* Productregels uit de Argenta hypotheekgids, augustus 2026 */
+const REGELS = {
+  minHoofdsom: 25000, maxHoofdsom: 2000000, grensGroot: 1250000, maxLtvGroot: 90,
+  maxLtv: 100, maxLtvNhgGroen: 106, minMarktwaarde: 100000,
+  avMaxPct: 30, avMaxBedrag: 150000,
+  groenMax: 35000, groenPerioden: [5, 10, 15, 20, 25, 30],
+  consMax: 100000, consMaxLtv: 80,
+  desktopMaxLtv: 90, desktopMaxHoofdsom: 1000000, desktopMaxWaarde: 1500000,
+  bouwdepotVrij: 25000, eigenMiddelenBewijs: 25000,
+  ovbKosten: 250, ovbVerkoopkostenPct: 1.85
+};
+/* NHG: bron nhg.nl/voorwaarden-en-normen (C.2), geraadpleegd 10 november 2026 – jaarlijks controleren */
+const NHG = { grens: 470000, grensEnergie: 498200, provisiePct: 0.4 };
+const VORMEN = {
+  ann: { naam: 'Annuïtair', tabel: 'annuitair' },
+  lin: { naam: 'Lineair', tabel: 'annuitair' },
+  av: { naam: 'Aflossingsvrij', tabel: 'aflossingsvrij' },
+  groenAnn: { naam: 'Groen lenen – annuïtair', groen: true },
+  groenLin: { naam: 'Groen lenen – lineair', groen: true }
+};
+/* Energielabels: index sluit aan op de volgorde in NORMEN.labelExtra / verbouwExtra (0 = A++++ met garantie ... 8 = geen label) */
+const LABELS = [
+  { naam: 'A++++ met EPG', norm: 6, korting: 'A' }, { naam: 'A++++', norm: 5, korting: 'A' }, { naam: 'A+++', norm: 4, korting: 'A' },
+  { naam: 'A+ of A++', norm: 3, korting: 'A' }, { naam: 'A', norm: 2, korting: 'A' }, { naam: 'B', norm: 2, korting: 'B' },
+  { naam: 'C of D', norm: 1, korting: 'C' }, { naam: 'E, F of G', norm: 0, korting: 'C' }, { naam: 'Geen (geldig) label', norm: 7, korting: 'C' }
+];
+const OVB = {
+  a: { naam: 'Verkocht, ontbindende voorwaarden verstreken', pct: 100, kosten: true },
+  b: { naam: 'Verkocht, ontbindende voorwaarden niet verstreken', pct: 95 },
+  c: { naam: 'Niet verkocht, met taxatierapport', pct: 95 },
+  d: { naam: 'Niet verkocht, met Calcasa Desktop Taxatie', pct: 90 }
+};
+const VOORWAARDEN = [
+  ['Lening en offerte', [
+    'Hoofdsom € 25.000 tot € 2.000.000 (inclusief overbrugging en verhogingen); verhoging vanaf € 5.000; looptijd 5 tot 30 jaar.',
+    'Verstrekking tot 100% van de marktwaarde; met NHG en EBB/EBV tot 106%. Boven € 1.250.000 hoofdsom maximaal 90%.',
+    'NHG: NHG-grens € 470.000 (met energiebesparende maatregelen € 498.200); borgtochtprovisie 0,4%.',
+    'Offerte 3 maanden geldig, verlenging met 9 maanden zonder bereidstellingskosten; € 500 annuleringskosten in de verlengingsperiode.',
+    'Passeren binnen 3 maanden: de laagste van offerterente en passeerrente geldt. Na 3 maanden: de laagste van offerterente en rente op het vastklikmoment.',
+    'Renteaanbod binnen 3 weken retour; bindende offerte binnen 2 weken (digitaal) getekend retour.',
+    'Bouwdepot zonder kosten, 24 maanden geldig; rentevergoeding gelijk aan de hypotheekrente (maximaal 24 maanden).',
+    'Onbeperkt aflossen uit eigen middelen. Verhuisregeling: rente en resterende hoofdsom binnen 12 maanden meenemen.'
+  ]],
+  ['Aflosvormen', [
+    'Annuïtair, lineair en aflossingsvrij. Leven-, spaar- en beleggingshypotheken alleen voor bestaande klanten.',
+    'Aflossingsvrij maximaal 30% van de marktwaarde en maximaal € 150.000 (laagste van de 2); niet voor koopstarters (≤ 35 jaar, eerste koopwoning).',
+    'Consumptieve hypotheek: maximaal € 100.000, LTV maximaal 80%, annuïtair of lineair, niet met NHG, opslag op de vaste rente; afwijzing bij negatieve BKR-melding.',
+    'Groen lenen (EBB/EBV): maximaal € 35.000, annuïtair of lineair, looptijd en rentevast 5/10/15/20/25/30 jaar, niet voor appartementen.',
+    'Duurzaamheidskorting bij geregistreerd label A (of beter) of B; geldt tijdens de eerste rentevaste periode, niet op groen lenen en overbrugging.'
+  ]],
+  ['Woning en taxatie', [
+    'Eigen bewoning, vaste bewoning in Nederland; minimale marktwaarde (na verbouwing) € 100.000.',
+    'Taxatierapport via NWWI, op datum bindende offerte maximaal 6 maanden oud.',
+    'Calcasa Desktop Taxatie: tot 90% LTV, hoofdsom maximaal € 1.000.000, woningwaarde maximaal € 1.500.000, betrouwbaarheid ≥ 4,0 (NHG 5,0); niet bij nieuwbouw of erfpacht. Bij aflossingsvrij: Desktop Taxatie Plus of volledige taxatie.',
+    'Nieuwbouw: waarborgcertificaat (keurmerk Stichting GarantieWoning) en bij passeren een onherroepelijke omgevingsvergunning.',
+    'Uitgesloten onder meer: serviceflat, studenten- of noodwoning, (deels) verhuurde woning, recht van opstal, coöperatief eigendom, recreatiebestemming, zelfbouw zonder aannemer.',
+    'Hoog funderingsrisico (D) of vastgesteld funderingsprobleem (E): dossier voorleggen voor individuele beoordeling.'
+  ]],
+  ['Aanvrager en inkomen', [
+    'Maximaal 2 aanvragers, 18 jaar of ouder, geen maximumleeftijd; geen samenlevingsvormen in familiesfeer en geen borgstelling door derden.',
+    'Toetsing volgens de Tijdelijke regeling hypothecair krediet en zoveel mogelijk de NHG-normen; toetsrente bij rentevast ≥ 10 jaar is de offerterente.',
+    'Loondienst via IBL of werkgeversverklaring; maximaal 50 contractuele uren per week; toekomstige verhoging of dienstverband binnen 6 maanden na bindende offerte kan meetellen.',
+    'Flexibel inkomen: gemiddelde van 3 kalenderjaren, maximaal het laatste jaar; alleen naast een hoger vast inkomen van de andere aanvrager (tenzij volledig via IBL).',
+    'Ondernemers: tot 100% marktwaarde zonder opslag; inkomensverklaring ondernemer of cijfers van 3 kalenderjaren; maximaal 3 actieve ondernemingen (NL, BE of DE).',
+    'Alleen inkomen en vermogen in euro’s; verhuurinkomsten uit een 2e woning tellen niet mee.',
+    'Herkomst eigen middelen aantonen vanaf € 25.000.'
+  ]],
+  ['Financiële lasten en BKR', [
+    'Doorlopend krediet en verzendhuiskrediet: 2% van de oorspronkelijke hoofdsom per maand. Aflopend krediet, restschuld en operational lease: werkelijke last.',
+    'Studielening DUO: termijnbedrag gebruteerd volgens de Tijdelijke regeling hypothecair krediet.',
+    'Partneralimentatie en erfpachtcanon komen in mindering op het toetsinkomen.',
+    'Geen hypotheek bij loonbeslag of looncessie, BKR-code 1 t/m 5, A-registratie of code SK/SH/ZO/RO; herstelde A-registratie alleen na 2 jaar en met verklaring.',
+    'Vanaf 9 BKR-contracten (1 aanvrager) of 16 (2 aanvragers): losse beoordeling.'
+  ]],
+  ['Overbrugging', [
+    'Alleen in combinatie met de Argenta hypotheek; looptijd maximaal 24 maanden (nieuwbouw 36 maanden); afsluitkosten € 250 bij aflossing.',
+    'Maximum: 100% verkoopprijs – 1,85% verkoopkosten – restschuld (verkocht, voorwaarden verstreken); 95% (verkocht, voorwaarden niet verstreken of onverkocht met taxatie); 90% (onverkocht met Desktop Taxatie).',
+    'Dubbele lasten moeten gedragen kunnen worden gedurende de verwachte looptijd.'
+  ]]
+];
+
+/* ---------- Nederlandse notatie ---------- */
+const fmtEuro0 = n => (n < 0 ? '-' : '') + '€ ' + Math.abs(Math.round(n)).toLocaleString('nl-NL');
+const fmtEuro2 = n => (n < 0 ? '-' : '') + '€ ' + Math.abs(n).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtPct = (n, d = 2) => n.toLocaleString('nl-NL', { minimumFractionDigits: d, maximumFractionDigits: d }) + '%';
+const parseEuro = s => parseInt(String(s).replace(/\D/g, ''), 10) || 0;
+const parseDec = s => parseFloat(String(s).replace(/[^\d,.]/g, '').replace(',', '.')) || 0;
+const fmtInvoer = n => n ? n.toLocaleString('nl-NL') : '';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = id => document.getElementById(id);
+const euro = id => parseEuro($(id).value);
+
+/* ---------- State (in-memory; geen localStorage i.v.m. embed in Google Sites) ---------- */
+let volgnr = 1;
+const delen = [{ id: volgnr++, vorm: 'ann', bedrag: 360000, looptijd: 30, rvp: '10', consumptief: false }];
+
+function rvpOpties(d) {
+  if (VORMEN[d.vorm].groen) return REGELS.groenPerioden.map(j => [String(j), j + ' jaar']);
+  const o = [];
+  if (!d.consumptief) o.push(['var', 'Variabel (3 mnd)']);
+  for (let j = 1; j <= 30; j++) o.push([String(j), j + ' jaar']);
+  return o;
+}
+
+function tekenDelen() {
+  $('delen').innerHTML = delen.map((d, i) => {
+    const groen = VORMEN[d.vorm].groen;
+    const kanCons = d.vorm === 'ann' || d.vorm === 'lin';
+    return `<div class="deel" data-id="${d.id}">
+      <div class="deel-kop"><span>Leningdeel ${i + 1}</span>${delen.length > 1 ? '<button type="button" class="klein" data-weg>Verwijderen</button>' : ''}</div>
+      <div class="grid">
+        <div><label>Aflosvorm</label><select data-veld="vorm">${Object.entries(VORMEN).map(([k, v]) => `<option value="${k}"${k === d.vorm ? ' selected' : ''}>${v.naam}</option>`).join('')}</select></div>
+        <div><label>Bedrag</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" data-euro data-veld="bedrag" value="${fmtInvoer(d.bedrag)}"></div></div>
+        <div><label>Looptijd</label><select data-veld="looptijd">${(groen ? REGELS.groenPerioden : Array.from({ length: 26 }, (_, k) => k + 5)).map(j => `<option value="${j}"${j === d.looptijd ? ' selected' : ''}>${j} jaar</option>`).join('')}</select></div>
+        <div><label>Rentevaste periode</label><select data-veld="rvp">${rvpOpties(d).map(([v, t]) => `<option value="${v}"${v === d.rvp ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+        ${kanCons ? `<label class="check"><input type="checkbox" data-veld="consumptief"${d.consumptief ? ' checked' : ''}> Consumptieve hypotheek</label>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function normaliseer(d) {
+  if (VORMEN[d.vorm].groen) {
+    d.consumptief = false;
+    if (!REGELS.groenPerioden.includes(d.looptijd)) d.looptijd = 30;
+    if (!REGELS.groenPerioden.includes(+d.rvp)) d.rvp = '10';
+  }
+  if (d.vorm === 'av') d.consumptief = false;
+  if (d.consumptief && d.rvp === 'var') d.rvp = '10';
+}
+
+/* ---------- Rekenkern ---------- */
+function klasseIndex(ltv, nhg) {
+  if (nhg) return 0;
+  const i = RATES.klassen.findIndex(k => ltv <= k);
+  return i === -1 ? RATES.klassen.length + 1 : i + 1;
+}
+function klasseNaam(idx) {
+  if (idx === 0) return 'NHG';
+  return idx <= RATES.klassen.length ? '≤ ' + RATES.klassen[idx - 1] + '%' : '> 106%';
+}
+const annFactor = (rentePct, jaren) => { const r = rentePct / 100 / 12, n = jaren * 12; return r === 0 ? 1 / n : r / (1 - Math.pow(1 + r, -n)); };
+function maandlast(vorm, bedrag, rentePct, jaren) {
+  const r = rentePct / 100 / 12, n = jaren * 12;
+  if (vorm === 'av') return bedrag * r;
+  if (vorm === 'lin' || vorm === 'groenLin') return bedrag / n + bedrag * r;
+  return bedrag * annFactor(rentePct, jaren);
+}
+function normKolom(rente) { const i = NORMEN.grenzen.findIndex(g => rente <= g + 1e-9); return i === -1 ? NORMEN.grenzen.length : i; }
+function normPct(tabel, inkomen, kol) {
+  const t = NORMEN[tabel];
+  const rij = Math.max(0, Math.min(t.length - 1, Math.floor((inkomen - NORMEN.start) / 1000)));
+  return t[rij][kol] / 1000;
+}
+
+function inkomenstoets(rijen, totaal, labelIdx) {
+  const i1 = euro('ink1'), i2 = euro('ink2');
+  if (i1 + i2 === 0 || totaal === 0) return null;
+  const aow = $('aow').checked, alleen = $('alleenstaand').checked;
+  const toetsKort = parseDec($('toetsrente').value);
+  const inkomen = Math.max(0, i1 * NORMEN.factorHoog + i2 * NORMEN.factorLaag - euro('aftrek'));
+  rijen.forEach(x => { x.toets = (x.d.rvp === 'var' || +x.d.rvp < 10) ? toetsKort : (x.rente || 0); });
+  const gemToets = rijen.reduce((s, x) => s + x.toets * x.d.bedrag, 0) / totaal;
+  const kol = normKolom(gemToets);
+  const pct = normPct(aow ? 'welAOW' : 'nietAOW', inkomen, kol);
+  const pctBox3 = normPct(aow ? 'box3welAOW' : 'box3nietAOW', inkomen, kol);
+  /* Toetslast: annuïtair over 30 jaar tegen de toetsrente; niet-aftrekbare (consumptieve) delen gewogen met de box 3-tabel */
+  const toetslast = rijen.reduce((s, x) => s + x.d.bedrag * annFactor(x.toets, 30) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
+  const brutering = NORMEN.brutering[kol];
+  const studieBruto = euro('studie') * brutering;
+  const toegestaan = inkomen * pct / 12 - euro('verplichtingen') - studieBruto;
+  const norm = LABELS[labelIdx].norm;
+  const vrij = [];
+  if (NORMEN.labelExtra[norm]) vrij.push(['Extra leenruimte energielabel ' + LABELS[labelIdx].naam, NORMEN.labelExtra[norm]]);
+  const maatregelen = Math.min(euro('maatregelen'), NORMEN.verbouwExtra[norm]);
+  if (maatregelen) vrij.push(['Energiebesparende maatregelen (maximaal ' + fmtEuro0(NORMEN.verbouwExtra[norm]) + ')', maatregelen]);
+  if (alleen && inkomen > NORMEN.start) vrij.push(['Alleenstaande aanvrager', NORMEN.alleenstaandBedrag]);
+  const vrijTotaal = vrij.reduce((s, v) => s + v[1], 0);
+  const maxHyp = Math.max(0, toegestaan) / (toetslast / totaal) + vrijTotaal;
+  return { inkomen, gemToets, pct, toegestaan, toetslast, studieBruto, brutering, vrij, vrijTotaal, maxHyp, ruimte: maxHyp - totaal, aow };
+}
+
+function bereken() {
+  const mw = euro('marktwaarde');
+  const nhg = $('nhg').checked, starter = $('starter').checked, app = $('appartement').checked, erfpacht = $('erfpachtgrond').checked;
+  const labelIdx = +$('label').value, label = LABELS[labelIdx];
+  const doel = $('doel').value, taxatie = $('taxatie').value;
+  const totaal = delen.reduce((s, d) => s + d.bedrag, 0);
+  const ltv = mw > 0 ? totaal / mw * 100 : 0;
+  const idx = klasseIndex(ltv, nhg);
+  const korting = RATES.korting[label.korting] || 0;
+  const fouten = [], letop = [];
+
+  const rijen = delen.map((d, i) => {
+    const v = VORMEN[d.vorm];
+    let rente = null;
+    if (v.groen) { const rij = RATES.groen[d.rvp]; rente = rij ? rij[nhg ? 0 : 1] : null; }
+    else if (d.rvp === 'var') rente = RATES.variabel[idx];
+    else { const rij = RATES[v.tabel][d.rvp]; rente = rij ? rij[idx] : null; }
+    if (rente != null && !v.groen) {
+      if (d.consumptief) rente += RATES.consumptiefOpslag;
+      rente = Math.round((rente - korting) * 100) / 100;
+    }
+    const pm = rente != null && d.bedrag > 0 ? maandlast(d.vorm, d.bedrag, rente, d.looptijd) : 0;
+    if (d.bedrag <= 0) fouten.push(`Leningdeel ${i + 1}: vul een bedrag in.`);
+    if (d.rvp !== 'var' && +d.rvp > d.looptijd) letop.push(`Leningdeel ${i + 1}: rentevaste periode is langer dan de looptijd.`);
+    return { nr: i + 1, d, naam: v.naam + (d.consumptief ? ' (consumptief)' : ''), rente, pm };
+  });
+
+  const som = f => delen.filter(f).reduce((s, d) => s + d.bedrag, 0);
+  const av = som(d => d.vorm === 'av'), groen = som(d => VORMEN[d.vorm].groen), cons = som(d => d.consumptief);
+
+  /* Overbrugging */
+  let ovb = null;
+  if ($('ovbAan').checked) {
+    const s = OVB[$('ovbSituatie').value], waarde = euro('ovbWaarde'), rest = euro('ovbRestschuld'), bedrag = euro('ovbBedrag');
+    const max = Math.max(0, waarde * s.pct / 100 - (s.kosten ? waarde * REGELS.ovbVerkoopkostenPct / 100 : 0) - rest);
+    ovb = { situatie: s.naam, waarde, rest, bedrag, max, rente: RATES.overbrugging, pm: bedrag * RATES.overbrugging / 100 / 12, looptijd: doel === 'nieuwbouw' ? 36 : 24 };
+    if (bedrag <= 0) fouten.push('Overbrugging: vul het gewenste bedrag in.');
+    if (waarde > 0 && bedrag > max) fouten.push(`Overbrugging is maximaal ${fmtEuro0(max)} in deze situatie.`);
+    letop.push(`Overbrugging: looptijd maximaal ${ovb.looptijd} maanden, ${fmtEuro0(REGELS.ovbKosten)} afsluitkosten bij aflossing; de klant moet de dubbele lasten kunnen dragen (niet getoetst in deze tool). De rente wordt vastgesteld bij het renteaanbod.`);
+  }
+  const totaalIncl = totaal + (ovb ? ovb.bedrag : 0);
+
+  if (mw > 0 && mw < REGELS.minMarktwaarde) fouten.push(`Minimale marktwaarde is ${fmtEuro0(REGELS.minMarktwaarde)}.`);
+  if (mw <= 0) fouten.push('Vul de marktwaarde in.');
+  if (totaal > 0 && totaal < REGELS.minHoofdsom) fouten.push(`Minimale hoofdsom is ${fmtEuro0(REGELS.minHoofdsom)}.`);
+  if (totaalIncl > REGELS.maxHoofdsom) fouten.push(`Maximale hoofdsom is ${fmtEuro0(REGELS.maxHoofdsom)} (inclusief overbrugging en verhogingen).`);
+  if (totaal > REGELS.grensGroot && ltv > REGELS.maxLtvGroot) fouten.push(`Bij een hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} geldt een maximale verstrekking van ${REGELS.maxLtvGroot}% van de marktwaarde.`);
+  if (ovb && totaalIncl > REGELS.grensGroot && $('ovbSituatie').value >= 'c') letop.push(`Hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} inclusief overbrugging op een onverkochte woning: individuele beoordeling, langere doorlooptijd.`);
+  if (mw > 0) {
+    if (!nhg && ltv > REGELS.maxLtv) fouten.push('Zonder NHG is de verstrekking maximaal 100% van de marktwaarde.');
+    if (nhg && ltv > REGELS.maxLtvNhgGroen) fouten.push('Met NHG is de verstrekking maximaal 106% van de marktwaarde (alleen met EBB/EBV).');
+    else if (nhg && ltv > REGELS.maxLtv && groen + euro('maatregelen') === 0) fouten.push('Boven 100% van de marktwaarde kan alleen met NHG in combinatie met energiebesparende maatregelen (EBB/EBV).');
+  }
+  if (nhg) {
+    if (totaal > NHG.grensEnergie) fouten.push(`Met NHG is de lening maximaal ${fmtEuro0(NHG.grensEnergie)} (NHG-grens inclusief energiebesparende maatregelen).`);
+    else if (totaal > NHG.grens && groen + euro('maatregelen') < totaal - NHG.grens) fouten.push(`De NHG-grens is ${fmtEuro0(NHG.grens)}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
+    letop.push(`NHG: borgtochtprovisie ${fmtPct(NHG.provisiePct, 1)} = ${fmtEuro0(totaal * NHG.provisiePct / 100)} (bij aankoop over de volledige lening). De NHG-grens is hier vereenvoudigd getoetst op de hoofdsom; NHG toetst op de kosten voor de woning. Controleer de grens die geldt op de datum van het bindend aanbod.`);
+  }
+  if (av > 0) {
+    if (starter) fouten.push('Aflossingsvrij is niet mogelijk voor koopstarters (35 jaar of jonger, eerste koopwoning).');
+    const maxAv = Math.min(mw * REGELS.avMaxPct / 100, REGELS.avMaxBedrag);
+    if (av > maxAv) fouten.push(`Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde en maximaal ${fmtEuro0(REGELS.avMaxBedrag)} (laagste van de 2): hier ${fmtEuro0(maxAv)}.`);
+    if (taxatie === 'desktop') fouten.push('Bij een aflossingsvrij leningdeel is een Calcasa Desktop Taxatie Plus of volledige taxatie verplicht.');
+  }
+  if (groen > 0) {
+    if (groen > REGELS.groenMax) fouten.push(`Argenta groen lenen is maximaal ${fmtEuro0(REGELS.groenMax)}.`);
+    if (app) fouten.push('Argenta groen lenen kan niet worden afgesloten voor een appartement.');
+    letop.push('Het groen-lenen-tarief geldt alleen tijdens de eerste rentevaste periode en is niet afhankelijk van de risicoklasse.');
+  }
+  if (cons > 0) {
+    if (nhg) fouten.push('Een consumptieve hypotheek kan niet met NHG worden aangevraagd.');
+    if (cons > REGELS.consMax) fouten.push(`De consumptieve hypotheek is maximaal ${fmtEuro0(REGELS.consMax)}.`);
+    if (ltv > REGELS.consMaxLtv) fouten.push(`Met een consumptieve hypotheek geldt een maximale LTV van ${REGELS.consMaxLtv}%.`);
+    letop.push('Consumptieve hypotheek: bestedingsdoel doorgeven in het opmerkingenveld van HDN; afwijzing bij een negatieve BKR-melding.');
+  }
+  if (taxatie !== 'nwwi') {
+    if (doel === 'nieuwbouw') fouten.push('Een Calcasa Desktop Taxatie is niet mogelijk bij nieuwbouw.');
+    if (erfpacht) fouten.push('Een Calcasa Desktop Taxatie is niet mogelijk bij erfpacht.');
+    if (ltv > REGELS.desktopMaxLtv) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot ${REGELS.desktopMaxLtv}% LTV.`);
+    if (totaal > REGELS.desktopMaxHoofdsom) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot een hoofdsom van ${fmtEuro0(REGELS.desktopMaxHoofdsom)}.`);
+    if (mw > REGELS.desktopMaxWaarde) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot een woningwaarde van ${fmtEuro0(REGELS.desktopMaxWaarde)}.`);
+    letop.push(`Desktop Taxatie: minimale betrouwbaarheid ${nhg ? '5,0 (NHG)' : '4,0'}; op datum bindende offerte maximaal 6 maanden oud.`);
+  }
+  if (doel === 'nieuwbouw') letop.push('Nieuwbouw: waarborgcertificaat (keurmerk Stichting GarantieWoning), (voorlopig) energielabel en bij passeren een onherroepelijke omgevingsvergunning.');
+  if (erfpacht) letop.push('Erfpacht: overheidserfpacht volgens NHG-regels; particuliere erfpacht afhankelijk van vestigingsdatum (erfpachtopinie of bancaire richtlijn). Canon komt in mindering op het toetsinkomen.');
+  if (korting) letop.push('De duurzaamheidskorting vereist een geldig geregistreerd energielabel en geldt alleen tijdens de eerste rentevaste periode.');
+  if (rijen.some(r => r.d.rvp === 'var')) letop.push('Variabele rente: de klant krijgt de rente die geldt op het moment van passeren; de rente staat 3 maanden vast.');
+
+  const toets = inkomenstoets(rijen, totaal, labelIdx);
+  if (toets) {
+    if (toets.ruimte < 0) fouten.push(`De hoofdsom is ${fmtEuro0(-toets.ruimte)} hoger dan de maximale hypotheek op inkomen (${fmtEuro0(toets.maxHyp)}).`);
+    if (toets.aow) letop.push('Vanaf de AOW-gerechtigde leeftijd mag op werkelijke last worden getoetst; deze tool rekent met de AOW-tabel op annuïtaire toetslast.');
+    letop.push(`Inkomenstoets op basis van de leennormen ${NORMEN.jaar} (gelden vanaf 1 januari ${NORMEN.jaar}); voor aanvragen daarvoor gelden de normen van ${NORMEN.jaar - 1}.`);
+  } else letop.push('Geen toetsinkomen ingevuld: de maximale hypotheek op inkomen is niet getoetst.');
+
+  const maand = rijen.reduce((s, r) => s + r.pm, 0) + (ovb ? ovb.pm : 0);
+  const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
+  return { mw, nhg, label, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente };
+}
+
+const rvpTekst = d => d.rvp === 'var' ? 'Variabel' : d.rvp + ' jaar';
+const rijHtml = (x, lang) => `<tr><td>${x.nr}</td><td>${esc(x.naam)}</td><td class="r">${fmtEuro0(x.d.bedrag)}</td><td class="r">${x.d.looptijd} ${lang ? 'jaar' : 'jr'}</td><td class="r">${rvpTekst(x.d)}</td><td class="r">${x.rente != null ? fmtPct(x.rente) : '–'}</td><td class="r">${fmtEuro2(x.pm)}</td></tr>`;
+const ovbHtml = o => o ? `<tr><td>O</td><td>Overbrugging</td><td class="r">${fmtEuro0(o.bedrag)}</td><td class="r">${o.looptijd} mnd</td><td class="r">–</td><td class="r">${fmtPct(o.rente)}</td><td class="r">${fmtEuro2(o.pm)}</td></tr>` : '';
+function toetsHtml(t) {
+  if (!t) return '';
+  const r = (a, b) => `<tr><td>${esc(a)}</td><td>${b}</td></tr>`;
+  return `<h3>Inkomenstoets (leennormen ${NORMEN.jaar})</h3><table class="kv">` +
+    r('Toetsinkomen', fmtEuro0(t.inkomen)) +
+    r('Gewogen toetsrente', fmtPct(t.gemToets)) +
+    r('Financieringslastpercentage' + (t.aow ? ' (AOW)' : ''), fmtPct(t.pct * 100, 1)) +
+    r('Toegestane maandlast na verplichtingen', fmtEuro2(t.toegestaan)) +
+    (t.studieBruto ? r('waarvan studielening gebruteerd (factor ' + t.brutering.toLocaleString('nl-NL') + ')', fmtEuro2(t.studieBruto)) : '') +
+    t.vrij.map(v => r(v[0], fmtEuro0(v[1]))).join('') +
+    r('Maximale hypotheek op inkomen', '<b>' + fmtEuro0(t.maxHyp) + '</b>') +
+    r(t.ruimte >= 0 ? 'Ruimte' : 'Tekort', '<b>' + fmtEuro0(Math.abs(t.ruimte)) + '</b>') + '</table>';
+}
+
+function toon() {
+  $('ovbVelden').hidden = !$('ovbAan').checked;
+  const r = bereken();
+  $('kHoofdsom').textContent = fmtEuro0(r.totaalIncl);
+  $('kLtv').textContent = r.mw > 0 ? fmtPct(r.ltv, 1) + ' · ' + klasseNaam(r.idx) : '–';
+  $('kMaand').textContent = fmtEuro2(r.maand);
+  $('kMax').textContent = r.toets ? fmtEuro0(r.toets.maxHyp) : '–';
+  $('resRijen').innerHTML = r.rijen.map(x => rijHtml(x)).join('') + ovbHtml(r.ovb);
+  $('tBedrag').textContent = fmtEuro0(r.totaalIncl);
+  $('tRente').textContent = r.totaal > 0 ? fmtPct(r.gewRente) : '';
+  $('tMaand').textContent = fmtEuro2(r.maand);
+  $('inkomenBlok').innerHTML = toetsHtml(r.toets);
+  $('meldingen').innerHTML =
+    r.fouten.map(m => `<div class="melding fout"><b>Niet mogelijk:</b> ${esc(m)}</div>`).join('') +
+    (r.fouten.length === 0 ? '<div class="melding ok">Past binnen de getoetste regels uit de hypotheekgids.</div>' : '') +
+    r.letop.map(m => `<div class="melding letop"><b>Let op:</b> ${esc(m)}</div>`).join('');
+  return r;
+}
+
+/* ---------- Afdrukken: altijd via window.open (window.print in een iframe wordt geblokkeerd) ---------- */
+function printDocument() {
+  const r = toon();
+  if (r.fouten.length && !confirm('Het voorstel past niet binnen de getoetste regels. Toch afdrukken?')) return;
+  const v = id => esc($(id).value.trim());
+  const keuze = id => esc($(id).selectedOptions[0].textContent);
+  const vandaag = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const meld = [...r.fouten.map(m => 'Niet mogelijk: ' + m), ...r.letop].map(m => `<li>${esc(m)}</li>`).join('');
+  const css = getComputedStyle(document.documentElement);
+  const kleur = n => css.getPropertyValue(n).trim();
+  const html = `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Offertevoorstel Argenta hypotheek${v('dossier') ? ' ' + v('dossier') : ''}</title><style>
+    @page { size: A4; margin: 16mm 15mm; }
+    body { font-family: "Segoe UI", Arial, sans-serif; color: #1c2733; font-size: 10.5pt; line-height: 1.4; margin: 0; }
+    .kop { border-bottom: 3px solid ${kleur('--accent')}; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+    h1 { font-size: 17pt; margin: 0; color: ${kleur('--primair')}; } h2, h3 { font-size: 11.5pt; color: ${kleur('--primair')}; margin: 14px 0 5px; }
+    .sub { color: #5b6875; font-size: 9pt; }
+    table { width: 100%; border-collapse: collapse; } th, td { padding: 4px 6px; border-bottom: 1px solid #d5dce4; text-align: left; font-size: 9.5pt; }
+    th { color: #5b6875; font-size: 8.5pt; } .r { text-align: right; } tfoot td { font-weight: 700; border-top: 2px solid ${kleur('--primair')}; border-bottom: none; }
+    .kv td { border: none; padding: 2px 6px 2px 0; } .kv td:first-child { color: #5b6875; width: 55%; } .kv td:last-child { text-align: right; }
+    .twee { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; } .twee .kv td:last-child { text-align: left; } .twee .kv td:first-child { width: 40%; }
+    ul { margin: 4px 0; padding-left: 18px; font-size: 9.5pt; }
+    .disc { margin-top: 14px; padding: 9px 11px; border: 1px solid #d5dce4; background: #f5f7f6; font-size: 8.5pt; color: #3b4753; break-inside: avoid; }
+  </style></head><body>
+  <div class="kop"><div><h1>Offertevoorstel Argenta hypotheek</h1><div class="sub">Indicatieve berekening van uw adviseur · geen renteaanbod of bindende offerte van Argenta</div></div>
+    <div class="sub" style="text-align:right">${v('kantoor') ? '<b>' + v('kantoor') + '</b><br>' : ''}${v('adviseur') ? v('adviseur') + '<br>' : ''}${vandaag}</div></div>
+  <div class="twee">
+    <div><h2>Dossier</h2><table class="kv">
+      <tr><td>Aanvrager(s)</td><td>${[v('klant1'), v('klant2')].filter(Boolean).join(' en ') || '–'}</td></tr>
+      <tr><td>Dossiernummer</td><td>${v('dossier') || '–'}</td></tr>
+      <tr><td>Adres woning</td><td>${v('adres') || '–'}</td></tr>
+      <tr><td>Financieringsdoel</td><td>${keuze('doel')}</td></tr>
+      <tr><td>Waardebepaling</td><td>${keuze('taxatie')}</td></tr></table></div>
+    <div><h2>Uitgangspunten</h2><table class="kv">
+      <tr><td>Marktwaarde</td><td>${fmtEuro0(r.mw)}</td></tr>
+      <tr><td>Hoofdsom${r.ovb ? ' (excl. overbrugging)' : ''}</td><td>${fmtEuro0(r.totaal)}</td></tr>
+      <tr><td>LTV / tariefklasse</td><td>${fmtPct(r.ltv, 1)} / ${klasseNaam(r.idx)}</td></tr>
+      <tr><td>NHG</td><td>${r.nhg ? 'Ja' : 'Nee'}</td></tr>
+      <tr><td>Energielabel</td><td>${esc(r.label.naam)}</td></tr></table></div>
+  </div>
+  <h2>Leningdelen</h2>
+  <table><thead><tr><th>#</th><th>Aflosvorm</th><th class="r">Bedrag</th><th class="r">Looptijd</th><th class="r">Rentevast</th><th class="r">Rente</th><th class="r">Bruto per maand*</th></tr></thead>
+    <tbody>${r.rijen.map(x => rijHtml(x, true)).join('')}${ovbHtml(r.ovb)}</tbody>
+    <tfoot><tr><td colspan="2">Totaal</td><td class="r">${fmtEuro0(r.totaalIncl)}</td><td></td><td></td><td class="r">${fmtPct(r.gewRente)}</td><td class="r">${fmtEuro2(r.maand)}</td></tr></tfoot></table>
+  <div class="sub">* Bruto maandlast in de eerste maand (rente en aflossing), exclusief fiscaal effect en verzekeringen. Rentes inclusief eventuele duurzaamheidskorting en opslag consumptief. Totaalrente: gewogen gemiddelde exclusief overbrugging.</div>
+  ${toetsHtml(r.toets)}
+  ${meld ? '<h2>Aandachtspunten</h2><ul>' + meld + '</ul>' : ''}
+  <h2>Kenmerken offertetraject Argenta</h2>
+  <ul>${VOORWAARDEN[0][1].slice(3).map(t => '<li>' + esc(t) + '</li>').join('')}</ul>
+  <div class="disc"><b>Belangrijk.</b> Dit is een indicatieve berekening van uw adviseur en geen aanbod of document van Argenta. De berekening is gebaseerd op de door Argenta gepubliceerde tarieven
+    (vaste rente per ${esc(RATES.datumVast)}, variabele rente per ${esc(RATES.datumVariabel)}), de Argenta hypotheekgids van augustus 2026 en de leennormen ${NORMEN.jaar} uit de Tijdelijke regeling hypothecair krediet.
+    Tarieven, normen en voorwaarden kunnen wijzigen. Inkomen, financiële verplichtingen (BKR), onderpand en NHG-voorwaarden zijn niet door Argenta beoordeeld. Aan deze berekening kunnen geen rechten worden ontleend;
+    uitsluitend het renteaanbod en de bindende offerte van Argenta zijn leidend. Dit document is geen adviesrapport.</div>
+  </body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { alert('Het afdrukvenster is geblokkeerd. Sta pop-ups toe voor deze pagina.'); return; }
+  w.document.open(); w.document.write(html); w.document.close(); w.focus();
+  setTimeout(() => w.print(), 300);
+}
+
+/* ---------- Events ---------- */
+function verwerk(e) {
+  const t = e.target;
+  if (t.matches('[data-euro]')) t.value = fmtInvoer(parseEuro(t.value));
+  const kaart = t.closest('.deel');
+  if (kaart && t.dataset.veld) {
+    const d = delen.find(x => x.id === +kaart.dataset.id), veld = t.dataset.veld;
+    if (veld === 'bedrag') d.bedrag = parseEuro(t.value);
+    else if (veld === 'looptijd') d.looptijd = +t.value;
+    else if (veld === 'consumptief') d.consumptief = t.checked;
+    else d[veld] = t.value;
+    if (veld === 'vorm' || veld === 'consumptief') { normaliseer(d); tekenDelen(); }
+  }
+  toon();
+}
+document.addEventListener('input', verwerk);
+document.addEventListener('change', verwerk);
+document.addEventListener('click', e => {
+  if (e.target.matches('[data-weg]')) {
+    const id = +e.target.closest('.deel').dataset.id;
+    delen.splice(delen.findIndex(x => x.id === id), 1);
+    tekenDelen(); toon();
+  }
+});
+$('voegToe').addEventListener('click', () => { delen.push({ id: volgnr++, vorm: 'ann', bedrag: 0, looptijd: 30, rvp: '10', consumptief: false }); tekenDelen(); toon(); });
+$('print').addEventListener('click', printDocument);
+
+$('datumVast').textContent = RATES.datumVast;
+$('datumVar').textContent = RATES.datumVariabel;
+$('normJaar').textContent = $('normJaar2').textContent = NORMEN.jaar;
+$('voorwaarden').innerHTML = VOORWAARDEN.map(([kop, punten]) => `<details><summary>${esc(kop)}</summary><ul>${punten.map(p => '<li>' + esc(p) + '</li>').join('')}</ul></details>`).join('');
+tekenDelen(); toon();
+</script>
+</body>
+</html>
