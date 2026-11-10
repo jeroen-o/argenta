@@ -22,6 +22,33 @@ aflossingsvrij terugbrengen, leenruimte vergroten). Dit zijn rekenkundige mogeli
 
 Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`.
 
+## Bestanden
+
+| Bestand | Doel |
+| --- | --- |
+| `index.html` | De rekentool; bevat ook de rekenkern (enige bron) |
+| `handleiding.html` | Handleiding voor de tool en de API |
+| `argenta-engine.js` | De rekenkern als module voor koppelingen (gegenereerd uit `index.html`) |
+| `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; de mapping moet nog worden ingevuld |
+| `voorbeelden/aanvraag.json` | Voorbeeldinvoer voor de API |
+| `tests/test.js` | Tests van de rekenkern en de adapter |
+| `tools/` | Scripts om tarieven, normen en de module bij te werken |
+
+## API
+
+`ArgentaEngine.resultaat(aanvraag)` geeft een oordeel (`past`, `voorbehoud`, `past_niet`) met afwijzingen, voorbehouden,
+voorwaarden, grenzen (minimale marktwaarde, minimaal toetsinkomen, benodigd eigen geld en meer), rente, maandlast en JKP.
+Het is een module, geen server: de rekenkern draait in de browser of in Node en verstuurt niets. Het oordeel is geen kans
+dat Argenta de offerte afgeeft. Zie `handleiding.html` voor invoer, uitvoer en de HDN-aansluiting.
+
+```bash
+python3 tools/export_engine.py
+```
+
+```bash
+node tests/test.js
+```
+
 ## Bijzondere toetsen
 
 | Toets | Invoer | Bron |
@@ -80,7 +107,7 @@ Productregels (`REGELS`, `VOORWAARDEN`) en NHG-parameters (`NHG`) staan als cons
 - De inkomenstoets rekent met de normen 2027 (gelden vanaf 1 januari 2027); de normen 2026 zitten er niet in.
 - De toetsrente voor rentevast korter dan 10 jaar is een invoerveld (standaard 5,00%); de AFM stelt deze per kwartaal vast.
 - De NHG-grens is vereenvoudigd getoetst op de hoofdsom, niet op de kosten voor de woning.
-- Niet getoetst: BKR en fraudesignalen. Geen netto maandlast.
+- De tool voert zelf geen BKR-toets uit; de uitkomst van de BKR-toets is invoer. Geen netto maandlast.
 - Bijzondere toetsen (werkelijke lasten AOW, senioren verhuisregeling, tijdelijk-tekortregeling, erfpacht, VvE, dubbele lasten)
   volgen de hypotheekgids en het stroomschema VvE, maar blijven indicatief: de AOW-leeftijd is vast op 67 jaar gezet, de
   dubbele-lastentoets is een eigen uitwerking (eigen middelen of ruimte in de inkomenstoets) en erfpachtopinies beoordeelt Argenta zelf.

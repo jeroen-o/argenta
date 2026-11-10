@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handleiding – Conceptofferte Argenta hypotheek</title>
+<style>
+  :root { --primair: #00703f; --primair-licht: #e6f4ed; --accent: #00a35f; --tekst: #1c2733; --tekst-zacht: #5b6875; --lijn: #d5dce4; --vlak: #f5f7f6; --wit: #fff; --letop: #7a5200; --letop-vlak: #fff4dd; --code: #f0f3f2; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; color: var(--tekst); background: var(--vlak); font-size: 15px; line-height: 1.55; }
+  header { background: var(--primair); color: var(--wit); padding: 18px 16px; border-bottom: 4px solid var(--accent); }
+  .in { max-width: 920px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+  header p { margin: 4px 0 0; opacity: .9; font-size: 14px; }
+  header a { color: var(--wit); }
+  nav { background: var(--wit); border-bottom: 1px solid var(--lijn); padding: 10px 16px; position: sticky; top: 0; }
+  nav .in { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 14px; }
+  nav a, main a { color: var(--primair); }
+  main { padding: 16px; }
+  section { background: var(--wit); border: 1px solid var(--lijn); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  h2 { margin: 0 0 10px; font-size: 19px; color: var(--primair); }
+  h3 { margin: 18px 0 6px; font-size: 15.5px; color: var(--primair); }
+  p { margin: 0 0 10px; } ul, ol { margin: 0 0 10px; padding-left: 22px; } li { margin-bottom: 4px; }
+  .tabel-wrap { overflow-x: auto; margin-bottom: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--lijn); vertical-align: top; }
+  th { font-size: 12.5px; color: var(--tekst-zacht); }
+  code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; background: var(--code); padding: 1px 4px; border-radius: 3px; }
+  pre { background: var(--code); border: 1px solid var(--lijn); border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 13px; line-height: 1.45; margin: 0 0 10px; }
+  pre code { background: none; padding: 0; }
+  .kader { background: var(--letop-vlak); color: var(--letop); border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; font-size: 14px; }
+  .kader.groen { background: var(--primair-licht); color: #1b6e3c; }
+  .deel { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--tekst-zacht); margin: 22px 0 8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="in">
+    <h1>Handleiding</h1>
+    <p>Conceptofferte Argenta hypotheek – de rekentool en de API. <a href="index.html">Naar de rekentool</a></p>
+  </div>
+</header>
+<nav><div class="in">
+  <a href="#tool">De rekentool</a><a href="#stappen">De vier stappen</a><a href="#uitkomst">De uitkomst lezen</a><a href="#offerte">De conceptofferte</a>
+  <a href="#api">De API</a><a href="#invoer">Invoer</a><a href="#uitvoer">Uitvoer</a><a href="#hdn">HDN</a><a href="#beheer">Beheer</a><a href="#grenzen">Wat de tool niet doet</a>
+</div></nav>
+<main><div class="in">
+
+<div class="kader"><b>Geen offerte van Argenta.</b> De tool en de API toetsen een aanvraag aan de tarieven en voorwaarden die Argenta publiceert.
+  De uitkomst is een indicatie. Alleen Argenta brengt een renteaanbod en een bindende offerte uit, na een aanvraag via HDN, en kan daarbij afwijken van deze berekening.</div>
+
+<div class="deel">Deel 1 – De rekentool</div>
+
+<section id="tool">
+  <h2>Wat de rekentool doet</h2>
+  <p>De rekentool is één HTML-bestand (<code>index.html</code>). Je opent het in de browser; er is geen installatie, geen server en er worden geen gegevens verstuurd of opgeslagen. Sluit je het venster, dan is de invoer weg.</p>
+  <p>Je vult een aanvraag in vier stappen in. De tool berekent de rente per leningdeel, de maandlast, het jaarlijks kostenpercentage en de maximale hypotheek, toetst de aanvraag aan de regels uit de Argenta hypotheekgids en maakt een conceptofferte die je kunt afdrukken of als PDF kunt opslaan.</p>
+</section>
+
+<section id="stappen">
+  <h2>De vier stappen</h2>
+  <h3>Stap 1 – Start de conceptaanvraag</h3>
+  <ul>
+    <li><b>Woning:</b> financieringsdoel, koopsom, marktwaarde, energielabel, soort waardebepaling en het funderingsrisico uit de taxatie (als dat al bekend is).</li>
+    <li><b>Marktwaarde</b> volgt de koopsom totdat je het veld zelf aanpast.</li>
+    <li><b>Appartement</b> aangevinkt: je beantwoordt de vragen uit het stroomschema voor de VvE.</li>
+    <li><b>Erfpacht</b> aangevinkt: je vult uitgever, vestigingsdatum, erfpachtopinie, resterende duur en canon in.</li>
+    <li><b>Aanvragers en adviseur:</b> namen, geboortedata, kantoor en AFM-vergunningnummer. Deze komen op de conceptofferte; de geboortedata zijn nodig voor de senioren- en tekortregeling.</li>
+  </ul>
+  <h3>Stap 2 – Bereken de kosten</h3>
+  <ul>
+    <li>Verbouwing, energiebesparende maatregelen, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG en eigen geld.</li>
+    <li>De bedragen voor notaris, taxatie en advies zijn vooringevulde indicaties. Vul de werkelijke bedragen in; ze tellen mee in het jaarlijks kostenpercentage.</li>
+    <li><b>Eigen geld</b> wordt automatisch ingevuld met het bedrag dat minimaal nodig is om binnen de marktwaarde (of de NHG-grens) te blijven, totdat je het veld zelf aanpast.</li>
+    <li>Rechts zie je de opbouw: totale kosten, aftrek eigen geld en het te financieren bedrag.</li>
+  </ul>
+  <h3>Stap 3 – Kan dit bedrag geleend worden?</h3>
+  <ul>
+    <li><b>Leningdelen:</b> aflosvorm, bedrag, looptijd en rentevaste periode. Bij één leningdeel neemt de tool het te financieren bedrag over. Voeg je een tweede deel toe, dan verdeel je de bedragen zelf.</li>
+    <li><b>Inkomen en lasten:</b> toetsinkomen per aanvrager, alimentatie, financiële verplichtingen per maand en de studielening. Doorlopend krediet tel je mee voor 2% van de limiet per maand.</li>
+    <li><b>Toetsrente bij rentevast korter dan 10 jaar:</b> staat standaard op 5,00%. De AFM stelt deze elk kwartaal vast; controleer de actuele waarde.</li>
+    <li><b>Bijzondere toets:</b> kies hier de toets op werkelijke lasten voor AOW-gerechtigden, de senioren verhuisregeling of de tijdelijk-tekortregeling.</li>
+    <li><b>BKR en loon:</b> de uitkomst van de BKR-toets, het aantal contracten en loonbeslag.</li>
+    <li><b>Overbrugging:</b> situatie van de huidige woning, verkoopprijs, restschuld, gewenst bedrag en de gegevens voor de dubbele lasten.</li>
+  </ul>
+  <h3>Stap 4 – Overzicht en conceptofferte</h3>
+  <p>Hier staat het oordeel, de voorwaarden waaronder het geldt, de meldingen, de tips en de knop voor de conceptofferte.</p>
+</section>
+
+<section id="uitkomst">
+  <h2>De uitkomst lezen</h2>
+  <div class="tabel-wrap"><table>
+    <tr><th>Oordeel</th><th>Betekenis</th><th>Wat je doet</th></tr>
+    <tr><td><b>Past binnen de regels</b></td><td>Geen enkele getoetste regel wordt overschreden en er zijn geen punten die Argenta apart beoordeelt.</td><td>Controleer de voorwaarden; als die kloppen, kan de aanvraag worden ingediend.</td></tr>
+    <tr><td><b>Past onder voorbehoud</b></td><td>Rekenkundig past het, maar er is een punt dat Argenta zelf beoordeelt of dat nog niet is getoetst (bijvoorbeeld funderingsrisico D, erfpachtopinie oranje, geen inkomen ingevuld).</td><td>Lees de punten onder “Let op” en lever de genoemde stukken mee.</td></tr>
+    <tr><td><b>Past niet</b></td><td>Minstens één regel wordt overschreden. De melding noemt de regel en het bedrag.</td><td>Pas de aanvraag aan; de tips laten zien wat rekenkundig mogelijk is.</td></tr>
+  </table></div>
+  <h3>Voorwaarden waaronder de uitkomst geldt</h3>
+  <p>Dit zijn de eisen waaraan de aanvraag straks moet voldoen, omgerekend naar dit dossier:</p>
+  <ul>
+    <li>de <b>minimale marktwaarde</b> die de taxatie moet opleveren, en de waarde die nodig is om in de gerekende tariefklasse te blijven;</li>
+    <li>het <b>funderingsrisico</b>: maximaal klasse C, anders beoordeelt Argenta individueel;</li>
+    <li><b>BKR</b>: geen achterstands- of bijzonderheidscodes, geen HY-registratie, geen loonbeslag;</li>
+    <li>het <b>minimale toetsinkomen</b> waarbij deze lening binnen de leennorm past;</li>
+    <li>het <b>eigen geld</b> dat de klant minimaal inbrengt, en vanaf € 25.000 het bewijs van herkomst;</li>
+    <li>eisen aan de taxatie, het energielabel, de woning en de opstalverzekering.</li>
+  </ul>
+  <h3>Meldingen, bijzondere toetsen en tips</h3>
+  <ul>
+    <li><b>Niet mogelijk</b> (rood): een regel uit de hypotheekgids wordt overschreden.</li>
+    <li><b>Let op</b> (geel): aandachtspunt of stuk dat moet worden aangeleverd.</li>
+    <li><b>Bijzondere toetsen:</b> de uitkomst van AOW, senioren, tijdelijk tekort, erfpacht, VvE, funderingsrisico, BKR en dubbele lasten.</li>
+    <li><b>Tips voor de adviseur:</b> rekenkundige mogelijkheden, zoals extra eigen geld voor een lagere tariefklasse of NHG. Het zijn geen adviezen en ze komen niet op de conceptofferte.</li>
+  </ul>
+</section>
+
+<section id="offerte">
+  <h2>De conceptofferte</h2>
+  <p>De knop <b>Download conceptofferte</b> opent een nieuw venster met het rapport en start het afdrukvenster. Kies daar “Opslaan als PDF” om een bestand te maken. Blokkeert de browser het venster, sta dan pop-ups toe voor de pagina.</p>
+  <p>Het rapport telt 7 pagina's: voorblad, toelichting en gegevens, kosten en maandlast, verloop van de restschuld, een overzicht volgens de indeling van het ESIS, voorwaarden en aandachtspunten, en het vervolgtraject bij Argenta.</p>
+  <div class="kader">Het rapport is geen renteaanbod, geen bindend aanbod, geen ESIS en geen adviesrapport. Het advies en de onderbouwing leg je apart vast.</div>
+</section>
+
+<div class="deel">Deel 2 – De API</div>
+
+<section id="api">
+  <h2>Wat de API is</h2>
+  <p>De API is dezelfde rekenkern als in de rekentool, als los JavaScript-bestand: <code>argenta-engine.js</code>. Je geeft een aanvraag als JSON mee en krijgt het oordeel als JSON terug. De rekenkern draait in de browser of in Node, heeft geen afhankelijkheden en verstuurt niets. Er is dus geen server of endpoint; eBlinqx laadt het bestand en roept de functie aan.</p>
+  <h3>In de browser</h3>
+<pre><code>&lt;script src="argenta-engine.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const uitkomst = ArgentaEngine.resultaat(aanvraag);
+  if (uitkomst.oordeel === 'past') { /* toon groen */ }
+&lt;/script&gt;</code></pre>
+  <h3>In Node</h3>
+<pre><code>const ArgentaEngine = require('./argenta-engine.js');
+const uitkomst = ArgentaEngine.resultaat(require('./voorbeelden/aanvraag.json'));
+console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
+  <h3>Functies</h3>
+  <div class="tabel-wrap"><table>
+    <tr><th>Functie</th><th>Geeft terug</th></tr>
+    <tr><td><code>ArgentaEngine.resultaat(aanvraag)</code></td><td>Het oordeel als platte JSON (zie <a href="#uitvoer">Uitvoer</a>). Bij ongeldige invoer: <code>oordeel: "ongeldige_invoer"</code> met de lijst <code>invoerFouten</code>.</td></tr>
+    <tr><td><code>ArgentaEngine.beoordeel(aanvraag)</code></td><td>Het interne resultaat dat de rekentool gebruikt, inclusief het maandschema per leningdeel. Gooit een fout bij ongeldige invoer.</td></tr>
+    <tr><td><code>ArgentaEngine.VERSIE</code>, <code>RATES</code>, <code>NORMEN</code>, <code>REGELS</code>, <code>NHG</code></td><td>Versie van de rekenkern en de gebruikte tarieven, leennormen en grenzen.</td></tr>
+  </table></div>
+</section>
+
+<section id="invoer">
+  <h2>Invoer</h2>
+  <p>Een volledig voorbeeld staat in <code>voorbeelden/aanvraag.json</code>. Bedragen zijn hele euro's, percentages gewone getallen (5 = 5%), datums <code>JJJJ-MM-DD</code>.</p>
+<pre><code>{
+  "peildatum": "2027-01-15",
+  "woning": { "doel": "bestaand", "koopsom": 400000, "marktwaarde": 400000, "energielabel": "A",
+              "waardebepaling": "nwwi", "funderingsrisico": null, "koopstarter": false, "appartement": false, "nhg": false },
+  "kosten": { "verbouwing": 0, "energiemaatregelen": 0, "overdrachtsbelastingPct": 2, "notarisLevering": 650,
+              "notarisHypotheek": 650, "taxatie": 500, "advies": 2500, "eigenGeld": 32300 },
+  "aanvragers": [ { "geboortedatum": "1988-04-12", "toetsinkomen": 62000 },
+                  { "geboortedatum": "1990-09-30", "toetsinkomen": 41000 } ],
+  "inkomen": { "aftrekPerJaar": 0, "verplichtingenPerMaand": 0, "studieleningPerMaand": 85, "toetsrenteKort": 5,
+               "aowGerechtigd": false, "alleenstaand": false, "regeling": "geen" },
+  "leningdelen": [ { "vorm": "ann", "bedrag": 380000, "looptijd": 30, "rentevast": 10, "consumptief": false } ],
+  "erfpacht": null, "vve": null, "overbrugging": null,
+  "bkr": { "status": "onbekend", "aantalContracten": 2, "loonbeslag": false }
+}</code></pre>
+  <h3>Velden en toegestane waarden</h3>
+  <div class="tabel-wrap"><table>
+    <tr><th>Veld</th><th>Waarden</th></tr>
+    <tr><td><code>woning.doel</code></td><td><code>bestaand</code>, <code>nieuwbouw</code>, <code>oversluiten</code>, <code>verbouwing</code>, <code>uitkoop</code>, <code>erfpacht</code></td></tr>
+    <tr><td><code>woning.marktwaarde</code></td><td>Bedrag; <code>null</code> = gelijk aan de koopsom</td></tr>
+    <tr><td><code>woning.energielabel</code></td><td><code>A++++_EPG</code>, <code>A++++</code>, <code>A+++</code>, <code>A+_A++</code>, <code>A</code>, <code>B</code>, <code>C_D</code>, <code>E_F_G</code>, <code>GEEN</code></td></tr>
+    <tr><td><code>woning.waardebepaling</code></td><td><code>nwwi</code>, <code>desktop</code>, <code>desktopplus</code></td></tr>
+    <tr><td><code>woning.funderingsrisico</code></td><td><code>A</code> t/m <code>E</code>; <code>null</code> = nog niet bekend (wordt dan een voorwaarde)</td></tr>
+    <tr><td><code>kosten.eigenGeld</code></td><td>Bedrag; <code>null</code> = de rekenkern neemt het minimaal benodigde bedrag</td></tr>
+    <tr><td><code>inkomen.regeling</code></td><td><code>geen</code>, <code>aow</code>, <code>senioren</code>, <code>tekort</code>. Bij <code>senioren</code> en <code>tekort</code> ook <code>regelingInkomen</code>; bij <code>senioren</code> ook <code>huidigeMaandlast</code></td></tr>
+    <tr><td><code>leningdelen[].vorm</code></td><td><code>ann</code>, <code>lin</code>, <code>av</code>, <code>groenAnn</code>, <code>groenLin</code></td></tr>
+    <tr><td><code>leningdelen[].bedrag</code></td><td>Bedrag; <code>null</code> bij één leningdeel = het te financieren bedrag</td></tr>
+    <tr><td><code>leningdelen[].rentevast</code></td><td>1 t/m 30 (jaren) of <code>"var"</code>; groen lenen: 5, 10, 15, 20, 25 of 30</td></tr>
+    <tr><td><code>erfpacht</code></td><td><code>null</code> of <code>{ uitgever: overheid|particulier, vestiging: voor2013|2013|na2014, opinie: groen|oranje|rood|geen, resterendeDuur, canonPerJaar }</code></td></tr>
+    <tr><td><code>vve</code></td><td><code>null</code> of <code>{ aanwezig: ja|oprichting|nee, actief, onderhoudGoed, mjopVoldoende, fondsenToereikend }</code> (laatste vier: true/false). Ontbreekt dit bij een appartement, dan volgt een voorbehoud.</td></tr>
+    <tr><td><code>overbrugging</code></td><td><code>null</code> of <code>{ situatie: a|b|c|d, waarde, restschuld, bedrag, maandlastHuidig, maanden, eigenMiddelen }</code>. a = verkocht en voorwaarden verstreken, b = verkocht en voorwaarden niet verstreken, c = onverkocht met taxatie, d = onverkocht met desktoptaxatie.</td></tr>
+    <tr><td><code>bkr.status</code></td><td><code>onbekend</code>, <code>schoon</code>, <code>negatief</code>, <code>hy2</code>, <code>hy</code>, <code>herstelA2</code>, <code>herstelA0</code></td></tr>
+  </table></div>
+</section>
+
+<section id="uitvoer">
+  <h2>Uitvoer</h2>
+  <div class="tabel-wrap"><table>
+    <tr><th>Veld</th><th>Inhoud</th></tr>
+    <tr><td><code>oordeel</code></td><td><code>past</code>, <code>voorbehoud</code>, <code>past_niet</code> of <code>ongeldige_invoer</code></td></tr>
+    <tr><td><code>toelichting</code></td><td>Eén zin bij het oordeel</td></tr>
+    <tr><td><code>afwijzingen</code></td><td>Regels die worden overschreden (leeg bij <code>past</code> en <code>voorbehoud</code>)</td></tr>
+    <tr><td><code>voorbehoud</code></td><td>Punten die Argenta zelf beoordeelt of die niet getoetst zijn</td></tr>
+    <tr><td><code>voorwaarden</code></td><td>Eisen waaronder het oordeel geldt, als leesbare zinnen</td></tr>
+    <tr><td><code>grenzen</code></td><td>Dezelfde eisen als getallen: <code>minimaleMarktwaarde</code>, <code>minimaleMarktwaardeTariefklasse</code>, <code>minimaalToetsinkomen</code>, <code>maximaleHoofdsomOpInkomen</code>, <code>maximaleHoofdsomOpWaarde</code>, <code>maximaalAflossingsvrij</code>, <code>benodigdEigenGeld</code>, <code>ruimteVerplichtingenPerMaand</code>, <code>nhgGrens</code></td></tr>
+    <tr><td><code>bijzondereToetsen</code></td><td>Per toets: <code>naam</code>, <code>uitkomst</code> (<code>akkoord</code>, <code>voorbehoud</code>, <code>niet_mogelijk</code>) en <code>tekst</code></td></tr>
+    <tr><td><code>leningdelen</code></td><td>Per deel: rente, bruto maandlast, looptijd en rentevaste periode</td></tr>
+    <tr><td><code>totalen</code></td><td>Hoofdsom, LTV, tariefklasse, maandlast, JKP, totale rente, totaal te betalen bedrag</td></tr>
+    <tr><td><code>kosten</code>, <code>inkomenstoets</code>, <code>overbrugging</code>, <code>verloop</code></td><td>Kostenopbouw, de inkomenstoets, de overbrugging en het verloop per jaar</td></tr>
+    <tr><td><code>aandachtspunten</code>, <code>tips</code></td><td>De meldingen “Let op” en de rekenkundige tips</td></tr>
+    <tr><td><code>bronnen</code>, <code>versie</code></td><td>Datum van de tarieven, jaar van de normen en versie van de rekenkern. Toon deze bij het oordeel.</td></tr>
+  </table></div>
+  <div class="kader"><b>Geen kans of percentage.</b> Het oordeel zegt of de aanvraag past binnen de gepubliceerde regels, niet hoe groot de kans is dat Argenta de offerte afgeeft. Een waarschijnlijkheid kan pas worden berekend als uitkomsten van ingediende aanvragen worden teruggekoppeld.</div>
+  <p>Gebruik in eBlinqx bij voorkeur de tekst “past binnen de gepubliceerde regels van Argenta, onder de genoemde voorwaarden” en toon altijd de <code>voorwaarden</code> en de <code>disclaimer</code> erbij.</p>
+</section>
+
+<section id="hdn">
+  <h2>Aansluiten op HDN</h2>
+  <p><code>hdn-adapter.js</code> zet een HDN-aanvraagbericht (XML) om naar de invoer van de rekenkern. Welke elementen bij welk veld horen, staat in <code>hdn-mapping.json</code>.</p>
+<pre><code>const { invoer, ontbrekend } = HdnAdapter.vanHdn(xmlTekst, mapping);
+if (ontbrekend.length) { /* toon welke gegevens ontbreken */ }
+const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
+  <div class="kader"><b>De mapping is nog leeg.</b> De paden en codelijsten in <code>hdn-mapping.json</code> moeten worden ingevuld met het HDN-schema van het aanvraagbericht dat eBlinqx gebruikt. Dat schema is alleen voor HDN-deelnemers beschikbaar. Tot die tijd meldt de adapter elk veld als ontbrekend.</div>
+  <h3>Een veld in de mapping</h3>
+<pre><code>"woning.koopsom":      { "pad": "…/…/…", "type": "bedrag", "verplicht": true }
+"woning.energielabel": { "pad": "//…", "codes": { "HDN-code": "A" }, "standaard": "GEEN" }
+"looptijd":            { "pad": "…", "type": "getal", "factor": 0.0833333 }</code></pre>
+  <ul>
+    <li><code>pad</code>: elementnamen gescheiden door <code>/</code>, zonder namespace-prefix. Begin met <code>//</code> om overal in het bericht te zoeken.</li>
+    <li><code>type</code>: <code>bedrag</code>, <code>getal</code>, <code>datum</code>, <code>janee</code> of tekst.</li>
+    <li><code>codes</code>: vertaalt een HDN-code naar de waarde van de rekenkern.</li>
+    <li><code>factor</code>: omrekening, bijvoorbeeld van maanden naar jaren.</li>
+    <li><code>standaard</code>: waarde als het element ontbreekt. <code>verplicht</code>: meld het veld als het ontbreekt.</li>
+    <li><code>lijsten</code> (aanvragers, leningdelen) en <code>blokken</code> (erfpacht, overbrugging) hebben een eigen <code>pad</code>; de velden daarbinnen zijn relatief.</li>
+  </ul>
+  <p>Gegevens die niet in het HDN-bericht staan, zoals het funderingsrisico of de uitkomst van de BKR-toets, vult eBlinqx na de omzetting zelf aan in <code>invoer</code>.</p>
+</section>
+
+<section id="beheer">
+  <h2>Beheer</h2>
+  <p><code>index.html</code> is de enige bron. De rekenkern staat daar tussen <code>/*ENGINE_START*/</code> en <code>/*ENGINE_END*/</code>; <code>argenta-engine.js</code> wordt daaruit gemaakt.</p>
+  <div class="tabel-wrap"><table>
+    <tr><th>Wanneer</th><th>Wat</th></tr>
+    <tr><td>Nieuwe tariefkaart (meerdere keren per maand)</td><td><code>python3 tools/update_rates.py tarief.txt</code></td></tr>
+    <tr><td>Nieuwe leennormen (jaarlijks)</td><td><code>python3 tools/update_normen.py "Bijlage financieringslastnormen JJJJ.xlsx" JJJJ</code></td></tr>
+    <tr><td>Nieuwe NHG-grens of hypotheekgids</td><td>Constanten <code>NHG</code>, <code>REGELS</code>, <code>EXTRA</code> en <code>VOORWAARDEN</code> in <code>index.html</code> nalopen</td></tr>
+    <tr><td>Na elke wijziging</td><td><code>python3 tools/export_engine.py</code> en daarna <code>node tests/test.js</code></td></tr>
+  </table></div>
+  <p>Argenta heeft geen API voor tarieven; wijzigingen komen via de nieuwsbrief. Een verouderde tariefkaart geeft een verkeerde rente. De datum van de tarieven staat in de kop van de tool en in <code>bronnen</code>.</p>
+</section>
+
+<section id="grenzen">
+  <h2>Wat de tool en de API niet doen</h2>
+  <ul>
+    <li>Geen beslissing van Argenta voorspellen: Argenta mag afwijken van de gids en beoordeelt elke aanvraag aanvullend.</li>
+    <li>Geen BKR-toets uitvoeren, geen inkomen vaststellen en geen taxatie beoordelen: de uitkomst hangt af van wat is ingevuld.</li>
+    <li>Geen netto maandlast berekenen.</li>
+    <li>De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.</li>
+    <li>De dubbele-lastentoets, de volgorde in het VvE-stroomschema en de toets bij de senioren- en tekortregeling zijn eigen uitwerkingen van de gids; de AOW-leeftijd staat op 67 jaar.</li>
+    <li>De leennormen zijn die van 2027.</li>
+  </ul>
+  <div class="kader groen">Bronnen: tariefkaart Argenta, Argenta hypotheekgids (augustus 2026), voorwaarden Argenta hypotheek (juli 2025), Wijzigingsregeling hypothecair krediet 2027, NHG Voorwaarden en normen 2027.</div>
+</section>
+
+</div></main>
+<footer style="background:#fff;border-top:1px solid var(--lijn);padding:16px;font-size:13px;color:var(--tekst-zacht)"><div class="in" style="display:flex;flex-wrap:wrap;gap:6px 20px">
+  <a href="index.html" style="color:var(--primair);font-weight:600">Rekentool</a><a href="#api" style="color:var(--primair);font-weight:600">API</a><a href="voorbeelden/aanvraag.json" style="color:var(--primair);font-weight:600">Voorbeeldaanvraag (JSON)</a><a href="argenta-engine.js" style="color:var(--primair);font-weight:600">Rekenkern (JS)</a><a href="hdn-mapping.json" style="color:var(--primair);font-weight:600">HDN-mapping</a>
+</div></footer>
+</body>
+</html>
