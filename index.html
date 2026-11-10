@@ -87,6 +87,7 @@
   details { border-top: 1px solid var(--lijn); padding: 8px 0; }
   details summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--primair); }
   details ul { margin: 6px 0; padding-left: 18px; font-size: 13.5px; }
+  ul.tips { margin: 4px 0 6px; padding-left: 18px; font-size: 13.5px; } ul.tips li { margin-bottom: 5px; }
   .klaar { text-align: center; padding: 26px 16px; }
   .klaar .bedrag { font-size: 22px; color: var(--primair); font-weight: 700; margin: 4px 0; }
   [hidden] { display: none !important; }
@@ -270,6 +271,7 @@
           <div><small>Maximaal op inkomen</small><b id="kMax">–</b></div>
         </div>
         <div id="meldingen"></div>
+        <div id="tipsBlok"></div>
         <div id="inkomenBlok"></div>
       </section>
     </div>
@@ -694,7 +696,7 @@ function bereken() {
   if (korting) letop.push('De duurzaamheidskorting vereist een geldig geregistreerd energielabel en geldt alleen tijdens de eerste rentevaste periode.');
   if (rijen.some(r => r.d.rvp === 'var')) letop.push('Variabele rente: de klant krijgt de rente die geldt op het moment van passeren; de rente staat 3 maanden vast.');
 
-  const maandNu = () => rijen.reduce((s, r) => s + r.pm, 0);
+  const maandNu = () => rijen.reduce((s, r) => s + r.pm, 0), maand0 = maandNu;
   const toets = inkomenstoets(rijen, totaal, labelIdx);
   if (toets) {
     if (toets.ruimte < 0) fouten.push(`De hoofdsom is ${fmtEuro0(-toets.ruimte)} hoger dan de maximale hypotheek op inkomen (${fmtEuro0(toets.maxHyp)}).`);
@@ -780,6 +782,50 @@ function bereken() {
     }
   }
 
+  /* ----- Optimalisatietips voor de adviseur (niet in het rapport voor de klant) ----- */
+  const tips = [];
+  const pmt = (vorm, bedrag, rente, jaren) => { const r = rente / 100 / 12, n = jaren * 12; return vorm === 'av' ? bedrag * r : (vorm === 'lin' || vorm === 'groenLin') ? bedrag / n + bedrag * r : bedrag * annFactor(rente, jaren); };
+  const tarief = (d, kolom) => { const v = VORMEN[d.vorm]; if (v.groen) return RATES.groen[d.rvp][kolom === 0 ? 0 : 1]; const basis = d.rvp === 'var' ? RATES.variabel[kolom] : RATES[v.tabel][d.rvp][kolom]; return Math.round((basis + (d.consumptief ? RATES.consumptiefOpslag : 0) - korting) * 100) / 100; };
+  const hoofd = rijen.find(x => !VORMEN[x.d.vorm].groen && x.rente != null && x.d.bedrag > 0);
+  if (hoofd && mw > 0 && totaal > 0) {
+    /* Lagere tariefklasse door extra eigen geld */
+    if (!nhg && idx > 1 && idx <= RATES.klassen.length + 1) {
+      for (let doelIdx = idx - 1; doelIdx >= 1; doelIdx--) {
+        const nieuw = tarief(hoofd.d, doelIdx);
+        if (hoofd.rente - nieuw >= 0.01 - 1e-9) {
+          const extraEigen = Math.ceil(totaal - mw * RATES.klassen[doelIdx - 1] / 100);
+          if (extraEigen > 0 && extraEigen < hoofd.d.bedrag) {
+            const rest = x => x.d.bedrag - (x === hoofd ? extraEigen : 0);
+            const oudTarief = rijen.reduce((som, x) => som + pmt(x.d.vorm, rest(x), x.rente, x.d.looptijd), 0);
+            const nieuwTarief = rijen.reduce((som, x) => som + pmt(x.d.vorm, rest(x), tarief(x.d, doelIdx), x.d.looptijd), 0);
+            tips.push(`Met ${fmtEuro0(extraEigen)} extra eigen geld daalt de verstrekking naar ${RATES.klassen[doelIdx - 1]}% van de marktwaarde en gaat de rente van leningdeel ${hoofd.nr} van ${fmtPct(hoofd.rente)} naar ${fmtPct(nieuw)}. De bruto maandlast daalt dan met circa ${fmtEuro0(maand0() - nieuwTarief)}, waarvan ${fmtEuro0(oudTarief - nieuwTarief)} door het lagere tarief.`);
+          }
+          break;
+        }
+      }
+    }
+    /* NHG als alternatief */
+    if (!nhg && cons === 0 && totaal * (1 + NHG.provisiePct / 100) <= nhgGrens() && ltv <= REGELS.maxLtv) {
+      const metNhg = tarief(hoofd.d, 0);
+      if (metNhg < hoofd.rente) {
+        const nieuwPm = rijen.reduce((som, x) => som + pmt(x.d.vorm, x.d.bedrag, tarief(x.d, 0), x.d.looptijd), 0);
+        tips.push(`Met NHG is de rente van leningdeel ${hoofd.nr} ${fmtPct(metNhg)} in plaats van ${fmtPct(hoofd.rente)}: circa ${fmtEuro0(maand0() - nieuwPm)} per maand lager, tegen eenmalig ${fmtEuro0(totaal * NHG.provisiePct / 100)} borgtochtprovisie. Controleer of de aanvraag aan de NHG-voorwaarden voldoet.`);
+      }
+    }
+    /* Duurzaamheidskorting */
+    if (label.korting === 'C') tips.push(`Bij een geregistreerd energielabel B geldt ${fmtPct(RATES.korting.B)}-punt rentekorting en bij A of beter ${fmtPct(RATES.korting.A)}-punt. Verduurzamen kan met Argenta groen lenen (tot ${fmtEuro0(REGELS.groenMax)}, ${fmtPct(RATES.groen['10'][nhg ? 0 : 1])} bij 10 jaar vast${app ? '; niet voor appartementen' : ''}).`);
+  }
+  const maxAvTip = Math.min(mw * REGELS.avMaxPct / 100, REGELS.avMaxBedrag);
+  if (av > maxAvTip && !starter) tips.push(`Zet ${fmtEuro0(av - maxAvTip)} van het aflossingsvrije deel om naar annuïtair of lineair om binnen het maximum van ${fmtEuro0(maxAvTip)} te blijven.`);
+  if (!nhg && ltv > REGELS.maxLtv) tips.push(`Met ${fmtEuro0(Math.ceil(totaal - mw))} extra eigen geld past de lening binnen 100% van de marktwaarde.`);
+  if (toets && toets.ruimte < 0) {
+    tips.push(`Met ${fmtEuro0(Math.ceil(-toets.ruimte))} extra eigen geld (of een lagere hoofdsom) past de lening binnen de maximale hypotheek op inkomen.`);
+    const kort = rijen.filter(x => x.d.rvp === 'var' || +x.d.rvp < 10);
+    if (kort.length && kort.some(x => !VORMEN[x.d.vorm].groen && tarief(Object.assign({}, x.d, { rvp: '10' }), idx) < x.toets)) tips.push('Bij een rentevaste periode van 10 jaar of langer geldt de offerterente als toetsrente in plaats van de AFM-toetsrente; dat vergroot de leenruimte.');
+    if (euro('verplichtingen') + euro('studie') > 0) tips.push('Het aflossen of beëindigen van kredieten vóór de aanvraag verlaagt de financiële verplichtingen en vergroot de leenruimte (aflossingsbewijs en afmelding bij BKR aanleveren).');
+  }
+  if (toets && toets.ruimte >= 0 && euro('maatregelen') === 0 && NORMEN.verbouwExtra[label.norm] > 0) tips.push(`Voor energiebesparende maatregelen is ${fmtEuro0(NORMEN.verbouwExtra[label.norm])} extra leenruimte beschikbaar boven de maximale hypotheek op inkomen.`);
+
   /* Verloop per jaar en kosten van het krediet (exclusief overbrugging) */
   const maanden = Math.max(0, ...rijen.map(r => r.sch.length));
   const termijnen = Array.from({ length: maanden }, (_, m) => rijen.reduce((s, r) => s + (r.sch[m] ? r.sch[m].rente + r.sch[m].afl : 0), 0));
@@ -794,7 +840,7 @@ function bereken() {
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
-    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], extra };
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], extra, tips };
 }
 
 /* ---------- Weergave ---------- */
@@ -868,6 +914,7 @@ function toon() {
   $('tRente').textContent = r.totaal > 0 ? fmtPct(r.gewRente) : '';
   $('tMaand').textContent = fmtEuro2(r.maand + (r.ovb ? r.ovb.pm : 0));
   $('inkomenBlok').innerHTML = toetsHtml(r.toets, r.extra);
+  $('tipsBlok').innerHTML = r.tips.length ? '<h3>Tips voor de adviseur</h3><ul class="tips">' + r.tips.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul><p class="klein-tekst">Rekenkundige mogelijkheden, geen advies. Of een optie past bij de klant beoordeelt de adviseur; de tips staan niet in de conceptofferte.</p>' : '';
   $('meldingen').innerHTML =
     r.fouten.map(m => `<div class="melding fout"><b>Niet mogelijk:</b> ${esc(m)}</div>`).join('') +
     (r.fouten.length === 0 ? '<div class="melding ok">Past binnen de getoetste regels uit de hypotheekgids.</div>' : '') +
