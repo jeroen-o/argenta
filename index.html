@@ -141,6 +141,12 @@
           <label class="check"><input type="checkbox" id="appartement"> Appartement</label>
           <label class="check"><input type="checkbox" id="erfpachtgrond"> Erfpacht</label>
         </div>
+        <div id="erfpachtVelden" hidden><h3>Erfpacht</h3><div class="grid">
+          <div><label for="epUitgever">Uitgever van de grond</label><select id="epUitgever"><option value="overheid">Overheidsinstantie</option><option value="particulier">Woningcorporatie of particulier</option></select></div><div><label for="epVestiging">Erfpachtrecht gevestigd</label><select id="epVestiging"><option value="voor2013">Vóór 1 januari 2013</option><option value="2013">1 januari 2013 tot 1 juli 2014</option><option value="na2014">Op of na 1 juli 2014</option></select></div><div><label for="epOpinie">Erfpachtopinie (notaris of NivE)</label><select id="epOpinie"><option value="groen">Groen</option><option value="oranje">Oranje</option><option value="rood">Rood</option><option value="geen">Nog niet aanwezig</option></select></div><div><label for="epDuur">Resterende duur erfpacht (jaren, leeg = eeuwigdurend)</label><input type="text" inputmode="numeric" id="epDuur" style="text-align:right"></div><div><label for="epCanon">Erfpachtcanon (per jaar)</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="epCanon" data-euro></div></div>
+        </div></div>
+        <div id="vveVelden" hidden><h3>Vereniging van Eigenaars</h3><div class="grid">
+          <div><label for="vveAanwezig">VvE aanwezig?</label><select id="vveAanwezig"><option value="ja">Ja</option><option value="oprichting">Nee, in oprichting (nieuwbouw of splitsing)</option><option value="nee">Nee</option></select></div><div><label for="vveActief">VvE actief of slapend?</label><select id="vveActief"><option value="actief">Actief</option><option value="slapend">Slapend</option></select></div><div><label for="vveOnderhoud">Staat van onderhoud volgens taxatie redelijk of goed?</label><select id="vveOnderhoud"><option value="ja">Ja</option><option value="nee">Nee</option></select></div><div><label for="vveMjop">MJOP aanwezig en onderhoudsfonds voldoende (of reservering ≥ 0,5% herbouwwaarde)?</label><select id="vveMjop"><option value="ja">Ja</option><option value="nee">Nee</option></select></div><div><label for="vveFondsen">Reserve- en onderhoudsfondsen groot genoeg voor het MJOP?</label><select id="vveFondsen"><option value="ja">Ja</option><option value="nee">Nee</option></select></div>
+        </div></div>
       </section>
     </div>
     <div>
@@ -208,6 +214,9 @@
           <label class="check"><input type="checkbox" id="aow"> Aanvrager met hoogste inkomen is AOW-gerechtigd</label>
           <label class="check"><input type="checkbox" id="alleenstaand"> Alleenstaande aanvrager</label>
         </div>
+        <div class="grid" style="margin-top:6px">
+          <div><label for="regeling">Bijzondere toets</label><select id="regeling"><option value="geen">Geen (standaard annuïtaire toets)</option><option value="aow">AOW-gerechtigd: toets op werkelijke lasten</option><option value="senioren">Senioren verhuisregeling</option><option value="tekort">Tijdelijk-tekortregeling</option></select></div><div id="regInkomenVeld" hidden><label for="regInkomen" id="regInkomenLabel">Toetsinkomen</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="regInkomen" data-euro></div></div><div id="regHuidigVeld" hidden><label for="regHuidig">Huidige bruto maandlast hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="regHuidig" data-euro></div></div>
+        </div>
         <p class="klein-tekst" style="margin:6px 0 0">Verplichtingen: doorlopend krediet/verzendhuiskrediet 2% van de limiet per maand; aflopend krediet en operational lease op werkelijke last.
           De toetsrente voor rentevast korter dan 10 jaar stelt de AFM per kwartaal vast – controleer de actuele waarde.</p>
       </section>
@@ -225,6 +234,7 @@
           <div><label for="ovbWaarde">Verkoopprijs / marktwaarde</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbWaarde" data-euro></div></div>
           <div><label for="ovbRestschuld">Restschuld huidige hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbRestschuld" data-euro></div></div>
           <div><label for="ovbBedrag">Gewenste overbrugging</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="ovbBedrag" data-euro></div></div>
+          <div><label for="dlMaandlast">Bruto maandlast huidige hypotheek</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="dlMaandlast" data-euro></div></div><div><label for="dlMaanden">Verwachte periode dubbele lasten (maanden)</label><input type="text" inputmode="numeric" id="dlMaanden" value="12" style="text-align:right"></div><div><label for="dlEigen">Eigen middelen beschikbaar voor dubbele lasten</label><div class="euro"><span>€</span><input type="text" inputmode="numeric" id="dlEigen" data-euro></div></div>
         </div>
       </section>
     </div>
@@ -311,6 +321,8 @@ const REGELS = {
 const NHG = { jaar: 2027, grens: 500000, grensEnergie: 530000, provisiePct: 0.4 };
 /* Nieuwbouwwoning met een A++++ label valt direct onder de hogere grens */
 const nhgGrens = () => ($('doel').value === 'nieuwbouw' && +$('label').value <= 1) ? NHG.grensEnergie : NHG.grens;
+/* Bijzondere toetsen: hypotheekgids 1.8.1, 2.1.6 (stroomschema VvE), 2.4, 5.1.1 en 5.1.2. AOW-leeftijd indicatief (67 jaar). */
+const EXTRA = { aowLeeftijd: 67, erfpachtRuimte: 550, vveLtv: 80, dlStandaard: 12 };
 const VORMEN = {
   ann: { naam: 'Annuïtair', tabel: 'annuitair' },
   lin: { naam: 'Lineair', tabel: 'annuitair' },
@@ -527,19 +539,51 @@ function kosten() {
   return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: euro('notHypotheek'), tax: euro('taxKosten'), adv: euro('advKosten'), nhgKosten, hypKosten, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
 }
 
+/* Werkelijke bruto maandlast (1e maand) van een leningdeel tegen de toetsrente */
+function werkelijkeLast(x) {
+  const r = x.toets / 100 / 12, n = x.d.looptijd * 12, b = x.d.bedrag;
+  if (x.d.vorm === 'av') return b * r;
+  if (x.d.vorm === 'lin' || x.d.vorm === 'groenLin') return b / n + b * r;
+  return b * annFactor(x.toets, x.d.looptijd);
+}
+const leeftijd = id => { const v = $(id).value; if (!v) return null; return (Date.now() - new Date(v + 'T00:00:00').getTime()) / (365.25 * 864e5); };
+
+/* Tweede toets op werkelijke lasten met een ander inkomen (pensioen- of tekortperiode), AOW-tabel */
+function periodeToets(rijen, toets, inkomenJaar) {
+  const pct = normPct('welAOW', inkomenJaar, toets.kol), pctBox3 = normPct('box3welAOW', inkomenJaar, toets.kol);
+  const last = rijen.reduce((s, x) => s + werkelijkeLast(x) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
+  const toegestaan = inkomenJaar * pct / 12 - euro('verplichtingen') - toets.studieBruto;
+  return { inkomen: inkomenJaar, pct, last, toegestaan, ruimte: toegestaan - last };
+}
+
+function vveOordeel(ltv) {
+  const aanwezig = $('vveAanwezig').value, ja = id => $(id).value === 'ja';
+  if (aanwezig === 'oprichting') return ['ok', 'VvE in oprichting; aanleveren: (concept) splitsingsakte en splitsingsreglement.'];
+  if (aanwezig === 'nee') return ['fout', 'Er is geen VvE en deze is ook niet in oprichting.'];
+  if (ltv <= EXTRA.vveLtv) return ['ok', `VvE aanwezig en LTV ≤ ${EXTRA.vveLtv}%: in beginsel geen aanvullende stukken nodig.`];
+  const slapend = $('vveActief').value === 'slapend';
+  if (ja('vveOnderhoud')) {
+    if (ja('vveMjop')) return ['ok', slapend ? 'Slapende VvE met voldoende onderhoud en reserves; aanleveren: kopie collectieve opstalverzekering.' : 'Actieve VvE met voldoende onderhoud en reserves.'];
+    return ['letop', 'Individuele beoordeling – aanleveren: bouwkundig rapport en MJOP (indien aanwezig)' + (slapend ? ' of een verbouwing waarbij de onderhoudstoestand verbetert.' : '.')];
+  }
+  if (ja('vveFondsen')) return ['letop', 'Individuele beoordeling – onderhoud niet redelijk of goed, fondsen wel toereikend; aanleveren: bouwkundig rapport en MJOP (indien aanwezig).'];
+  return ['fout', 'Onderhoud niet redelijk of goed en de fondsen zijn niet toereikend voor het meerjarenonderhoudsplan.'];
+}
+
 function inkomenstoets(rijen, totaal, labelIdx) {
   const i1 = euro('ink1'), i2 = euro('ink2');
   if (i1 + i2 === 0 || totaal === 0) return null;
   const aow = $('aow').checked, alleen = $('alleenstaand').checked;
   const toetsKort = parseDec($('toetsrente').value);
-  const inkomen = Math.max(0, Math.max(i1, i2) * NORMEN.factorHoog + Math.min(i1, i2) * NORMEN.factorLaag - euro('aftrek'));
+  const inkomen = Math.max(0, Math.max(i1, i2) * NORMEN.factorHoog + Math.min(i1, i2) * NORMEN.factorLaag - euro('aftrek') - ($('erfpachtgrond').checked ? euro('epCanon') : 0));
   rijen.forEach(x => { x.toets = (x.d.rvp === 'var' || +x.d.rvp < 10) ? toetsKort : (x.rente || 0); });
   const gemToets = rijen.reduce((s, x) => s + x.toets * x.d.bedrag, 0) / totaal;
   const kol = normKolom(gemToets);
   const pct = normPct(aow ? 'welAOW' : 'nietAOW', inkomen, kol);
   const pctBox3 = normPct(aow ? 'box3welAOW' : 'box3nietAOW', inkomen, kol);
   /* Toetslast: annuïtair over 30 jaar tegen de toetsrente; niet-aftrekbare (consumptieve) delen gewogen met de box 3-tabel */
-  const toetslast = rijen.reduce((s, x) => s + x.d.bedrag * annFactor(x.toets, 30) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
+  const werkelijk = $('regeling').value === 'aow' && aow;
+  const toetslast = rijen.reduce((s, x) => s + (werkelijk ? werkelijkeLast(x) : x.d.bedrag * annFactor(x.toets, 30)) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
   const brutering = NORMEN.brutering[kol];
   const studieBruto = euro('studie') * brutering;
   const toegestaan = inkomen * pct / 12 - euro('verplichtingen') - studieBruto;
@@ -551,7 +595,7 @@ function inkomenstoets(rijen, totaal, labelIdx) {
   if (alleen && inkomen > NORMEN.start) vrij.push(['Alleenstaande aanvrager', NORMEN.alleenstaandBedrag]);
   const vrijTotaal = vrij.reduce((s, v) => s + v[1], 0);
   const maxHyp = Math.max(0, toegestaan) / (toetslast / totaal) + vrijTotaal;
-  return { inkomen, gemToets, pct, toegestaan, studieBruto, brutering, vrij, vrijTotaal, maxHyp, ruimte: maxHyp - totaal, aow };
+  return { inkomen, gemToets, kol, pct, toegestaan, toetslast, werkelijk, studieBruto, brutering, vrij, vrijTotaal, maxHyp, ruimte: maxHyp - totaal, aow };
 }
 
 function bereken() {
@@ -596,7 +640,7 @@ function bereken() {
     ovb = { situatie: s.naam, waarde, rest, bedrag, max, rente: RATES.overbrugging, pm: bedrag * RATES.overbrugging / 100 / 12, looptijd: doel === 'nieuwbouw' ? 36 : 24 };
     if (bedrag <= 0) fouten.push('Overbrugging: vul het gewenste bedrag in.');
     if (waarde > 0 && bedrag > max) fouten.push(`Overbrugging is maximaal ${fmtEuro0(max)} in deze situatie.`);
-    letop.push(`Overbrugging: looptijd maximaal ${ovb.looptijd} maanden, ${fmtEuro0(REGELS.ovbKosten)} afsluitkosten bij aflossing; de klant moet de dubbele lasten kunnen dragen (niet getoetst in deze tool). De rente wordt vastgesteld bij het renteaanbod.`);
+    letop.push(`Overbrugging: looptijd maximaal ${ovb.looptijd} maanden, ${fmtEuro0(REGELS.ovbKosten)} afsluitkosten bij aflossing. De rente wordt vastgesteld bij het renteaanbod.`);
   }
   const totaalIncl = totaal + (ovb ? ovb.bedrag : 0);
 
@@ -647,15 +691,94 @@ function bereken() {
   if (doel === 'nieuwbouw') letop.push('Nieuwbouw: waarborgcertificaat (keurmerk Stichting GarantieWoning), (voorlopig) energielabel en bij passeren een onherroepelijke omgevingsvergunning.');
   if (k.verbouwing >= REGELS.bouwdepotVrij || (nhg && k.verbouwing > 0)) letop.push('Verbouwing: het bedrag wordt in een bouwdepot gestort (24 maanden, rentevergoeding gelijk aan de hypotheekrente).');
   if (k.eigen >= REGELS.eigenMiddelenBewijs) letop.push(`Eigen middelen vanaf ${fmtEuro0(REGELS.eigenMiddelenBewijs)}: herkomst aantonen met bewijsstukken.`);
-  if (erfpacht) letop.push('Erfpacht: overheidserfpacht volgens NHG-regels; particuliere erfpacht afhankelijk van vestigingsdatum (erfpachtopinie of bancaire richtlijn). Canon komt in mindering op het toetsinkomen.');
   if (korting) letop.push('De duurzaamheidskorting vereist een geldig geregistreerd energielabel en geldt alleen tijdens de eerste rentevaste periode.');
   if (rijen.some(r => r.d.rvp === 'var')) letop.push('Variabele rente: de klant krijgt de rente die geldt op het moment van passeren; de rente staat 3 maanden vast.');
 
+  const maandNu = () => rijen.reduce((s, r) => s + r.pm, 0);
   const toets = inkomenstoets(rijen, totaal, labelIdx);
   if (toets) {
     if (toets.ruimte < 0) fouten.push(`De hoofdsom is ${fmtEuro0(-toets.ruimte)} hoger dan de maximale hypotheek op inkomen (${fmtEuro0(toets.maxHyp)}).`);
-    if (toets.aow) letop.push('Vanaf de AOW-gerechtigde leeftijd mag op werkelijke last worden getoetst; deze tool rekent met de AOW-tabel op annuïtaire toetslast.');
+    if (toets.aow && !toets.werkelijk) letop.push('Vanaf de AOW-gerechtigde leeftijd mag op werkelijke last worden getoetst: kies bij “Bijzondere toets” voor AOW-gerechtigd.');
   } else letop.push('Geen toetsinkomen ingevuld: de maximale hypotheek op inkomen is niet getoetst.');
+
+  /* ----- Bijzondere toetsen ----- */
+  const extra = [];
+  const zet = (naam, soort, tekst) => { extra.push([naam, soort, tekst]); if (soort === 'fout') fouten.push(naam + ': ' + tekst); else if (soort === 'letop') letop.push(naam + ': ' + tekst); };
+  const regeling = $('regeling').value;
+  const l1 = leeftijd('geb1'), l2 = leeftijd('geb2');
+  const oudste = Math.max(l1 || 0, l2 || 0), jongste = l1 && l2 ? Math.min(l1, l2) : null;
+  const rvpMin = Math.min(...delen.map(d => d.rvp === 'var' ? 0 : +d.rvp));
+  if (regeling === 'aow') {
+    if (!$('aow').checked) zet('Werkelijke lasten', 'fout', 'toetsen op werkelijke lasten kan alleen als de aanvrager met het hoogste inkomen AOW-gerechtigd is.');
+    else if (toets) zet('Werkelijke lasten (AOW)', toets.ruimte >= 0 ? 'ok' : 'fout', `werkelijke bruto last ${fmtEuro2(toets.toetslast)} per maand tegen toegestaan ${fmtEuro2(toets.toegestaan)}.`);
+  }
+  if (regeling === 'senioren' || regeling === 'tekort') {
+    const naam = regeling === 'senioren' ? 'Senioren verhuisregeling' : 'Tijdelijk-tekortregeling';
+    const ink = euro('regInkomen');
+    if (!oudste) zet(naam, 'letop', 'vul de geboortedatum in (stap 1) om de AOW-termijn te toetsen.');
+    else if (oudste < EXTRA.aowLeeftijd - 10) zet(naam, 'fout', `de (oudste) aanvrager moet nu of binnen 10 jaar de AOW-leeftijd bereiken (indicatief ${EXTRA.aowLeeftijd} jaar).`);
+    if (regeling === 'senioren') {
+      if (['bestaand', 'nieuwbouw'].indexOf(doel) === -1) zet(naam, 'fout', 'alleen voor doorstromers die een andere woning kopen.');
+      if (starter) zet(naam, 'fout', 'niet voor koopstarters; de regeling is bedoeld voor doorstromers.');
+      const huidig = euro('regHuidig');
+      if (!huidig) zet(naam, 'letop', 'vul de huidige bruto maandlast in: de nieuwe woning moet dezelfde of lagere maandlasten hebben.');
+      else if (maandNu() > huidig) zet(naam, 'fout', `de nieuwe maandlast (${fmtEuro2(maandNu())}) is hoger dan de huidige (${fmtEuro2(huidig)}).`);
+      if (rvpMin < 20) zet(naam, 'letop', 'de rente moet minimaal 20 jaar vaststaan; in een aantal gevallen mag hiervan worden afgeweken.');
+      letop.push(naam + ': alleen pensioen en lijfrente dat op de datum van het bindend aanbod is opgebouwd telt mee.');
+    } else {
+      if (!euro('ink2') && !$('klant2').value.trim()) zet(naam, 'fout', 'alleen voor partners die samen een hypotheek hebben.');
+      if (jongste != null && jongste >= EXTRA.aowLeeftijd) zet(naam, 'fout', 'de jongste partner mag nog geen AOW ontvangen.');
+      if (jongste != null && oudste - jongste > 10) zet(naam, 'fout', `de AOW-ingangsdata liggen ${(oudste - jongste).toLocaleString('nl-NL', { maximumFractionDigits: 1 })} jaar uit elkaar; maximaal 10 jaar (tekort maximaal 10 jaar).`);
+      if (!delen.some(d => d.vorm === 'av')) zet(naam, 'fout', 'de hypotheek moet minimaal voor een deel aflossingsvrij zijn.');
+      if (rvpMin < 10) zet(naam, 'letop', 'de rente moet minimaal 10 jaar vaststaan (afwijken kan binnen de voorwaarden en normen van NHG).');
+    }
+    if (toets && ink) {
+      const pt = periodeToets(rijen, toets, ink);
+      zet(naam + (regeling === 'senioren' ? ' – toets vanaf AOW' : ' – toets in tekortperiode'), pt.ruimte >= 0 ? 'ok' : 'fout',
+        `werkelijke bruto last ${fmtEuro2(pt.last)} tegen toegestaan ${fmtEuro2(pt.toegestaan)} per maand (inkomen ${fmtEuro0(ink)}, ${fmtPct(pt.pct * 100, 1)}); ${pt.ruimte >= 0 ? 'ruimte' : 'tekort'} ${fmtEuro2(Math.abs(pt.ruimte))}.`);
+    } else zet(naam, 'letop', 'vul het toetsinkomen voor de periode in om op werkelijke lasten te toetsen.');
+  }
+
+  if (erfpacht) {
+    const duur = parseEuro($('epDuur').value), langste = Math.max(...delen.map(d => d.looptijd));
+    if ($('epUitgever').value === 'overheid') zet('Erfpacht', 'letop', 'uitgegeven door een overheidsinstantie: het erfpachtrecht moet voldoen aan de regels van NHG.');
+    else {
+      const v = $('epVestiging').value, o = $('epOpinie').value;
+      if (v === 'voor2013') {
+        if (o === 'rood') zet('Erfpacht', 'fout', 'erfpachtopinie rood: Argenta financiert deze particuliere erfpacht niet.');
+        else if (o === 'oranje') zet('Erfpacht', 'letop', 'erfpachtopinie oranje: opinie met onderbouwing en voorwaarden ter goedkeuring voorleggen aan Argenta.');
+        else if (o === 'geen') zet('Erfpacht', 'letop', 'erfpachtopinie van de notaris of het NivE aanleveren.');
+        else zet('Erfpacht', 'ok', 'erfpachtopinie groen: particuliere erfpacht financierbaar.');
+        if (nhg) zet('Erfpacht', 'fout', 'NHG accepteert geen woningen met een erfpachtopinie.');
+      } else if (v === '2013') zet('Erfpacht', 'letop', 'beoordeling volgens de bancaire richtlijn financierbaarheid erfpachtrechten.');
+      else zet('Erfpacht', 'letop', 'het erfpachtrecht moet voldoen aan het model voor de vestiging van nieuwe erfpachtrechten.');
+    }
+    if (duur && duur < langste) {
+      const ruimtePm = toets ? toets.toegestaan - toets.toetslast : null;
+      if (ruimtePm == null) zet('Erfpacht – looptijd', 'letop', `resterende duur (${duur} jaar) is korter dan de looptijd (${langste} jaar); alleen mogelijk bij meer dan ${fmtEuro0(EXTRA.erfpachtRuimte)} ruimte per maand in de inkomenstoets (vul inkomen in).`);
+      else zet('Erfpacht – looptijd', ruimtePm > EXTRA.erfpachtRuimte ? 'ok' : 'fout', `resterende duur ${duur} jaar is korter dan de looptijd van ${langste} jaar; ruimte in de inkomenstoets ${fmtEuro2(ruimtePm)} per maand (vereist: meer dan ${fmtEuro0(EXTRA.erfpachtRuimte)}).`);
+    }
+    if (doel === 'erfpacht') letop.push('Afkoop erfpachtcanon: de looptijd van de erfpacht moet minimaal gelijk zijn aan de looptijd van de lening, tenzij de overeenkomst een onvoorwaardelijke verlenging bevat.');
+    letop.push('Erfpachtconstructies en vormen van koperssteun worden alleen gefinancierd in combinatie met NHG.');
+  }
+
+  if (app) { const [soort, tekst] = vveOordeel(ltv); zet('VvE', soort, tekst + ' (volgens het stroomschema beoordeling VvE)'); }
+
+  if (ovb) {
+    const mnd = parseEuro($('dlMaanden').value), verkocht = $('ovbSituatie').value === 'a';
+    const pm = euro('dlMaandlast') + ovb.pm, totaalDl = pm * mnd, eigenDl = euro('dlEigen');
+    if (!euro('dlMaandlast')) zet('Dubbele lasten', 'letop', 'vul de bruto maandlast van de huidige hypotheek in om de dubbele lasten te toetsen.');
+    else {
+      if (mnd > ovb.looptijd) zet('Dubbele lasten', 'fout', `de periode (${mnd} maanden) is langer dan de maximale looptijd van de overbrugging (${ovb.looptijd} maanden).`);
+      if (mnd < EXTRA.dlStandaard && !verkocht) zet('Dubbele lasten', 'fout', `een periode korter dan ${EXTRA.dlStandaard} maanden kan alleen als de woning definitief is verkocht en de leverdatum vaststaat.`);
+      const ruimtePm = toets ? toets.toegestaan - toets.toetslast : null;
+      const basis = `${fmtEuro2(pm)} per maand × ${mnd} maanden = ${fmtEuro0(totaalDl)}`;
+      if (eigenDl >= totaalDl) zet('Dubbele lasten', 'ok', `${basis}; gedekt door eigen middelen (${fmtEuro0(eigenDl)}).`);
+      else if (ruimtePm != null && ruimtePm >= pm) zet('Dubbele lasten', 'ok', `${basis}; passend binnen de ruimte in de inkomenstoets (${fmtEuro2(ruimtePm)} per maand).`);
+      else zet('Dubbele lasten', 'fout', `${basis}; niet gedekt: eigen middelen ${fmtEuro0(eigenDl)}${ruimtePm != null ? ', ruimte in de inkomenstoets ' + fmtEuro2(ruimtePm) + ' per maand' : ''}. Tekort ${fmtEuro0(totaalDl - eigenDl)}.`);
+      if (eigenDl + k.eigen >= REGELS.eigenMiddelenBewijs && k.eigen < REGELS.eigenMiddelenBewijs) letop.push(`Eigen middelen inclusief dubbele lasten vanaf ${fmtEuro0(REGELS.eigenMiddelenBewijs)}: herkomst aantonen met bewijsstukken.`);
+    }
+  }
 
   /* Verloop per jaar en kosten van het krediet (exclusief overbrugging) */
   const maanden = Math.max(0, ...rijen.map(r => r.sch.length));
@@ -671,7 +794,7 @@ function bereken() {
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
-    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm] };
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], extra };
 }
 
 /* ---------- Weergave ---------- */
@@ -694,21 +817,37 @@ function kvMaandHtml(r) {
     t('Looptijd van de lening', r.maanden + ' maanden') + t('Totale kosten van het krediet', fmtEuro0(r.renteTotaal + r.kredietKosten)) +
     t('Totaal te betalen bedrag', fmtEuro0(r.totaalTeBetalen)) + t('Jaarlijks kostenpercentage (JKP)', r.jkp != null ? '<b>' + fmtPct(r.jkp) + '</b>' : '–');
 }
-function toetsHtml(t) {
-  if (!t) return '';
+function extraHtml(extra) {
+  if (!extra || !extra.length) return '';
+  const oordeel = { ok: 'Akkoord', letop: 'Let op', fout: 'Niet mogelijk' };
+  return '<h3>Bijzondere toetsen</h3><table class="kv links3">' + extra.map(([n, s, t]) => `<tr><td>${esc(n)}</td><td style="text-align:left;white-space:normal"><b>${oordeel[s]}</b> – ${esc(t)}</td></tr>`).join('') + '</table>';
+}
+function toetsHtml(t, extra) {
+  if (!t) return extraHtml(extra);
   const r = (a, b) => `<tr><td>${esc(a)}</td><td>${b}</td></tr>`;
   return `<h3>Inkomenstoets (leennormen ${NORMEN.jaar})</h3><table class="kv">` +
     r('Toetsinkomen', fmtEuro0(t.inkomen)) + r('Gewogen toetsrente', fmtPct(t.gemToets)) +
     r('Financieringslastpercentage' + (t.aow ? ' (AOW)' : ''), fmtPct(t.pct * 100, 1)) +
+    (t.werkelijk ? r('Toetsmethode', 'werkelijke lasten') : '') +
     r('Toegestane maandlast na verplichtingen', fmtEuro2(t.toegestaan)) +
     (t.studieBruto ? r('waarvan studielening gebruteerd (factor ' + t.brutering.toLocaleString('nl-NL') + ')', fmtEuro2(t.studieBruto)) : '') +
     t.vrij.map(v => r(v[0], fmtEuro0(v[1]))).join('') +
     r('Maximale hypotheek op inkomen', '<b>' + fmtEuro0(t.maxHyp) + '</b>') +
-    r(t.ruimte >= 0 ? 'Ruimte' : 'Tekort', '<b>' + fmtEuro0(Math.abs(t.ruimte)) + '</b>') + '</table>';
+    r(t.ruimte >= 0 ? 'Ruimte' : 'Tekort', '<b>' + fmtEuro0(Math.abs(t.ruimte)) + '</b>') + '</table>' + extraHtml(extra);
 }
 
 function toon() {
   $('ovbVelden').hidden = !$('ovbAan').checked;
+  $('erfpachtVelden').hidden = !$('erfpachtgrond').checked;
+  $('vveVelden').hidden = !$('appartement').checked;
+  $('epOpinie').closest('div').hidden = !($('epUitgever').value === 'particulier' && $('epVestiging').value === 'voor2013');
+  $('epVestiging').closest('div').hidden = $('epUitgever').value !== 'particulier';
+  const vveJa = $('vveAanwezig').value === 'ja';
+  ['vveActief', 'vveOnderhoud', 'vveMjop', 'vveFondsen'].forEach(id => { $(id).closest('div').hidden = !vveJa; });
+  const reg = $('regeling').value;
+  $('regInkomenVeld').hidden = !(reg === 'senioren' || reg === 'tekort');
+  $('regHuidigVeld').hidden = reg !== 'senioren';
+  $('regInkomenLabel').textContent = reg === 'senioren' ? 'Toetsinkomen vanaf AOW (per jaar)' : 'Gezamenlijk toetsinkomen in de tekortperiode (per jaar)';
   const doel = $('doel').value;
   $('koopsomLabel').textContent = doel === 'oversluiten' ? 'Af te lossen hypotheek' : doel === 'verbouwing' ? 'Bestaande hypotheek (0 bij verhoging)' : doel === 'uitkoop' ? 'Uitkoopsom + over te nemen schuld' : doel === 'erfpacht' ? 'Afkoopsom erfpacht' : 'Koopsom';
   $('ovb_pct').disabled = doel !== 'bestaand';
@@ -728,7 +867,7 @@ function toon() {
   $('tBedrag').textContent = fmtEuro0(r.totaalIncl);
   $('tRente').textContent = r.totaal > 0 ? fmtPct(r.gewRente) : '';
   $('tMaand').textContent = fmtEuro2(r.maand + (r.ovb ? r.ovb.pm : 0));
-  $('inkomenBlok').innerHTML = toetsHtml(r.toets);
+  $('inkomenBlok').innerHTML = toetsHtml(r.toets, r.extra);
   $('meldingen').innerHTML =
     r.fouten.map(m => `<div class="melding fout"><b>Niet mogelijk:</b> ${esc(m)}</div>`).join('') +
     (r.fouten.length === 0 ? '<div class="melding ok">Past binnen de getoetste regels uit de hypotheekgids.</div>' : '') +
@@ -903,8 +1042,12 @@ function printDocument() {
   </div>
 
   <div class="pag">
-    ${toetsHtml(r.toets).replace('<h3>', '<h2>').replace('</h3>', '</h2>')}
+    ${toetsHtml(r.toets, r.extra).replace(/<h3>/g, '<h2>').replace(/<\/h3>/g, '</h2>')}
     ${meld.length ? '<h2>Aandachtspunten bij deze aanvraag</h2>' + li(meld) : ''}
+    ${voet()}
+  </div>
+
+  <div class="pag">
     <h2>Het renteaanbod en de bindende offerte van Argenta</h2>
     ${li(['Uw adviseur dient de aanvraag in bij Argenta. Argenta beoordeelt de aanvraag en brengt een renteaanbod uit.',
       'Het renteaanbod stuurt u binnen 3 weken terug; daarna levert u via uw adviseur de gevraagde documenten aan.',
