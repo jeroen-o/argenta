@@ -92,6 +92,10 @@
   .oordeel.past { background: var(--primair-licht); color: var(--goed); } .oordeel.voorbehoud { background: var(--letop-vlak); color: var(--letop); } .oordeel.past_niet { background: var(--fout-vlak); color: var(--fout); }
   .klaar { text-align: center; padding: 26px 16px; }
   .klaar .bedrag { font-size: 22px; color: var(--primair); font-weight: 700; margin: 4px 0; }
+  footer.voet { background: var(--wit); border-top: 1px solid var(--lijn); padding: 16px; font-size: 13px; color: var(--tekst-zacht); }
+  footer.voet nav { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 8px; }
+  footer.voet a { color: var(--primair); font-weight: 600; }
+  footer.voet p { margin: 0; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -102,7 +106,7 @@
     <div>
       <h1>Conceptofferte Argenta hypotheek <span style="font-weight:400">(indicatief)</span></h1>
       <p>Rekentool voor hypotheekadviseurs – geen renteaanbod of bindende offerte van Argenta.
-         Tarieven vast: <span id="datumVast"></span> · variabel: <span id="datumVar"></span> · leennormen <span id="normJaar"></span>. <a href="handleiding.html" target="_blank" rel="noopener" style="color:#fff">Handleiding</a></p>
+         Tarieven vast: <span id="datumVast"></span> · variabel: <span id="datumVar"></span> · leennormen <span id="normJaar"></span>.</p>
     </div>
   </div>
 </header>
@@ -314,6 +318,21 @@
   <button type="button" class="primair" id="verder">Verder ›</button>
 </div>
 </main>
+<footer class="voet">
+  <div class="in">
+    <nav aria-label="Documentatie">
+      <a href="handleiding.html" target="_blank" rel="noopener">Handleiding</a>
+      <a href="handleiding.html#api" target="_blank" rel="noopener">API</a>
+      <a href="handleiding.html#invoer" target="_blank" rel="noopener">Invoer en uitvoer</a>
+      <a href="handleiding.html#hdn" target="_blank" rel="noopener">HDN-aansluiting</a>
+      <a href="handleiding.html#beheer" target="_blank" rel="noopener">Beheer</a>
+      <a href="voorbeelden/aanvraag.json" target="_blank" rel="noopener">Voorbeeldaanvraag (JSON)</a>
+      <a href="argenta-engine.js" target="_blank" rel="noopener">Rekenkern (JS)</a>
+    </nav>
+    <p>Rekenkern <span id="voetVersie"></span> · tarieven vast <span id="voetVast"></span>, variabel <span id="voetVar"></span> · leennormen en NHG-grens <span id="voetJaar"></span> · hypotheekgids augustus 2026.
+      Indicatieve rekentool voor adviseurs; geen renteaanbod of bindende offerte van Argenta.</p>
+  </div>
+</footer>
 
 <script>
 /*ENGINE_START*/
@@ -1360,6 +1379,7 @@ $('verder').addEventListener('click', () => naarStap(stap + 1));
 $('datumVast').textContent = RATES.datumVast;
 $('datumVar').textContent = RATES.datumVariabel;
 $('normJaar').textContent = NORMEN.jaar;
+$('voetVersie').textContent = ArgentaEngine.VERSIE; $('voetVast').textContent = RATES.datumVast; $('voetVar').textContent = RATES.datumVariabel; $('voetJaar').textContent = NORMEN.jaar;
 const lijst = blokken => blokken.map(([kop, punten]) => `<details><summary>${esc(kop)}</summary><ul>${punten.map(p => '<li>' + esc(p) + '</li>').join('')}</ul></details>`).join('');
 $('voorwaarden').innerHTML = lijst(VOORWAARDEN);
 $('eisen').innerHTML = lijst(EISEN);
