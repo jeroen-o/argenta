@@ -77,6 +77,7 @@
   <h3>Stap 3 – Kan dit bedrag geleend worden?</h3>
   <ul>
     <li><b>Leningdelen:</b> aflosvorm, bedrag, looptijd en rentevaste periode. Bij één leningdeel neemt de tool het te financieren bedrag over. Voeg je een tweede deel toe, dan verdeel je de bedragen zelf.</li>
+    <li><b>Meegenomen leningdeel (verhuisregeling):</b> vink dit aan en vul de meegenomen rente, de resterende rentevaste periode en de resterende looptijd in. Staat de rente nog 10 jaar of langer vast (bijvoorbeeld 12 jaar), dan toetst de tool op de meegenomen rente. Staat de rente korter vast (bijvoorbeeld 5 jaar), dan toetst de tool op de toetsrente van de AFM. Het extra bedrag voer je op als apart leningdeel tegen de rente van nu.</li>
     <li><b>Inkomen en lasten:</b> toetsinkomen per aanvrager, alimentatie, financiële verplichtingen per maand en de studielening. Doorlopend krediet tel je mee voor 2% van de limiet per maand.</li>
     <li><b>Toetsrente bij rentevast korter dan 10 jaar:</b> staat standaard op 5,00%. De AFM stelt deze elk kwartaal vast; controleer de actuele waarde.</li>
     <li><b>Bijzondere toets:</b> kies hier de toets op werkelijke lasten voor AOW-gerechtigden, de senioren verhuisregeling of de tijdelijk-tekortregeling.</li>
@@ -175,6 +176,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>leningdelen[].vorm</code></td><td><code>ann</code>, <code>lin</code>, <code>av</code>, <code>groenAnn</code>, <code>groenLin</code></td></tr>
     <tr><td><code>leningdelen[].bedrag</code></td><td>Bedrag; <code>null</code> bij één leningdeel = het te financieren bedrag</td></tr>
     <tr><td><code>leningdelen[].rentevast</code></td><td>1 t/m 30 (jaren) of <code>"var"</code>; groen lenen: 5, 10, 15, 20, 25 of 30</td></tr>
+    <tr><td><code>leningdelen[].meegenomen</code></td><td><code>true</code> voor een leningdeel uit de verhuisregeling. Geef dan <code>rente</code> (de meegenomen rente), <code>rentevast</code> (resterende rentevaste periode in jaren) en <code>looptijd</code> (resterende looptijd). De rente komt dan niet uit de tariefkaart.</td></tr>
     <tr><td><code>erfpacht</code></td><td><code>null</code> of <code>{ uitgever: overheid|particulier, vestiging: voor2013|2013|na2014, opinie: groen|oranje|rood|geen, resterendeDuur, canonPerJaar }</code></td></tr>
     <tr><td><code>vve</code></td><td><code>null</code> of <code>{ aanwezig: ja|oprichting|nee, actief, onderhoudGoed, mjopVoldoende, fondsenToereikend }</code> (laatste vier: true/false). Ontbreekt dit bij een appartement, dan volgt een voorbehoud.</td></tr>
     <tr><td><code>overbrugging</code></td><td><code>null</code> of <code>{ situatie: a|b|c|d, waarde, restschuld, bedrag, maandlastHuidig, maanden, eigenMiddelen }</code>. a = verkocht en voorwaarden verstreken, b = verkocht en voorwaarden niet verstreken, c = onverkocht met taxatie, d = onverkocht met desktoptaxatie.</td></tr>
@@ -197,6 +199,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>totalen</code></td><td>Hoofdsom, LTV, tariefklasse, maandlast, JKP, totale rente, totaal te betalen bedrag</td></tr>
     <tr><td><code>kosten</code>, <code>inkomenstoets</code>, <code>overbrugging</code>, <code>verloop</code></td><td>Kostenopbouw, de inkomenstoets, de overbrugging en het verloop per jaar</td></tr>
     <tr><td><code>aandachtspunten</code>, <code>tips</code></td><td>De meldingen “Let op” en de rekenkundige tips</td></tr>
+    <tr><td><code>tarieven</code></td><td>Tariefbewaking: datum van de tariefkaart, <code>leeftijdDagen</code> en <code>verouderd</code> (true na 14 dagen) met een <code>melding</code>. Toon de melding in eBlinqx als <code>verouderd</code> waar is.</td></tr>
     <tr><td><code>bronnen</code>, <code>versie</code></td><td>Datum van de tarieven, jaar van de normen en versie van de rekenkern. Toon deze bij het oordeel.</td></tr>
   </table></div>
   <div class="kader"><b>Geen kans of percentage.</b> Het oordeel zegt of de aanvraag past binnen de gepubliceerde regels, niet hoe groot de kans is dat Argenta de offerte afgeeft. Een waarschijnlijkheid kan pas worden berekend als uitkomsten van ingediende aanvragen worden teruggekoppeld.</div>
@@ -233,8 +236,11 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
     <tr><td>Nieuwe tariefkaart (meerdere keren per maand)</td><td><code>python3 tools/update_rates.py tarief.txt</code></td></tr>
     <tr><td>Nieuwe leennormen (jaarlijks)</td><td><code>python3 tools/update_normen.py "Bijlage financieringslastnormen JJJJ.xlsx" JJJJ</code></td></tr>
     <tr><td>Nieuwe NHG-grens of hypotheekgids</td><td>Constanten <code>NHG</code>, <code>REGELS</code>, <code>EXTRA</code> en <code>VOORWAARDEN</code> in <code>index.html</code> nalopen</td></tr>
+    <tr><td>Controleren of er een nieuwere tariefkaart is</td><td><code>python3 tools/check_rates.py</code>; met <code>--update</code> wordt de nieuwe kaart direct verwerkt. Dit draait ook elke werkdag automatisch op GitHub en maakt dan een pull request.</td></tr>
+    <tr><td>Nieuwe toetsrente AFM (per kwartaal)</td><td><code>REGELS.toetsrenteStandaard</code> in <code>index.html</code>. Per dossier kan de adviseur de waarde in stap 3 aanpassen; via de API met <code>inkomen.toetsrenteKort</code>.</td></tr>
     <tr><td>Na elke wijziging</td><td><code>python3 tools/export_engine.py</code> en daarna <code>node tests/test.js</code></td></tr>
   </table></div>
+  <p><b>Tariefbewaking.</b> Is de tariefkaart ouder dan 14 dagen, dan toont de tool een gele balk bovenaan, staat de melding op de conceptofferte en geeft de API <code>tarieven.verouderd: true</code>. Bij elke wijziging op GitHub draaien de tests automatisch (<code>tests/test.js</code> en <code>tests/e2e.js</code>).</p>
   <p>Argenta heeft geen API voor tarieven; wijzigingen komen via de nieuwsbrief. Een verouderde tariefkaart geeft een verkeerde rente. De datum van de tarieven staat in de kop van de tool en in <code>bronnen</code>.</p>
 </section>
 
@@ -253,7 +259,7 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
 
 </div></main>
 <footer style="background:#fff;border-top:1px solid var(--lijn);padding:16px;font-size:13px;color:var(--tekst-zacht)"><div class="in" style="display:flex;flex-wrap:wrap;gap:6px 20px">
-  <a href="index.html" style="color:var(--primair);font-weight:600">Rekentool</a><a href="#api" style="color:var(--primair);font-weight:600">API</a><a href="voorbeelden/aanvraag.json" style="color:var(--primair);font-weight:600">Voorbeeldaanvraag (JSON)</a><a href="argenta-engine.js" style="color:var(--primair);font-weight:600">Rekenkern (JS)</a><a href="hdn-mapping.json" style="color:var(--primair);font-weight:600">HDN-mapping</a>
+  <a href="index.html" style="color:var(--primair);font-weight:600">Rekentool</a><a href="#api" style="color:var(--primair);font-weight:600">API</a><a href="voorbeelden/voorbeeld-conceptofferte.pdf" style="color:var(--primair);font-weight:600">Voorbeeldofferte (PDF)</a><a href="voorbeelden/aanvraag.json" style="color:var(--primair);font-weight:600">Voorbeeldaanvraag (JSON)</a><a href="argenta-engine.js" style="color:var(--primair);font-weight:600">Rekenkern (JS)</a><a href="hdn-mapping.json" style="color:var(--primair);font-weight:600">HDN-mapping</a>
 </div></footer>
 </body>
 </html>

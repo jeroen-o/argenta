@@ -1,0 +1,55 @@
+name: Tariefbewaking
+
+# Controleert elke werkdag of Argenta een nieuwere tariefkaart heeft en maakt dan een pull request.
+on:
+  schedule:
+    - cron: "17 6 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  tarieven:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Installeer pdftotext
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Controleer en verwerk de tariefkaart
+        id: check
+        run: python3 tools/check_rates.py --update
+      - name: Test de nieuwe tarieven
+        run: node tests/test.js
+      - name: Maak een pull request bij gewijzigde tarieven
+        run: |
+          if git diff --quiet; then
+            echo "Tarieven zijn actueel."
+            exit 0
+          fi
+          branch="tarieven-$(date +%Y%m%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -am "Werk de tarieven bij naar de nieuwste tariefkaart van Argenta"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Nieuwe tariefkaart Argenta" \
+            --body "De tariefbewaking vond nieuwere tarieven op argenta.nl en heeft index.html en argenta-engine.js bijgewerkt. Controleer de rentes steekproefsgewijs met de tariefkaart voordat je merget." \
+            || gh issue create --title "Nieuwe tariefkaart Argenta: pull request maken mislukt" \
+                 --body "De tarieven staan op branch $branch, maar het aanmaken van de pull request is mislukt. Maak deze handmatig aan."
+      - name: Meld een mislukte controle
+        if: failure()
+        run: |
+          gh issue create --title "Tariefbewaking mislukt" \
+            --body "De dagelijkse controle van de tariefkaart is mislukt (mogelijk is de pagina van Argenta gewijzigd of niet bereikbaar). Zie de uitvoer van de workflow en werk de tarieven zo nodig handmatig bij met tools/update_rates.py."

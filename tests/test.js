@@ -55,4 +55,26 @@ assert.strictEqual(E.resultaat(uit.invoer).leningdelen[0].rentePct, 4.52);
 const leeg = H.vanHdn(xml, require('../hdn-mapping.json'));
 assert.ok(leeg.ontbrekend.length > 3, 'lege mapping meldt ontbrekende paden');
 
+// 8. Verhuisregeling: meegenomen leningdeel houdt de eigen rente; toetsrente hangt af van de resterende rentevaste periode
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 200000, looptijd: 22, rentevast: 12, meegenomen: true, rente: 2.1 }, { vorm: 'ann', bedrag: 180000, looptijd: 30, rentevast: 10 }];
+r = E.resultaat(inv);
+assert.strictEqual(r.leningdelen[0].rentePct, 2.1);
+const toetsLang = r.inkomenstoets.toetsrentePct;
+inv.leningdelen[0].rentevast = 5;
+r = E.resultaat(inv);
+assert.ok(r.inkomenstoets.toetsrentePct > toetsLang, 'korter dan 10 jaar: toets op de AFM-toetsrente');
+inv.leningdelen[0].rente = 0;
+assert.strictEqual(E.resultaat(inv).oordeel, 'past_niet');
+
+// 9. Tariefbewaking: na 14 dagen geldt de tariefkaart als verouderd
+const kaart = E.RATES.datumVastIso;
+const plus = d => new Date(new Date(kaart + 'T00:00:00').getTime() + d * 864e5).toISOString().slice(0, 10);
+assert.strictEqual(E.tariefStatus(plus(14)).verouderd, false);
+assert.strictEqual(E.tariefStatus(plus(16)).verouderd, true);
+
+// 10. Toetsrente is per aanvraag aan te passen
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 30, rentevast: 5 }];
+inv.inkomen.toetsrenteKort = 5; const max5 = E.resultaat(inv).inkomenstoets.maximaleHypotheek;
+inv.inkomen.toetsrenteKort = 5.5; assert.ok(E.resultaat(inv).inkomenstoets.maximaleHypotheek < max5);
+
 console.log('Alle tests geslaagd');

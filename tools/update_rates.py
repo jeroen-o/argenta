@@ -16,6 +16,13 @@ import re
 
 PCT = re.compile(r"(\d+,\d+)%")
 num = lambda s: float(s.replace(",", "."))
+MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"]
+
+
+def iso(datum):
+    """'28 oktober 2026' -> '2026-10-28'"""
+    dag, maand, jaar = datum.split()
+    return f"{int(jaar):04d}-{MAANDEN.index(maand.lower()) + 1:02d}-{int(dag):02d}"
 
 
 def parse(text):
@@ -79,6 +86,8 @@ def main():
         rates["variabel"] = v
         if a.variabel_datum:
             rates["datumVariabel"] = a.variabel_datum
+    rates["datumVastIso"] = iso(rates["datumVast"])
+    rates["datumVariabelIso"] = iso(rates["datumVariabel"])
     html = pathlib.Path(a.html)
     src = html.read_text(encoding="utf-8")
     new, n = re.subn(r"/\*RATES_START\*/.*?/\*RATES_END\*/",
