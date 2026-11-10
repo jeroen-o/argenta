@@ -30,7 +30,7 @@ of opgeslagen.
 | Onderdeel | Bron |
 | --- | --- |
 | Rente per leningdeel: NHG of risicoklasse, duurzaamheidskorting, opslag consumptief, groen lenen, variabel, overbrugging | tariefkaart Argenta |
-| Hoofdsom, LTV, aflossingsvrij, koopstarters, consumptief, groen lenen, Desktop Taxatie, overbrugging | hypotheekgids, hoofdstuk 1–3 |
+| Hoofdsom, LTV, aflossingsvrij (ook de regel voor hypotheken van vóór 17 augustus 2026), koopstarters, consumptief, groen lenen, Desktop Taxatie met betrouwbaarheidsscore, een of meer overbruggingen, verkrijgen volledig eigendom | hypotheekgids, hoofdstuk 1–3 |
 | Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig inkomen en toekomstig pensioen | hypotheekgids hoofdstuk 5 |
 | Inkomenstoets: financieringslastpercentages, toetsrente, studielening, energielabel, alleenstaanden | Tijdelijke regeling hypothecair krediet 2027 |
 | NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |

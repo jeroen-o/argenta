@@ -13,7 +13,7 @@ const REGELS = {
   avMaxPct: 30, avMaxBedrag: 150000,
   groenMax: 35000, groenPerioden: [5, 10, 15, 20, 25, 30],
   consMax: 100000, consMaxLtv: 80,
-  desktopMaxLtv: 90, desktopMaxHoofdsom: 1000000, desktopMaxWaarde: 1500000,
+  desktopMaxLtv: 90, desktopScore: 4, desktopScoreNhg: 5, desktopMaxHoofdsom: 1000000, desktopMaxWaarde: 1500000,
   bouwdepotVrij: 25000, eigenMiddelenBewijs: 25000,
   ovbKosten: 250, ovbVerkoopkostenPct: 1.85, kredietPct: 2, minVerhoging: 5000, herstelPct: 10,
   /* Toetsrente voor rentevast korter dan 10 jaar: de AFM stelt deze per kwartaal vast. Pas de standaardwaarde hier aan. */
@@ -421,7 +421,9 @@ function bereken() {
   const krediet = kredietlasten(F.kredieten);
   F.verplichtingen += krediet.totaal;
   letop.push(...krediet.letop); voorwaarden.push(...krediet.voorwaarden);
-  const maxAvBedrag = isOha ? (F.ohaWaarde || mw) * EXTRA.ohaAvPct / 100 : Math.min(mw * REGELS.avMaxPct / 100, REGELS.avMaxBedrag);
+  /* Bestaande hypotheek aangevraagd voor 17 augustus 2026 (verhoging of verhuisregeling): alleen de grens van 30%, zonder het maximum van 150.000 */
+  const avOudeRegel = F.oudeHypotheek && delen.some(d => d.meegenomen);
+  const maxAvBedrag = isOha ? (F.ohaWaarde || mw) * EXTRA.ohaAvPct / 100 : avOudeRegel ? mw * REGELS.avMaxPct / 100 : Math.min(mw * REGELS.avMaxPct / 100, REGELS.avMaxBedrag);
 
   const rijen = delen.map((d, i) => {
     const v = VORMEN[d.vorm];
@@ -447,12 +449,18 @@ function bereken() {
   /* Overbrugging */
   let ovb = null;
   if (F.ovbAan) {
-    const s = OVB[F.ovbSituatie], waarde = F.ovbWaarde, rest = F.ovbRestschuld, bedrag = F.ovbBedrag;
-    const max = Math.max(0, waarde * s.pct / 100 - (s.kosten ? waarde * REGELS.ovbVerkoopkostenPct / 100 : 0) - rest);
-    ovb = { situatie: s.naam, waarde, rest, bedrag, max, rente: RATES.overbrugging, pm: bedrag * RATES.overbrugging / 100 / 12, looptijd: doel === 'nieuwbouw' ? 36 : 24 };
-    if (bedrag <= 0) fouten.push('Overbrugging: vul het gewenste bedrag in.');
-    if (waarde > 0 && bedrag > max) fouten.push(`Overbrugging is maximaal ${fmtEuro0(max)} in deze situatie.`);
-    letop.push(`Overbrugging: looptijd maximaal ${ovb.looptijd} maanden, ${fmtEuro0(REGELS.ovbKosten)} afsluitkosten bij aflossing. De rente wordt vastgesteld bij het renteaanbod.`);
+    const lijst = [{ situatie: F.ovbSituatie, waarde: F.ovbWaarde, rest: F.ovbRestschuld, bedrag: F.ovbBedrag }].concat(F.ovbExtra);
+    const looptijd = doel === 'nieuwbouw' ? 36 : 24, meer = lijst.length > 1;
+    ovb = { bedrag: 0, max: 0, pm: 0, rente: RATES.overbrugging, looptijd, aantal: lijst.length, onverkocht: lijst.some(o => o.situatie >= 'c'), allesVerkocht: lijst.every(o => o.situatie === 'a'), contract: lijst.every(o => o.situatie <= 'b') };
+    lijst.forEach((o, n) => {
+      const srt = OVB[o.situatie], naam = meer ? 'Overbrugging ' + (n + 1) : 'Overbrugging';
+      const max = Math.max(0, o.waarde * srt.pct / 100 - (srt.kosten ? o.waarde * REGELS.ovbVerkoopkostenPct / 100 : 0) - o.rest);
+      if (o.bedrag <= 0) fouten.push(naam + ': vul het gewenste bedrag in.');
+      if (o.waarde > 0 && o.bedrag > max) fouten.push(`${naam} is maximaal ${fmtEuro0(max)} in deze situatie.`);
+      ovb.bedrag += o.bedrag; ovb.max += max; ovb.pm += o.bedrag * RATES.overbrugging / 100 / 12;
+    });
+    letop.push(`Overbrugging: looptijd maximaal ${looptijd} maanden, ${fmtEuro0(REGELS.ovbKosten)} afsluitkosten per overbrugging bij aflossing${meer ? ' (' + lijst.length + ' overbruggingen: ' + fmtEuro0(REGELS.ovbKosten * lijst.length) + ')' : ''}. De rente wordt vastgesteld bij het renteaanbod.`);
+    if (meer) letop.push('Meerdere overbruggingen: per te verkopen woning één overbrugging, elk met een hypothecaire inschrijving op die woning en op de aan te kopen woning.');
   }
   const totaalIncl = totaal + (ovb ? ovb.bedrag : 0);
 
@@ -464,7 +472,7 @@ function bereken() {
   else if (totaal > 0 && totaal < REGELS.minHoofdsom) fouten.push(`Minimale hoofdsom is ${fmtEuro0(REGELS.minHoofdsom)}.`);
   if (totaalIncl > REGELS.maxHoofdsom) fouten.push(`Maximale hoofdsom is ${fmtEuro0(REGELS.maxHoofdsom)} (inclusief overbrugging en verhogingen).`);
   if (totaal > REGELS.grensGroot && ltv > REGELS.maxLtvGroot) fouten.push(`Bij een hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} geldt een maximale verstrekking van ${REGELS.maxLtvGroot}% van de marktwaarde.`);
-  if (ovb && totaalIncl > REGELS.grensGroot && F.ovbSituatie >= 'c') { const t = `Hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} inclusief overbrugging op een onverkochte woning: individuele beoordeling, langere doorlooptijd.`; letop.push(t); voorbehoud.push(t); }
+  if (ovb && totaalIncl > REGELS.grensGroot && ovb.onverkocht) { const t = `Hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} inclusief overbrugging op een onverkochte woning: individuele beoordeling, langere doorlooptijd.`; letop.push(t); voorbehoud.push(t); }
   const energie = groen + F.maatregelen;
   if (mw > 0) {
     if (!nhg && ltv > REGELS.maxLtv) fouten.push('Zonder NHG is de verstrekking maximaal 100% van de marktwaarde.');
@@ -480,7 +488,8 @@ function bereken() {
     if (starter && !isOha) fouten.push('Aflossingsvrij is niet mogelijk voor koopstarters (35 jaar of jonger, eerste koopwoning).');
     const maxAv = maxAvBedrag;
     if (isOha) { if (av > maxAv) fouten.push(`Bij ontslag hoofdelijke aansprakelijkheid is aflossingsvrij maximaal ${EXTRA.ohaAvPct}% van de oorspronkelijke marktwaarde: hier ${fmtEuro0(maxAv)}.`); }
-    else if (av > maxAv) fouten.push(`Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde en maximaal ${fmtEuro0(REGELS.avMaxBedrag)} (laagste van de 2): hier ${fmtEuro0(maxAv)}.`);
+    else if (av > maxAv) fouten.push(avOudeRegel ? `Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde (hypotheek aangevraagd voor 17 augustus 2026): hier ${fmtEuro0(maxAv)}.` : `Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde en maximaal ${fmtEuro0(REGELS.avMaxBedrag)} (laagste van de 2): hier ${fmtEuro0(maxAv)}.`);
+    if (avOudeRegel) letop.push(`Aflossingsvrij: omdat de bestaande hypotheek voor 17 augustus 2026 is aangevraagd geldt alleen de grens van ${REGELS.avMaxPct}% van de marktwaarde; het bestaande aflossingsvrije deel kan ongewijzigd doorlopen als de verhoging annuïtair of lineair is.`);
     if (taxatie === 'desktop') fouten.push('Bij een aflossingsvrij leningdeel is een Calcasa Desktop Taxatie Plus of volledige taxatie verplicht.');
   }
   if (groen > 0) {
@@ -500,7 +509,9 @@ function bereken() {
     if (ltv > REGELS.desktopMaxLtv) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot ${REGELS.desktopMaxLtv}% LTV.`);
     if (totaal > REGELS.desktopMaxHoofdsom) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot een hoofdsom van ${fmtEuro0(REGELS.desktopMaxHoofdsom)}.`);
     if (mw > REGELS.desktopMaxWaarde) fouten.push(`Een Calcasa Desktop Taxatie is mogelijk tot een woningwaarde van ${fmtEuro0(REGELS.desktopMaxWaarde)}.`);
-    letop.push(`Desktop Taxatie: minimale betrouwbaarheid ${nhg ? '5,0 (NHG)' : '4,0'}; op datum bindende offerte maximaal 6 maanden oud.`);
+    const minScore = nhg ? REGELS.desktopScoreNhg : REGELS.desktopScore;
+    if (F.desktopScore > 0 && F.desktopScore < minScore) fouten.push(`De betrouwbaarheid van de Desktop Taxatie is ${F.desktopScore.toLocaleString('nl-NL', { minimumFractionDigits: 1 })}; minimaal ${minScore.toLocaleString('nl-NL', { minimumFractionDigits: 1 })}${nhg ? ' met NHG' : ''} is vereist. Een volledig taxatierapport is nodig.`);
+    else if (!F.desktopScore) letop.push(`Desktop Taxatie: minimale betrouwbaarheid ${nhg ? '5,0 (NHG)' : '4,0'}; op datum bindende offerte maximaal 6 maanden oud.`);
   }
   if (doel === 'bestaand' && F.ovb_pct === '0') letop.push('Overdrachtsbelasting 0%: controleer of de klant aan de voorwaarden van de startersvrijstelling voldoet.');
   if (doel === 'nieuwbouw') {
@@ -719,6 +730,15 @@ function bereken() {
   if (F.buitenland) letop.push('Buitenlands belastingplichtig: de inkomenstoets rekent met de tabel voor fiscaal niet-aftrekbare leningen. Dat geldt niet als een belastingverdrag de eigen woning in Nederland fiscaal behandelt, of als de aanvrager met het hoogste inkomen in Nederland belastingplichtig is.');
   if (F.dertig) letop.push('30%-regeling: het bruto jaarinkomen telt mee zonder ophoging; het fiscale voordeel mag niet bruto worden gemaakt.');
 
+  /* Verkrijgen van volledig eigendom uit verdeling (hypotheekgids 2.5) */
+  if (doel === 'uitkoop') {
+    const redenen = { echtscheiding: 'een echtscheiding', partnerschap: 'de beëindiging van een geregistreerd partnerschap', samenleving: 'de beëindiging van een duurzaam samenlevingsverband', erfopvolging: 'verwerving uit een onverdeelde boedel bij erfopvolging' };
+    if (!F.verdelingReden) zet('Volledig eigendom', 'letop', 'kies de reden van de verdeling; volledig eigendom kan alleen bij een echtscheiding, het einde van een geregistreerd partnerschap of duurzaam samenlevingsverband, of erfopvolging.');
+    else if (!redenen[F.verdelingReden]) zet('Volledig eigendom', 'fout', 'verkrijgen van volledig eigendom kan alleen bij een echtscheiding, het einde van een geregistreerd partnerschap of duurzaam samenlevingsverband, of verwerving uit een onverdeelde boedel bij erfopvolging.');
+    else if (F.verdelingIngeschreven) zet('Volledig eigendom', 'fout', 'de notariële akte van levering ter uitvoering van de verdeling is al ingeschreven in de openbare registers; dan is financiering van de verdeling niet meer mogelijk.');
+    else { zet('Volledig eigendom', 'ok', `verdeling vanwege ${redenen[F.verdelingReden]}.`); voorwaarden.push('Volledig eigendom: de notariële akte van levering ter uitvoering van de verdeling is nog niet ingeschreven in de openbare registers.'); }
+  }
+
   /* Woningtype (hypotheekgids 2.3) */
   if (F.woningtype === 'uitgesloten') zet('Woningtype', 'fout', 'Argenta verstrekt geen hypotheek op dit type woning (onder meer serviceflat, studenten- of noodwoning, verhuurde woning, vruchtgebruik, recht van opstal, coöperatief eigendom, recreatiebestemming, zeecontainers, zelfbouw zonder aannemer).');
   else if (F.woningtype === 'bedrijfsruimte') {
@@ -780,7 +800,7 @@ function bereken() {
     }
   }
   voorwaarden.push(taxatie === 'nwwi' ? 'Het taxatierapport is uitgebracht via het NWWI, gevalideerd en op de datum van de bindende offerte niet ouder dan 6 maanden.'
-    : `De desktoptaxatie heeft een betrouwbaarheid van minimaal ${nhg ? '5,0' : '4,0'} en is op de datum van de bindende offerte niet ouder dan 6 maanden.`);
+    : F.desktopScore > 0 ? 'De desktoptaxatie is op de datum van de bindende offerte niet ouder dan 6 maanden.' : `De desktoptaxatie heeft een betrouwbaarheid van minimaal ${nhg ? '5,0' : '4,0'} en is op de datum van de bindende offerte niet ouder dan 6 maanden.`);
   /* Minimaal toetsinkomen waarbij deze lening binnen de leennorm past (zelfde lasten, regeling en toetsrente) */
   let minInkomen = null;
   if (totaal > 0) {
@@ -816,7 +836,7 @@ function bereken() {
   voorwaarden.push('Inkomen, identiteit en herkomst van eigen middelen worden met de aangeleverde documenten of brondata bevestigd.');
 
   if (ovb) {
-    const mnd = F.dlMaanden, verkocht = F.ovbSituatie === 'a';
+    const mnd = F.dlMaanden, verkocht = ovb.allesVerkocht;
     const pm = F.dlMaandlast + ovb.pm, totaalDl = pm * mnd, eigenDl = F.dlEigen;
     if (!F.dlMaandlast) zet('Dubbele lasten', 'letop', 'vul de bruto maandlast van de huidige hypotheek in om de dubbele lasten te toetsen.');
     else {
@@ -872,7 +892,7 @@ function bereken() {
   doc('Financiële verplichtingen', lasten);
   const eigenTotaal = k.eigen + (ovb ? F.dlEigen : 0);
   if (eigenTotaal > 0) doc('Eigen middelen', [eigenTotaal >= REGELS.eigenMiddelenBewijs ? 'Bewijsstukken voor de herkomst van eigen middelen (formulier eigen middelen, saldo-opgave, financieel jaaroverzicht)' : 'Bewijs van eigen middelen (rekeningafschrift); herkomststukken op verzoek']);
-  if (ovb) doc('Overbrugging', ['Opgave van de restschuld van de lopende hypotheek', F.ovbSituatie <= 'b' ? 'Getekende verkoopovereenkomst van de huidige woning' : 'Taxatierapport of Desktop Taxatie van de huidige woning en bewijs dat de woning te koop staat', 'Bewijs van eigen middelen voor de dubbele lasten']);
+  if (ovb) doc('Overbrugging', ['Opgave van de restschuld van de lopende hypotheek', ovb.contract ? 'Getekende verkoopovereenkomst van de huidige woning' : 'Taxatierapport of Desktop Taxatie van de huidige woning en bewijs dat de woning te koop staat', 'Bewijs van eigen middelen voor de dubbele lasten']);
   if (doel === 'oversluiten') doc('Oversluiten', ['Kopie van de pro-forma aflosnota van de bestaande geldverstrekker*', 'Opgave van de vergoeding voor vervroegd aflossen']);
   if (isOha || doel === 'uitkoop') doc(isOha ? 'Ontslag hoofdelijke aansprakelijkheid' : 'Verdeling', ['(Concept) akte van verdeling', 'Echtscheidingsbeschikking of -uitspraak en echtscheidingsconvenant', 'Inschrijvingsbewijs burgerlijke stand']
     .concat(isOha ? ['Aanvraagformulier OHA en het explainformulier'] : []));
@@ -933,10 +953,12 @@ function bereken() {
   }
   const renteTotaal = jaren.reduce((s, j) => s + j.rente, 0);
   const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten + k.overigKrediet;
+  const jkpWaarde = jkp(totaal - kredietKosten, termijnen);
+  if (jkpWaarde == null && totaal > 0 && termijnen.length) letop.push(`Het jaarlijks kostenpercentage is niet te berekenen: de kosten van het krediet (${fmtEuro0(kredietKosten)}) zijn hoger dan of gelijk aan de lening (${fmtEuro0(totaal)}).`);
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
-    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, tweeHyp, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkpWaarde, extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, tweeHyp, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
     oordeel: fouten.length ? 'past_niet' : voorbehoud.length ? 'voorbehoud' : 'past' };
 }
 
@@ -950,7 +972,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.4.0';
+const VERSIE = '1.5.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -967,6 +989,8 @@ function vlak(inv) {
   return {
     peildatum: inv.peildatum || null,
     doel: w.doel || 'bestaand', koopsom: getal(w.koopsom), marktwaarde: w.marktwaarde == null ? null : getal(w.marktwaarde), label: label < 0 ? 8 : label,
+    desktopScore: getal(w.desktopBetrouwbaarheid), oudeHypotheek: !!(inv.bestaandeHypotheek || {}).aangevraagdVoor17Augustus2026,
+    verdelingReden: (inv.verdeling || {}).reden || '', verdelingIngeschreven: !!(inv.verdeling || {}).akteIngeschreven,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
     verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
     notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
@@ -987,8 +1011,9 @@ function vlak(inv) {
     erfpachtgrond: !!e, epUitgever: (e || {}).uitgever || 'overheid', epVestiging: (e || {}).vestiging || 'voor2013', epOpinie: (e || {}).opinie || 'geen', epDuur: getal((e || {}).resterendeDuur), epCanon: getal((e || {}).canonPerJaar),
     vveOnbekend: !!w.appartement && !v, vveAanwezig: (v || {}).aanwezig || 'ja', vveActief: (v || {}).actief === false ? 'slapend' : 'actief',
     vveOnderhoud: jaNee((v || {}).onderhoudGoed), vveMjop: jaNee((v || {}).mjopVoldoende), vveFondsen: jaNee((v || {}).fondsenToereikend),
+    ovbExtra: (inv.overbruggingenExtra || []).map(x => ({ situatie: x.situatie || 'a', waarde: getal(x.waarde), rest: getal(x.restschuld), bedrag: getal(x.bedrag) })),
     ovbAan: !!o, ovbSituatie: (o || {}).situatie || 'a', ovbWaarde: getal((o || {}).waarde), ovbRestschuld: getal((o || {}).restschuld), ovbBedrag: getal((o || {}).bedrag),
-    dlMaandlast: getal((o || {}).maandlastHuidig), dlMaanden: (o || {}).maanden == null ? EXTRA.dlStandaard : getal(o.maanden), dlEigen: getal((o || {}).eigenMiddelen),
+    dlMaandlast: getal((o || {}).maandlastHuidig) + (inv.overbruggingenExtra || []).reduce((t, x) => t + getal(x.maandlastHuidig), 0), dlMaanden: (o || {}).maanden == null ? EXTRA.dlStandaard : getal(o.maanden), dlEigen: getal((o || {}).eigenMiddelen),
     ohaZonderWerk: !!(inv.oha || {}).zonderWerk, ohaAchterstand: !!(inv.oha || {}).achterstand, ohaWaarde: getal((inv.oha || {}).oorspronkelijkeMarktwaarde), ohaKinderen: getal((inv.oha || {}).kinderen),
     ohaInkBeheer: getal((inv.oha || {}).toetsinkomenBeheer), ohaEinde: !!(inv.oha || {}).dienstverbandEindigt, ohaJ1: getal(((inv.oha || {}).jaarinkomens || [])[0]), ohaJ2: getal(((inv.oha || {}).jaarinkomens || [])[1]), ohaJ3: getal(((inv.oha || {}).jaarinkomens || [])[2]),
     ohaPensioen: getal((inv.oha || {}).inkomenNaPensioen), ohaVermogen: getal((inv.oha || {}).vermogen), ohaWoz: getal((inv.oha || {}).wozWaarde),
@@ -1005,6 +1030,7 @@ function controleer(inv) {
   kies('woning.doel', w.doel, ['bestaand', 'nieuwbouw', 'oversluiten', 'verbouwing', 'uitkoop', 'erfpacht', 'oha']);
   kies('woning.energielabel', w.energielabel, LABEL_CODES);
   kies('woning.waardebepaling', w.waardebepaling, ['nwwi', 'desktop', 'desktopplus']);
+  kies('verdeling.reden', (inv.verdeling || {}).reden || undefined, ['echtscheiding', 'partnerschap', 'samenleving', 'erfopvolging', 'anders']);
   kies('woning.woningtype', w.woningtype, ['standaard', 'bedrijfsruimte', 'woonboerderij', 'kangoeroe', 'garagebox', 'uitgesloten']);
   kies('nieuwbouw.bouwwijze', (inv.nieuwbouw || {}).bouwwijze, ['project', 'eigenbeheer', 'zelfbouw']);
   kies('tweeHypotheken.vorm', (inv.tweeHypotheken || {}).vorm, ['ann', 'av']);
@@ -1016,6 +1042,8 @@ function controleer(inv) {
   (inv.aanvragers || []).forEach((p, n) => (p.inkomens || []).forEach((b, m) => kies(`aanvragers[${n}].inkomens[${m}].soort`, b.soort || '', Object.keys(INKOMEN_SOORTEN))));
   kies('bkr.status', (inv.bkr || {}).status, ['onbekend', 'schoon', 'negatief', 'hy2', 'hy', 'herstelA2', 'herstelA0']);
   kies('overbrugging.situatie', (inv.overbrugging || {}).situatie, Object.keys(OVB));
+  (inv.overbruggingenExtra || []).forEach((x, n) => kies(`overbruggingenExtra[${n}].situatie`, x.situatie, Object.keys(OVB)));
+  if ((inv.overbruggingenExtra || []).length && !inv.overbrugging) f.push('overbruggingenExtra: geef eerst overbrugging op');
   if (!Array.isArray(inv.leningdelen) || !inv.leningdelen.length) f.push('leningdelen: minimaal 1 leningdeel opgeven');
   (inv.leningdelen || []).forEach((d, n) => {
     const v = VORMEN[d.vorm];
@@ -1054,7 +1082,7 @@ function resultaat(inv) {
     afwijzingen: r.fouten, voorbehoud: r.voorbehoud, voorwaarden: r.voorwaarden, aandachtspunten: r.letop, tips: r.tips,
     bijzondereToetsen: r.extra.map(([naam, uitkomst, tekst]) => ({ naam, uitkomst: { ok: 'akkoord', letop: 'voorbehoud', fout: 'niet_mogelijk' }[uitkomst], tekst })),
     leningdelen: r.rijen.map(x => ({ nr: x.nr, vorm: x.d.vorm, omschrijving: x.naam, bedrag: x.d.bedrag, looptijdJaren: x.d.looptijd, rentevast: x.d.rvp === 'var' ? 'var' : +x.d.rvp, rentePct: x.rente, brutoMaandlast: rond(x.pm) })),
-    overbrugging: r.ovb ? { bedrag: r.ovb.bedrag, maximaal: rond(r.ovb.max, 0), rentePct: r.ovb.rente, brutoMaandlast: rond(r.ovb.pm), looptijdMaanden: r.ovb.looptijd } : null,
+    overbrugging: r.ovb ? { aantal: r.ovb.aantal, bedrag: r.ovb.bedrag, maximaal: rond(r.ovb.max, 0), rentePct: r.ovb.rente, brutoMaandlast: rond(r.ovb.pm), looptijdMaanden: r.ovb.looptijd } : null,
     totalen: { hoofdsom: r.totaal, hoofdsomInclOverbrugging: r.totaalIncl, marktwaarde: r.mw, ltvPct: rond(r.ltv), tariefklasse: klasseNaam(r.idx), gemiddeldeRentePct: rond(r.gewRente, 3),
       brutoMaandlast: rond(r.maand), looptijdMaanden: r.maanden, jkpPct: rond(r.jkp), renteTotaal: rond(r.renteTotaal, 0), kredietKosten: r.kredietKosten, totaalTeBetalen: rond(r.totaalTeBetalen, 0) },
     grenzen: r.grenzen,

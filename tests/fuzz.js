@@ -35,7 +35,7 @@ for (let i = 0; i < 3000; i++) {
     delen.push(deel);
   }
   const inv = {
-    woning: { doel, koopsom, marktwaarde: redelijk || kans(0.3) ? null : geld(80000, 1600000), energielabel: kies(E.LABEL_CODES), waardebepaling: kies(['nwwi', 'desktop', 'desktopplus']),
+    woning: { doel, koopsom, marktwaarde: redelijk || kans(0.3) ? null : geld(80000, 1600000), energielabel: kies(E.LABEL_CODES), waardebepaling: kies(['nwwi', 'desktop', 'desktopplus']), desktopBetrouwbaarheid: kies([0, 0, 3.5, 4.5, 5.5]),
       funderingsrisico: redelijk ? kies([null, 'A', 'C']) : kies([null, 'A', 'C', 'D', 'E']), woningtype: redelijk ? undefined : kies(['standaard', 'standaard', 'bedrijfsruimte', 'woonboerderij', 'kangoeroe', 'garagebox', 'uitgesloten']), bedrijfsdeelPct: kies([0, 10, 40]), herstelkosten: redelijk ? 0 : kies([0, 0, 15000, 90000]), bouwkundigOnderzoekGeadviseerd: !redelijk && kans(0.05), bouwkundigeStaatSlecht: !redelijk && kans(0.05), bestemmingWonen: kans(0.8), koopstarter: kans(0.2), appartement: kans(0.3), nhg: kans(0.3) },
     kosten: { verbouwing: kans(0.3) ? geld(0, 80000) : 0, energiemaatregelen: kans(0.3) ? geld(0, 30000) : 0, overdrachtsbelastingPct: kies([0, 2]), notarisLevering: 650, notarisHypotheek: 650, taxatie: 500, advies: 2500,
       eigenGeld: redelijk || kans(0.4) ? null : geld(0, 200000), overig: kans(0.3) ? [{ omschrijving: 'Kostenpost', bedrag: geld(0, 5000), kredietkosten: kans(0.5) }] : undefined },
@@ -43,6 +43,8 @@ for (let i = 0; i < 3000; i++) {
       : [{ geboortedatum: '1985-05-05', toetsinkomen: redelijk ? geld(60000, 150000) : geld(0, 150000) }, Object.assign({ geboortedatum: redelijk ? '1990-01-01' : kies(['1958-01-01', '1990-01-01']), toetsinkomen: geld(0, 90000) }, redelijk ? {} : extraAanvrager())],
     klant: redelijk ? undefined : { familieverband: kans(0.05), borgstelling: kans(0.05), bewind: kans(0.05), abcConstructie: kans(0.05), opschortendeVoorwaarde: kans(0.05), schuldsanering: kans(0.05), overnameStarterslening: kans(0.1) },
     nieuwbouw: doel === 'nieuwbouw' && kans(0.7) ? { bouwwijze: redelijk ? 'project' : kies(['project', 'eigenbeheer', 'zelfbouw']), grond: kies([0, 40000]), meerwerk: kies([0, 15000]), minderwerk: kies([0, 5000]), bouwrente: kies([0, 6000]), nutsaansluiting: kies([0, 4000]), woningcorporatie: kans(0.2) } : null,
+    bestaandeHypotheek: { aangevraagdVoor17Augustus2026: kans(0.3) },
+    verdeling: doel === 'uitkoop' ? (redelijk ? { reden: 'echtscheiding' } : kans(0.8) ? { reden: kies(['echtscheiding', 'partnerschap', 'samenleving', 'erfopvolging', 'anders']), akteIngeschreven: kans(0.1) } : null) : null,
     tweeHypotheken: !redelijk && kans(0.15) ? { restschuld: geld(0, 400000), marktwaarde: geld(0, 500000), vorm: kies(['ann', 'av']), nhg: kans(0.3), eigenMiddelen: geld(0, 20000) } : null,
     inkomen: { aftrekPerJaar: kans(0.2) ? geld(0, 12000) : 0, verplichtingenPerMaand: kans(0.3) ? 200 : 0, studieleningPerMaand: kans(0.3) ? 100 : 0, toetsrenteKort: kies([undefined, 5, 5.5]),
       aowGerechtigd: kans(0.2), alleenstaand: kans(0.3), regeling: redelijk ? 'geen' : kies(['geen', 'geen', 'aow', 'senioren', 'tekort']), regelingInkomen: geld(0, 80000), huidigeMaandlast: 1500,
@@ -53,10 +55,12 @@ for (let i = 0; i < 3000; i++) {
     erfpacht: !redelijk && kans(0.2) ? { uitgever: kies(['overheid', 'particulier']), vestiging: kies(['voor2013', '2013', 'na2014']), opinie: kies(['groen', 'oranje', 'rood', 'geen']), resterendeDuur: kies([0, 15, 40]), canonPerJaar: 1800 } : null,
     vve: kans(0.5) ? { aanwezig: kies(['ja', 'oprichting', 'nee']), actief: kans(0.5), onderhoudGoed: kans(0.5), mjopVoldoende: kans(0.5), fondsenToereikend: kans(0.5) } : null,
     overbrugging: !redelijk && kans(0.2) ? { situatie: kies(['a', 'b', 'c', 'd']), waarde: geld(100000, 600000), restschuld: geld(0, 300000), bedrag: geld(0, 200000), maandlastHuidig: kans(0.7) ? 900 : 0, maanden: kies([6, 12, 24, 40]), eigenMiddelen: geld(0, 30000) } : null,
+    overbruggingenExtra: [],
     oha: doel === 'oha' ? { zonderWerk: kans(0.3), achterstand: kans(0.1), oorspronkelijkeMarktwaarde: geld(0, 600000), kinderen: kies([0, 2, 5]), vermogen: kans(0.3) ? 50000 : 0, wozWaarde: 300000,
       dienstverbandEindigt: kans(0.2), jaarinkomens: [40000, 38000, 0], inkomenNaPensioen: kans(0.2) ? 30000 : 0, nettoInkomenPerMaand: kans(0.3) ? 3000 : 0, basisuitgavenPerMaand: 1500 } : null,
     bkr: { status: redelijk ? 'schoon' : kies(['onbekend', 'schoon', 'negatief', 'hy2', 'hy', 'herstelA2', 'herstelA0']), aantalContracten: kies([0, 3, 9, 16]), loonbeslag: !redelijk && kans(0.05) }
   };
+  if (inv.overbrugging && kans(0.3)) inv.overbruggingenExtra = [{ situatie: kies(['a', 'b', 'c', 'd']), waarde: geld(100000, 400000), restschuld: geld(0, 200000), bedrag: geld(0, 150000), maandlastHuidig: kies([0, 500]) }];
   const r = E.resultaat(inv);                         // mag niet crashen
   const context = 'aanvraag ' + i + ': ' + JSON.stringify(inv).slice(0, 400);
   oordelen[r.oordeel] = (oordelen[r.oordeel] || 0) + 1;
@@ -75,7 +79,8 @@ for (let i = 0; i < 3000; i++) {
     assert.ok(r.verloop[r.verloop.length - 1].restschuld <= 1, 'restschuld is 0 aan het einde; ' + context);
     assert.ok(Math.abs(r.totalen.totaalTeBetalen - (r.totalen.hoofdsom + r.totalen.renteTotaal + r.totalen.kredietKosten)) <= 2, context);
     const laagste = Math.min(...r.leningdelen.map(d => d.rentePct));
-    assert.ok(r.totalen.jkpPct >= laagste - 0.01, 'het JKP is niet lager dan de laagste rente; ' + context);
+    if (r.totalen.kredietKosten >= r.totalen.hoofdsom) assert.strictEqual(r.totalen.jkpPct, null, 'geen JKP als de kosten hoger zijn dan de lening; ' + context);
+    else assert.ok(r.totalen.jkpPct >= laagste - 0.01, 'het JKP is niet lager dan de laagste rente: ' + r.totalen.jkpPct + ' tegen ' + laagste + ', hoofdsom ' + r.totalen.hoofdsom + ', kosten ' + r.totalen.kredietKosten + ', delen ' + JSON.stringify(r.leningdelen) + '; ' + context);
   }
 }
 assert.ok(oordelen.past > 50 && oordelen.past_niet > 50, 'de test raakt zowel passende als niet-passende aanvragen: ' + JSON.stringify(oordelen));
