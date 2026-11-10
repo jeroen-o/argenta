@@ -71,6 +71,7 @@
   <ul>
     <li>Verbouwing, energiebesparende maatregelen, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG en eigen geld.</li>
     <li>De bedragen voor notaris, taxatie en advies zijn vooringevulde indicaties. Vul de werkelijke bedragen in; ze tellen mee in het jaarlijks kostenpercentage.</li>
+    <li><b>Overige kosten:</b> met “Kostenpost toevoegen” voeg je vrije regels toe (omschrijving en bedrag), bijvoorbeeld een bouwkundige keuring, bankgarantie of boete van de oude hypotheek. Ze tellen mee in de totale kosten. Vink “kosten van het krediet” aan als de post bij de lening hoort; dan telt hij ook mee in het jaarlijks kostenpercentage.</li>
     <li><b>Eigen geld</b> wordt automatisch ingevuld met het bedrag dat minimaal nodig is om binnen de marktwaarde (of de NHG-grens) te blijven, totdat je het veld zelf aanpast.</li>
     <li>Rechts zie je de opbouw: totale kosten, aftrek eigen geld en het te financieren bedrag.</li>
   </ul>
@@ -171,6 +172,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>woning.energielabel</code></td><td><code>A++++_EPG</code>, <code>A++++</code>, <code>A+++</code>, <code>A+_A++</code>, <code>A</code>, <code>B</code>, <code>C_D</code>, <code>E_F_G</code>, <code>GEEN</code></td></tr>
     <tr><td><code>woning.waardebepaling</code></td><td><code>nwwi</code>, <code>desktop</code>, <code>desktopplus</code></td></tr>
     <tr><td><code>woning.funderingsrisico</code></td><td><code>A</code> t/m <code>E</code>; <code>null</code> = nog niet bekend (wordt dan een voorwaarde)</td></tr>
+    <tr><td><code>kosten.overig</code></td><td>Lijst met vrije kostenposten: <code>[{ omschrijving, bedrag, kredietkosten }]</code>. <code>kredietkosten: true</code> telt mee in het JKP.</td></tr>
     <tr><td><code>kosten.eigenGeld</code></td><td>Bedrag; <code>null</code> = de rekenkern neemt het minimaal benodigde bedrag</td></tr>
     <tr><td><code>inkomen.regeling</code></td><td><code>geen</code>, <code>aow</code>, <code>senioren</code>, <code>tekort</code>. Bij <code>senioren</code> en <code>tekort</code> ook <code>regelingInkomen</code>; bij <code>senioren</code> ook <code>huidigeMaandlast</code></td></tr>
     <tr><td><code>leningdelen[].vorm</code></td><td><code>ann</code>, <code>lin</code>, <code>av</code>, <code>groenAnn</code>, <code>groenLin</code></td></tr>

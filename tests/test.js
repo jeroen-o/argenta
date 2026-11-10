@@ -77,4 +77,15 @@ inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 30, r
 inv.inkomen.toetsrenteKort = 5; const max5 = E.resultaat(inv).inkomenstoets.maximaleHypotheek;
 inv.inkomen.toetsrenteKort = 5.5; assert.ok(E.resultaat(inv).inkomenstoets.maximaleHypotheek < max5);
 
+// 11. Vrije kostenposten tellen mee in de totale kosten; alleen kredietkosten tellen mee in het JKP
+inv = basis(); const jkp0 = E.resultaat(inv);
+inv.kosten.overig = [{ omschrijving: 'Bouwkundige keuring', bedrag: 600 }];
+r = E.resultaat(inv);
+assert.strictEqual(r.kosten.totaal, jkp0.kosten.totaal + 600);
+assert.strictEqual(r.totalen.jkpPct, jkp0.totalen.jkpPct);
+inv.kosten.overig = [{ omschrijving: 'Afsluitkosten', bedrag: 4000, kredietkosten: true }];
+r = E.resultaat(inv);
+assert.ok(r.totalen.jkpPct > jkp0.totalen.jkpPct);
+assert.strictEqual(r.totalen.kredietKosten, jkp0.totalen.kredietKosten + 4000);
+
 console.log('Alle tests geslaagd');
