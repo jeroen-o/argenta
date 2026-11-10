@@ -42,6 +42,9 @@ of opgeslagen.
 | Maandlast per krediet, buitenlands belastingplichtig, 30%-regeling | hypotheekgids 6.3 en 6.4 |
 | Verhoging en tweede hypotheek | hypotheekgids 1.2.4 en de adviseurspagina over wijzigingen in beheer |
 | Bouwkundig rapport en herstelkosten in depot | hypotheekgids 2.1.4 en 2.1.5 |
+| Nieuwbouw: marktwaarde uit de stichtingskosten, eigen beheer, zelfbouw | hypotheekgids 2.2 |
+| Tijdelijk twee hypotheken bij de verhuisregeling | hypotheekgids 1.7.2 |
+| PGB-inkomen, opschortende voorwaarden, schuldsanering, starterslening, garagebox | hypotheekgids 7.1 en 2.3.1 |
 | Dubbele lasten bij overbrugging | hypotheekgids 1.8.1 |
 | Verhuisregeling: meegenomen leningdeel met eigen rente en resterende rentevaste periode | hypotheekgids 1.7 |
 | Ontslag hoofdelijke aansprakelijkheid: leennorm, werkelijke lasten, beheertoets | adviseurspagina Argenta OHA, NHG D.4, D.6 en bijlage 5 |
@@ -141,7 +144,7 @@ workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. D
 - Eigen uitwerkingen die Argenta nog moet bevestigen: de dubbele-lastentoets, de volgorde in het VvE-stroomschema, de toets
   bij de senioren- en tekortregeling, en welke NHG-regel bij welke stap van de OHA-toets hoort. De AOW-leeftijd staat op 67 jaar.
 - De budgettoets bij OHA rekent met bedragen van de adviseur; de tool bevat geen Nibud-normbedragen.
-- Bij de verhuisregeling bepaalt Argenta de risicoklasse opnieuw; de tool rekent met de ingevulde rente.
+- Bij de verhuisregeling bepaalt Argenta de risicoklasse opnieuw; de tool rekent met de ingevulde rente. Bij tijdelijk twee hypotheken rekent de tool indicatief met het huidige 1-jaarstarief; Argenta gebruikt de rentelijst van de laatste rentevaststelling.
 - Het JKP en het verloop gaan uit van een gelijkblijvende rente over de hele looptijd; de overbrugging telt niet mee.
 - Notaris-, taxatie- en advieskosten zijn invulbare indicaties; overdrachtsbelasting alleen 2% of 0%.
 - De HDN-mapping is leeg; het HDN-schema is alleen voor deelnemers beschikbaar.

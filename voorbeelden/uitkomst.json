@@ -1,6 +1,6 @@
 {
   "_toelichting": "Uitvoer van ArgentaEngine.resultaat() voor voorbeelden/aanvraag.json. tarieven.leeftijdDagen hangt af van de datum van uitvoeren en is hier leeg gelaten.",
-  "versie": "1.3.0",
+  "versie": "1.4.0",
   "oordeel": "past",
   "toelichting": "Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.",
   "afwijzingen": [],
@@ -68,7 +68,10 @@
     "ruimteVerplichtingenPerMaand": 414,
     "nhgGrens": null
   },
+  "tijdelijkTweeHypotheken": null,
   "kosten": {
+    "stichtingskosten": 400000,
+    "nieuwbouwExtra": 0,
     "koopsom": 400000,
     "verbouwing": 0,
     "overdrachtsbelasting": 8000,

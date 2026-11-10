@@ -14,7 +14,7 @@ const SOORTEN = Object.keys(E.INKOMEN_SOORTEN);
 const extraAanvrager = () => ({
   verblijf: kies(['nl', 'nl', 'eu', 'onbepaald', 'niettijdelijk', 'tijdelijk']), inkomenNaPensioen: kans(0.2) ? geld(0, 60000) : 0,
   inkomens: kans(0.4) ? Array.from({ length: 1 + Math.floor(rnd() * 3) }, () => ({ soort: kies(SOORTEN), salaris: geld(0, 90000), vakantietoeslag: geld(0, 7000), vast13: geld(0, 5000), variabel: geld(0, 5000),
-    verhoging: kies([0, 0, 4000]), verhogingMaanden: kies([2, 9]), toekomstig: kans(0.1), startMaanden: kies([3, 8]), bonus1: geld(0, 9000), bonus2: geld(0, 9000), bonus3: geld(0, 9000), bonusPersoonlijk: geld(0, 3000), uren: kies([0, 20, 36, 40, 60]), proeftijdVoorbij: kans(0.9), bedrag: geld(0, 90000),
+    verhoging: kies([0, 0, 4000]), verhogingMaanden: kies([2, 9]), toekomstig: kans(0.1), startMaanden: kies([3, 8]), bonus1: geld(0, 9000), bonus2: geld(0, 9000), bonus3: geld(0, 9000), bonusPersoonlijk: geld(0, 3000), uren: kies([0, 20, 36, 40, 60]), proeftijdVoorbij: kans(0.9), bedrag: geld(0, 90000), bestaandeKlant: kans(0.5),
     jaar1: geld(0, 90000), jaar2: geld(0, 90000), jaar3: geld(0, 90000), huidig: kans(0.3) ? geld(0, 90000) : 0, jaren: kies([0, 2, 5]), ikv: kans(0.5) ? geld(0, 90000) : 0, sociaalMinimum: kies([0, 16000]), vermogen: geld(0, 300000), pct: kies([0, 2.5, 6]) })) : undefined
 });
 
@@ -36,12 +36,14 @@ for (let i = 0; i < 3000; i++) {
   }
   const inv = {
     woning: { doel, koopsom, marktwaarde: redelijk || kans(0.3) ? null : geld(80000, 1600000), energielabel: kies(E.LABEL_CODES), waardebepaling: kies(['nwwi', 'desktop', 'desktopplus']),
-      funderingsrisico: redelijk ? kies([null, 'A', 'C']) : kies([null, 'A', 'C', 'D', 'E']), woningtype: redelijk ? undefined : kies(['standaard', 'standaard', 'bedrijfsruimte', 'woonboerderij', 'kangoeroe', 'uitgesloten']), bedrijfsdeelPct: kies([0, 10, 40]), herstelkosten: redelijk ? 0 : kies([0, 0, 15000, 90000]), bouwkundigOnderzoekGeadviseerd: !redelijk && kans(0.05), bouwkundigeStaatSlecht: !redelijk && kans(0.05), bestemmingWonen: kans(0.8), koopstarter: kans(0.2), appartement: kans(0.3), nhg: kans(0.3) },
+      funderingsrisico: redelijk ? kies([null, 'A', 'C']) : kies([null, 'A', 'C', 'D', 'E']), woningtype: redelijk ? undefined : kies(['standaard', 'standaard', 'bedrijfsruimte', 'woonboerderij', 'kangoeroe', 'garagebox', 'uitgesloten']), bedrijfsdeelPct: kies([0, 10, 40]), herstelkosten: redelijk ? 0 : kies([0, 0, 15000, 90000]), bouwkundigOnderzoekGeadviseerd: !redelijk && kans(0.05), bouwkundigeStaatSlecht: !redelijk && kans(0.05), bestemmingWonen: kans(0.8), koopstarter: kans(0.2), appartement: kans(0.3), nhg: kans(0.3) },
     kosten: { verbouwing: kans(0.3) ? geld(0, 80000) : 0, energiemaatregelen: kans(0.3) ? geld(0, 30000) : 0, overdrachtsbelastingPct: kies([0, 2]), notarisLevering: 650, notarisHypotheek: 650, taxatie: 500, advies: 2500,
       eigenGeld: redelijk || kans(0.4) ? null : geld(0, 200000), overig: kans(0.3) ? [{ omschrijving: 'Kostenpost', bedrag: geld(0, 5000), kredietkosten: kans(0.5) }] : undefined },
     aanvragers: kans(0.5) ? [Object.assign({ geboortedatum: redelijk ? '1985-05-05' : kies(['1960-01-01', '2012-01-01', '1985-05-05']), toetsinkomen: redelijk ? geld(90000, 200000) : geld(0, 150000) }, redelijk ? {} : extraAanvrager())]
       : [{ geboortedatum: '1985-05-05', toetsinkomen: redelijk ? geld(60000, 150000) : geld(0, 150000) }, Object.assign({ geboortedatum: redelijk ? '1990-01-01' : kies(['1958-01-01', '1990-01-01']), toetsinkomen: geld(0, 90000) }, redelijk ? {} : extraAanvrager())],
-    klant: redelijk ? undefined : { familieverband: kans(0.05), borgstelling: kans(0.05), bewind: kans(0.05), abcConstructie: kans(0.05) },
+    klant: redelijk ? undefined : { familieverband: kans(0.05), borgstelling: kans(0.05), bewind: kans(0.05), abcConstructie: kans(0.05), opschortendeVoorwaarde: kans(0.05), schuldsanering: kans(0.05), overnameStarterslening: kans(0.1) },
+    nieuwbouw: doel === 'nieuwbouw' && kans(0.7) ? { bouwwijze: redelijk ? 'project' : kies(['project', 'eigenbeheer', 'zelfbouw']), grond: kies([0, 40000]), meerwerk: kies([0, 15000]), minderwerk: kies([0, 5000]), bouwrente: kies([0, 6000]), nutsaansluiting: kies([0, 4000]), woningcorporatie: kans(0.2) } : null,
+    tweeHypotheken: !redelijk && kans(0.15) ? { restschuld: geld(0, 400000), marktwaarde: geld(0, 500000), vorm: kies(['ann', 'av']), nhg: kans(0.3), eigenMiddelen: geld(0, 20000) } : null,
     inkomen: { aftrekPerJaar: kans(0.2) ? geld(0, 12000) : 0, verplichtingenPerMaand: kans(0.3) ? 200 : 0, studieleningPerMaand: kans(0.3) ? 100 : 0, toetsrenteKort: kies([undefined, 5, 5.5]),
       aowGerechtigd: kans(0.2), alleenstaand: kans(0.3), regeling: redelijk ? 'geen' : kies(['geen', 'geen', 'aow', 'senioren', 'tekort']), regelingInkomen: geld(0, 80000), huidigeMaandlast: 1500,
       buitenlandsBelastingplichtig: !redelijk && kans(0.1), dertigProcentRegeling: kans(0.05),
