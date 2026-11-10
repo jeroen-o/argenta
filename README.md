@@ -17,6 +17,9 @@ MUNT Hypotheken (munt.hypotheekbond.nl): een wizard in vier stappen met een rapp
    voorblad, toelichting, kosten en maandlast, verloop restschuld per jaar, overzicht volgens de indeling van het ESIS,
    aandachtspunten en het vervolgtraject bij Argenta.
 
+Stap 4 toont ook **tips voor de adviseur** (extra eigen geld voor een lagere tariefklasse, NHG, duurzaamheidskorting,
+aflossingsvrij terugbrengen, leenruimte vergroten). Dit zijn rekenkundige mogelijkheden, geen advies; ze staan niet in het rapport.
+
 Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`.
 
 ## Bijzondere toetsen
