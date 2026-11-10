@@ -252,4 +252,40 @@ assert.strictEqual(uitkoop({ reden: 'anders' }).oordeel, 'past_niet');
 assert.strictEqual(uitkoop({ reden: 'erfopvolging', akteIngeschreven: true }).oordeel, 'past_niet');
 assert.strictEqual(uitkoop(null).oordeel, 'voorbehoud');
 
+// 29. Toetsrente (hypotheekgids 1.2.2): rentevast korter dan 10 jaar maar dan afgelost -> werkelijke rente
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 30, rentevast: 7 }];
+const toetsLangLopend = E.resultaat(inv).inkomenstoets.toetsrentePct;                              // loopt door na de rentevaste periode: AFM-toetsrente
+assert.strictEqual(toetsLangLopend, 5);
+inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 7, rentevast: 7 }];
+r = E.resultaat(inv); assert.strictEqual(r.inkomenstoets.toetsrentePct, r.leningdelen[0].rentePct); // afgelost aan het einde: werkelijke rente
+inv.leningdelen = [{ vorm: 'av', bedrag: 100000, looptijd: 7, rentevast: 7 }, { vorm: 'ann', bedrag: 280000, looptijd: 30, rentevast: 10 }];
+assert.ok(E.resultaat(inv).inkomenstoets.toetsrentePct > 4.6);                                      // aflossingsvrij is niet afgelost: toetsrente blijft
+
+// 30. Consumptieve hypotheek (hypotheekgids 1.5)
+const consumptief = extra => { const i = basis(); i.woning.marktwaarde = 600000; i.woning.koopsom = 400000; i.kosten.eigenGeld = 12300; i.aanvragers = [{ toetsinkomen: 200000 }];
+  i.leningdelen = [{ vorm: 'ann', bedrag: 360000, looptijd: 30, rentevast: 10 }, { vorm: 'ann', bedrag: 40000, looptijd: 30, rentevast: 10, consumptief: true }]; i.bkr = { status: 'schoon' }; Object.assign(i, extra || {}); return E.resultaat(i); };
+assert.strictEqual(consumptief().oordeel, 'past');
+assert.strictEqual(consumptief({ consumptief: { achterstandLaatste24Maanden: true } }).oordeel, 'past_niet');
+assert.strictEqual(consumptief({ consumptief: { zakelijkDoel: true } }).oordeel, 'past_niet');
+assert.ok(consumptief({ bkr: { status: 'hy2' } }).afwijzingen.some(t => t.includes('negatieve BKR-melding')));
+
+// 31. Bouwdepot (hypotheekgids 1.8.2) en omgevingsvergunning (2.1.1)
+const verbouw = (bedrag, extra) => { const i = basis(); i.kosten.verbouwing = bedrag; i.kosten.eigenGeld = 32300 + bedrag; Object.assign(i.woning, extra || {}); return E.resultaat(i).aandachtspunten.join(' | '); };
+assert.ok(verbouw(15000, { marktwaardeVoorVerbouwing: 400000 }).includes('geen bouwdepot verplicht'));
+assert.ok(verbouw(15000, { marktwaardeVoorVerbouwing: 385000 }).includes('in een bouwdepot gestort'));   // andere tariefklasse zonder de waarde na verbouwing
+assert.ok(verbouw(40000, { marktwaardeVoorVerbouwing: 400000 }).includes('in een bouwdepot gestort'));   // boven 25.000
+assert.ok(verbouw(40000, { verbouwingVergunningsplichtig: true }).includes('geblokkeerd tot de vergunning'));
+
+// 32. Taxatie maximaal 6 maanden oud (hypotheekgids 2.1.2)
+const taxatie = datum => { const i = basis(); i.peildatum = '2027-01-15'; i.woning.taxatiedatum = datum; return E.resultaat(i); };
+assert.strictEqual(taxatie('2026-12-01').oordeel, 'past');
+assert.strictEqual(taxatie('2026-08-20').oordeel, 'voorbehoud');                                    // bijna 5 maanden: nog kort geldig
+assert.strictEqual(taxatie('2026-06-30').oordeel, 'past_niet');                                     // ouder dan 6 maanden
+
+// 33. Meerdere dienstverbanden korter dan 12 maanden en alfahulp (hypotheekgids 5.2.4 en 5.2.9)
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, maandenInDienst: 40 }, { soort: 'vast', salaris: 15000, maandenInDienst: 6 }] }]), [60000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, maandenInDienst: 40 }, { soort: 'vast', salaris: 15000, maandenInDienst: 18 }] }]), [75000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000 }, { soort: 'bijzonder', alfahulp: true, jaar1: 9000, jaar2: 9000, jaar3: 9000 }] }]), [60000, 9000].reduce((a, b) => [a[0] + b, 0], [0, 0]));
+assert.strictEqual(E.resultaat(metBronnen([{ inkomens: [{ soort: 'vast', salaris: 90000 }, { soort: 'bijzonder', alfahulp: true, minderDan4Dagen: false, jaar1: 9000, jaar2: 9000, jaar3: 9000 }] }])).oordeel, 'past_niet');
+
 console.log('Alle tests geslaagd');
