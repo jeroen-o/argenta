@@ -161,4 +161,40 @@ assert.ok(r.documenten.find(d => d.groep === 'Financiële verplichtingen').items
 r = E.resultaat(metBronnen([{ inkomens: [{ soort: 'onderneming', jaren: 5, ikv: 90000 }] }]));
 assert.ok(r.documenten.find(d => d.groep === 'Inkomen').items.some(t => t.includes('Inkomensverklaring Ondernemer')));
 
+// 17. Lasten per krediet (hypotheekgids 6.3)
+inv = basis(); inv.inkomen.studieleningPerMaand = 0;
+inv.inkomen.kredieten = [{ soort: 'RK', limiet: 10000 }, { soort: 'AK', bedrag: 12000, looptijdMaanden: 60 }, { soort: 'overig', maandbedrag: 150 }, { soort: 'ZK', maandbedrag: 900 }, { soort: 'VK', limiet: 5000, aflossen: true }];
+r = E.resultaat(inv);
+assert.deepStrictEqual(r.verplichtingen.perKrediet.map(k => k.maandlast), [200, 200, 150, 0, 0]);   // 2% van de limiet; bedrag / looptijd; werkelijk; zakelijk en af te lossen tellen niet
+assert.strictEqual(r.verplichtingen.totaalPerMaand, 550);
+assert.ok(r.inkomenstoets.maximaleHypotheek < jkp0.inkomenstoets.maximaleHypotheek);
+
+// 18. Buitenlands belastingplichtig: de tabel voor niet-aftrekbare leningen (lagere leenruimte)
+inv = basis(); const maxNl = E.resultaat(inv).inkomenstoets;
+inv.inkomen.buitenlandsBelastingplichtig = true; r = E.resultaat(inv);
+assert.ok(r.inkomenstoets.financieringslastPct < maxNl.financieringslastPct && r.inkomenstoets.maximaleHypotheek < maxNl.maximaleHypotheek);
+assert.strictEqual(r.inkomenstoets.financieringslastPct, E.NORMEN.box3nietAOW[103 - 31][7] / 10);    // inkomen 103.000, toetsrente 4,52% valt in de kolom 4,501-5,000%
+
+// 19. Verhoging of tweede hypotheek (hypotheekgids 1.2.4)
+const verhoging = (nieuw, extra) => ({ woning: { doel: 'verbouwing', koopsom: 200000, marktwaarde: 400000, energielabel: 'C_D' }, kosten: { verbouwing: nieuw, notarisLevering: 0, notarisHypotheek: 0, taxatie: 0, advies: 0, eigenGeld: 0 },
+  aanvragers: [{ toetsinkomen: 90000 }], inkomen: {}, leningdelen: [{ vorm: 'ann', bedrag: 200000, looptijd: 22, rentevast: 8, meegenomen: true, rente: 2.4 }, { vorm: 'ann', bedrag: nieuw, looptijd: 30, rentevast: 10 }],
+  verhoging: Object.assign({ soort: 'onderhands', bestaandBijArgenta: true }, extra || {}), bkr: { status: 'schoon' } });
+assert.strictEqual(E.resultaat(verhoging(20000)).oordeel, 'past');                                  // 20.000 mag: het minimum van 25.000 geldt niet voor een verhoging
+assert.strictEqual(E.resultaat(verhoging(4000)).oordeel, 'past_niet');                              // onder het minimum van 5.000
+assert.strictEqual(E.resultaat(verhoging(20000, { bestaandBijArgenta: false })).oordeel, 'past_niet');
+assert.strictEqual(E.resultaat(verhoging(20000, { achterstand: true })).oordeel, 'past_niet');
+assert.strictEqual(E.resultaat(verhoging(20000, { achterstandLaatste12Maanden: true })).oordeel, 'voorbehoud');
+
+// 20. Bouwkundig rapport (hypotheekgids 2.1.4 en 2.1.5): verplicht boven 10% van de marktwaarde; herstelkosten in depot
+inv = basis(); inv.woning.herstelkosten = 30000; assert.strictEqual(E.resultaat(inv).bijzondereToetsen.find(b => b.naam === 'Bouwkundig rapport').uitkomst, 'akkoord');
+inv.woning.herstelkosten = 50000; assert.strictEqual(E.resultaat(inv).oordeel, 'past_niet');        // 50.000 > 10% van 400.000 en niet in depot
+inv.kosten.verbouwing = 50000; inv.kosten.eigenGeld = 82300; r = E.resultaat(inv);
+assert.strictEqual(r.oordeel, 'voorbehoud'); assert.ok(r.documenten.some(d => d.items.some(t => t.includes('Bouwkundig rapport'))));
+
+// 21. Toekomstig inkomen (hypotheekgids 5.2.3): verhoging of dienstverband binnen 6 maanden telt mee
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000, verhoging: 5000, verhogingMaanden: 4 }] }]), [75000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000, verhoging: 5000, verhogingMaanden: 9 }] }]), [70000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000, toekomstig: true, startMaanden: 3 }] }]), [70000, 0]);
+assert.strictEqual(E.resultaat(metBronnen([{ inkomens: [{ soort: 'vast', salaris: 90000, toekomstig: true, startMaanden: 8 }] }])).oordeel, 'past_niet');
+
 console.log('Alle tests geslaagd');

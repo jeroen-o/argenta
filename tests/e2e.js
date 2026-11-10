@@ -82,6 +82,28 @@ const { chromium } = require('playwright');
   await page.fill('#ink1', '95000');
   await page.fill('#ink2', '');
 
+  // Kredieten: de tool berekent de maandlast per krediet (2% van de limiet)
+  await stap(3);
+  await page.click('#voegKrediet');
+  await page.locator('.krediet [data-crveld=limiet]').fill('10000');
+  assert.ok((await tekst('#kredietUit')).replace(/\s+/g, ' ').includes('Totaal kredieten per maand € 200,00'));
+  await page.click('.krediet [data-crweg]');
+
+  // Verhoging: het blok verschijnt bij het doel verbouwing / verhoging
+  await stap(1);
+  await page.selectOption('#doel', 'verbouwing');
+  await stap(3);
+  assert.ok(await page.isVisible('#verhogingBlok'));
+  await stap(1);
+  await page.selectOption('#doel', 'bestaand');
+
+  // Bouwkundig rapport: herstelkosten boven 10% van de marktwaarde die niet in depot staan geven een afwijzing
+  await page.fill('#herstelkosten', '60000');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('Bouwkundig rapport'));
+  await stap(1);
+  await page.fill('#herstelkosten', '');
+
   // Woningtype en aanvrager: een uitgesloten woningtype en een tijdelijk verblijfsdoel geven een afwijzing
   await stap(1);
   await page.selectOption('#woningtype', 'uitgesloten');
