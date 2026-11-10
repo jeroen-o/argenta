@@ -19,6 +19,15 @@ const { chromium } = require('playwright');
   assert.ok((await tekst('#boom2')).replace(/\s+/g, ' ').includes('Te financieren € 400.000'));
   assert.strictEqual(await page.inputValue('#eigenGeld'), '12.300');
 
+  // Vrije kostenpost: telt mee in de totale kosten en verhoogt het automatisch ingevulde eigen geld
+  await page.click('#voegKosten');
+  await page.locator('.kostenrij [data-kveld=omschrijving]').fill('Bouwkundige keuring');
+  await page.locator('.kostenrij [data-kveld=bedrag]').fill('600');
+  assert.ok((await tekst('#boom2')).replace(/\s+/g, ' ').includes('Bouwkundige keuring € 600'));
+  assert.strictEqual(await page.inputValue('#eigenGeld'), '12.900');
+  await page.click('.kostenrij [data-kweg]');
+  assert.strictEqual(await page.inputValue('#eigenGeld'), '12.300');
+
   // Stap 3: inkomen, rente uit de tariefkaart, JKP
   await stap(3);
   await page.fill('#ink1', '95000');

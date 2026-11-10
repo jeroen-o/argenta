@@ -53,6 +53,9 @@
   .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--tekst); margin: 0; padding: 8px 0; }
   .check input { width: 16px; height: 16px; accent-color: var(--primair); flex: none; }
   .deel { border: 1px solid var(--lijn); border-left: 4px solid var(--accent); border-radius: 6px; padding: 12px; margin-bottom: 10px; background: var(--vlak); }
+  .kostenrij { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(110px, 1fr) auto auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .kostenrij .check { padding: 0; font-size: 13px; }
+  @media (max-width: 600px) { .kostenrij { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
   .deel-kop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
   button { font: inherit; cursor: pointer; border-radius: 6px; padding: 9px 16px; border: 1px solid var(--primair); background: var(--wit); color: var(--primair); }
   button.primair { background: var(--primair); color: var(--wit); font-weight: 600; }
@@ -196,6 +199,11 @@
         <div class="grid" style="margin-top:6px">
           <label class="check"><input type="checkbox" id="nhg"> Nationale Hypotheek Garantie</label>
         </div>
+        <h3>Overige kosten</h3>
+        <div id="overig"></div>
+        <button type="button" id="voegKosten">+ Kostenpost toevoegen</button>
+        <p class="klein-tekst" style="margin:6px 0 0">Vrije kostenposten, bijvoorbeeld bouwkundige keuring, bankgarantie, aankoopmakelaar of boete oude hypotheek. Ze tellen mee in de totale kosten.
+          Vink “kosten van het krediet” aan als de post bij de lening hoort; dan telt hij ook mee in het jaarlijks kostenpercentage (in de opbouw gemarkeerd met *).</p>
         <p class="klein-tekst" style="margin:6px 0 0">Notaris-, taxatie- en advieskosten zijn indicaties; vul de werkelijke bedragen in. Zolang het veld eigen geld niet is aangepast,
           vult de tool het bedrag in dat minimaal nodig is om binnen de marktwaarde te blijven.</p>
       </section>
@@ -495,7 +503,8 @@ function kosten() {
   const levering = (doel === 'bestaand' || doel === 'nieuwbouw' || doel === 'uitkoop') ? F.notLevering : 0;
   const aankoop = ovb + levering;
   const hypKostenExcl = F.notHypotheek + F.taxKosten + F.advKosten;
-  const exclNhg = koopsom + verbouwing + aankoop + hypKostenExcl;
+  const overig = F.overig || [], overigTotaal = overig.reduce((t, o) => t + o.bedrag, 0), overigKrediet = overig.filter(o => o.kredietkosten).reduce((t, o) => t + o.bedrag, 0);
+  const exclNhg = koopsom + verbouwing + aankoop + hypKostenExcl + overigTotaal;
   const mw = F.marktwaarde == null ? koopsom : F.marktwaarde;
   /* Eigen geld niet opgegeven: minimaal benodigd bedrag, wat boven de marktwaarde uitkomt (de NHG-provisie wordt meegefinancierd) */
   const maxLening = nhg ? Math.min(mw, Math.min(NHG.grensEnergie, nhgGrens() + F.maatregelen)) : mw;
@@ -504,7 +513,7 @@ function kosten() {
   const nhgKosten = nhg ? Math.round(Math.max(0, exclNhg - eigen) * (NHG.provisiePct / 100) / (1 - NHG.provisiePct / 100)) : 0;
   const hypKosten = hypKostenExcl + nhgKosten;
   const totaal = exclNhg + nhgKosten;
-  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, hypKosten, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
+  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, hypKosten, overig, overigTotaal, overigKrediet, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
 }
 
 /* Werkelijke bruto maandlast (1e maand) van een leningdeel tegen de toetsrente */
@@ -885,7 +894,7 @@ function bereken() {
     jaren.push({ jaar: j + 1, rest, rente, afl, pm: termijnen[j * 12] });
   }
   const renteTotaal = jaren.reduce((s, j) => s + j.rente, 0);
-  const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten;
+  const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten + k.overigKrediet;
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
@@ -922,7 +931,8 @@ function vlak(inv) {
     doel: w.doel || 'bestaand', koopsom: getal(w.koopsom), marktwaarde: w.marktwaarde == null ? null : getal(w.marktwaarde), label: label < 0 ? 8 : label,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
     verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
-    notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
+    notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
+    overig: (k.overig || []).filter(o => getal(o.bedrag) > 0).map(o => ({ omschrijving: String(o.omschrijving || 'Overige kosten'), bedrag: getal(o.bedrag), kredietkosten: !!o.kredietkosten })), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
     ink1: getal((a[0] || {}).toetsinkomen), ink2: getal((a[1] || {}).toetsinkomen), klant2: a.length > 1, geb1: (a[0] || {}).geboortedatum || '', geb2: (a[1] || {}).geboortedatum || '',
     aftrek: getal(i.aftrekPerJaar), verplichtingen: getal(i.verplichtingenPerMaand), studie: getal(i.studieleningPerMaand), toetsrente: i.toetsrenteKort == null ? REGELS.toetsrenteStandaard : getal(i.toetsrenteKort),
     aow: !!i.aowGerechtigd, alleenstaand: !!i.alleenstaand, regeling: i.regeling || 'geen', regInkomen: getal(i.regelingInkomen), regHuidig: getal(i.huidigeMaandlast),
@@ -989,7 +999,7 @@ function resultaat(inv) {
     totalen: { hoofdsom: r.totaal, hoofdsomInclOverbrugging: r.totaalIncl, marktwaarde: r.mw, ltvPct: rond(r.ltv), tariefklasse: klasseNaam(r.idx), gemiddeldeRentePct: rond(r.gewRente, 3),
       brutoMaandlast: rond(r.maand), looptijdMaanden: r.maanden, jkpPct: rond(r.jkp), renteTotaal: rond(r.renteTotaal, 0), kredietKosten: r.kredietKosten, totaalTeBetalen: rond(r.totaalTeBetalen, 0) },
     grenzen: r.grenzen,
-    kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
+    kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     inkomenstoets: t ? { toetsinkomen: t.inkomen, toetsrentePct: rond(t.gemToets, 3), financieringslastPct: rond(t.pct * 100, 1), methode: t.werkelijk ? 'werkelijke_lasten' : 'annuitair_30_jaar',
       toegestaneMaandlast: rond(t.toegestaan), toetslast: rond(t.toetslast), maximaleHypotheek: rond(t.maxHyp, 0), ruimte: rond(t.ruimte, 0), vrijgesteld: t.vrij.map(([omschrijving, bedrag]) => ({ omschrijving, bedrag })) } : null,
     verloop: r.jaren.map(j => ({ jaar: j.jaar, restschuld: rond(j.rest, 0), rente: rond(j.rente, 0), aflossing: rond(j.afl, 0), brutoMaandlast: rond(j.pm) })),
@@ -1093,6 +1103,7 @@ function boomHtml(r, metHaalbaar) {
   return `<div class="blok">${regel('Koopsom / af te lossen bedrag', fmtEuro0(k.koopsom))}${regel('Verbouwing', fmtEuro0(k.verbouwing))}</div>
     <div class="blok">${regel('Overdrachtsbelasting', fmtEuro0(k.ovb))}${regel('Notariskosten leveringsakte', fmtEuro0(k.levering))}${regel('Kosten aankoop woning', fmtEuro0(k.aankoop), 'som')}</div>
     <div class="blok">${regel('Notariskosten hypotheekakte', fmtEuro0(k.notHyp))}${regel('Taxatiekosten', fmtEuro0(k.tax))}${regel('Advies- en bemiddelingskosten', fmtEuro0(k.adv))}${regel('Nationale Hypotheek Garantie', fmtEuro0(k.nhgKosten))}${regel('Hypotheekkosten', fmtEuro0(k.hypKosten), 'som')}</div>
+    ${k.overig.length ? '<div class="blok">' + k.overig.map(o => regel(o.omschrijving + (o.kredietkosten ? ' *' : ''), fmtEuro0(o.bedrag))).join('') + regel('Overige kosten', fmtEuro0(k.overigTotaal), 'som') + '</div>' : ''}
     <div class="blok groen">${regel('Totale kosten', fmtEuro0(k.totaal))}${regel('Aftrek eigen geld', fmtEuro0(k.eigen))}</div>
     <div class="blok grijs">${regel('Te financieren', fmtEuro0(k.teFinancieren), 'groot')}</div>` +
     (metHaalbaar ? `<div class="blok grijs">${regel('Financieel haalbaar', r.toets ? fmtEuro0(r.toets.maxHyp) : 'vul inkomen in', 'groot')}${regel('Extra ruimte voor EBV', fmtEuro0(r.extraEbv))}</div>` : '');
@@ -1131,7 +1142,8 @@ function leesInvoer() {
     woning: { doel: waarde('doel'), koopsom: euro('koopsom'), marktwaarde: auto.marktwaarde ? null : euro('marktwaarde'), energielabel: ArgentaEngine.LABEL_CODES[+waarde('label')],
       waardebepaling: waarde('taxatie'), funderingsrisico: waarde('fundering') || null, koopstarter: aan('starter'), appartement: aan('appartement'), nhg: aan('nhg') },
     kosten: { verbouwing: euro('verbouwing'), energiemaatregelen: euro('maatregelen'), overdrachtsbelastingPct: +waarde('ovb_pct'), notarisLevering: euro('notLevering'), notarisHypotheek: euro('notHypotheek'),
-      taxatie: euro('taxKosten'), advies: euro('advKosten'), eigenGeld: auto.eigenGeld ? null : euro('eigenGeld') },
+      taxatie: euro('taxKosten'), advies: euro('advKosten'), eigenGeld: auto.eigenGeld ? null : euro('eigenGeld'),
+      overig: overig.map(o => ({ omschrijving: o.omschrijving.trim() || 'Overige kosten', bedrag: o.bedrag, kredietkosten: o.krediet })) },
     aanvragers,
     inkomen: { aftrekPerJaar: euro('aftrek'), verplichtingenPerMaand: euro('verplichtingen'), studieleningPerMaand: euro('studie'), toetsrenteKort: parseDec(waarde('toetsrente')),
       aowGerechtigd: aan('aow'), alleenstaand: aan('alleenstaand'), regeling: waarde('regeling'), regelingInkomen: euro('regInkomen'), huidigeMaandlast: euro('regHuidig') },
@@ -1222,7 +1234,7 @@ function printDocument() {
     ['1. Kredietgever', `${esc(ARGENTA.naam)}<br>${esc(ARGENTA.adres)}`],
     ['2. Kredietbemiddelaar / adviseur', [v('kantoor'), v('adviseur'), v('afmnr') ? 'AFM-vergunningnummer ' + v('afmnr') : ''].filter(Boolean).join('<br>') || '–'],
     ['3. Hoofdkenmerken van de lening', `Bedrag: ${fmtEuro0(r.totaal)}${r.ovb ? ' + overbrugging ' + fmtEuro0(r.ovb.bedrag) : ''}<br>${delenTekst}<br>Totaal te betalen bedrag: ${fmtEuro0(r.totaalTeBetalen)}<br>Aangenomen waarde van de woning: ${fmtEuro0(r.mw)} (verstrekking ${fmtPct(r.ltv, 1)})<br>Zekerheid: recht van eerste hypotheek op de woning${r.nhg ? '; Nationale Hypotheek Garantie' : ''}`],
-    ['4. Rentevoet en andere kosten', `${renteTekst}<br>Jaarlijks kostenpercentage (JKP): ${r.jkp != null ? fmtPct(r.jkp) : '–'}<br>In het JKP opgenomen eenmalige kosten: notariskosten hypotheekakte ${fmtEuro0(k.notHyp)}, taxatie ${fmtEuro0(k.tax)}, advies en bemiddeling ${fmtEuro0(k.adv)}${k.nhgKosten ? ', NHG ' + fmtEuro0(k.nhgKosten) : ''}<br>Niet opgenomen: kosten van de aankoop (overdrachtsbelasting, leveringsakte) en verzekeringen`],
+    ['4. Rentevoet en andere kosten', `${renteTekst}<br>Jaarlijks kostenpercentage (JKP): ${r.jkp != null ? fmtPct(r.jkp) : '–'}<br>In het JKP opgenomen eenmalige kosten: notariskosten hypotheekakte ${fmtEuro0(k.notHyp)}, taxatie ${fmtEuro0(k.tax)}, advies en bemiddeling ${fmtEuro0(k.adv)}${k.nhgKosten ? ', NHG ' + fmtEuro0(k.nhgKosten) : ''}${k.overig.filter(o => o.kredietkosten).map(o => ', ' + esc(o.omschrijving.toLowerCase()) + ' ' + fmtEuro0(o.bedrag)).join('')}<br>Niet opgenomen: kosten van de aankoop (overdrachtsbelasting, leveringsakte), overige kosten die niet bij het krediet horen en verzekeringen`],
     ['5. Frequentie en aantal betalingen', `Maandelijks, ${r.maanden} termijnen`],
     ['6. Bedrag van elke termijn', `${fmtEuro2(r.maand)} bruto in de eerste maand. Het bedrag wijzigt na afloop van de rentevaste periode${r.rijen.some(x => /lin/i.test(x.d.vorm)) ? ' en daalt bij een lineair leningdeel elke maand' : ''}.`],
     ['7. Illustratieve aflossingstabel', 'Zie “Verloop restschuld en maandlasten”.'],
@@ -1390,10 +1402,24 @@ function printDocument() {
 }
 
 /* ---------- Events ---------- */
+const overig = [];
+function tekenOverig() {
+  $('overig').innerHTML = overig.map(o => `<div class="kostenrij" data-kid="${o.id}">
+    <input type="text" data-kveld="omschrijving" placeholder="Omschrijving" aria-label="Omschrijving" value="${esc(o.omschrijving)}">
+    <div class="euro"><span>€</span><input type="text" inputmode="numeric" data-euro data-kveld="bedrag" aria-label="Bedrag" value="${fmtInvoer(o.bedrag)}"></div>
+    <label class="check"><input type="checkbox" data-kveld="krediet"${o.krediet ? ' checked' : ''}> Kosten van het krediet</label>
+    <button type="button" class="klein" data-kweg>Verwijderen</button></div>`).join('');
+}
+
 function verwerk(e) {
   const t = e.target;
   if (t.matches('[data-euro]')) t.value = fmtInvoer(parseEuro(t.value));
   if (e.type === 'input') { if (t.id === 'marktwaarde') auto.marktwaarde = false; if (t.id === 'eigenGeld') auto.eigenGeld = false; }
+  const rij = t.closest('.kostenrij');
+  if (rij && t.dataset.kveld) {
+    const o = overig.find(x => x.id === +rij.dataset.kid), veld = t.dataset.kveld;
+    if (veld === 'bedrag') o.bedrag = parseEuro(t.value); else if (veld === 'krediet') o.krediet = t.checked; else o.omschrijving = t.value;
+  }
   const kaart = t.closest('.deel');
   if (kaart && t.dataset.veld) {
     const d = delen.find(x => x.id === +kaart.dataset.id), veld = t.dataset.veld;
@@ -1412,8 +1438,10 @@ document.addEventListener('change', verwerk);
 document.addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.matches('[data-weg]')) { const id = +t.closest('.deel').dataset.id; delen.splice(delen.findIndex(x => x.id === id), 1); tekenDelen(); toon(); }
+  if (t.matches('[data-kweg]')) { const id = +t.closest('.kostenrij').dataset.kid; overig.splice(overig.findIndex(x => x.id === id), 1); tekenOverig(); toon(); }
   if (t.dataset.naar) naarStap(+t.dataset.naar);
 });
+$('voegKosten').addEventListener('click', () => { overig.push({ id: volgnr++, omschrijving: '', bedrag: 0, krediet: false }); tekenOverig(); toon(); const rijen = document.querySelectorAll('.kostenrij'); rijen[rijen.length - 1].querySelector('input').focus(); });
 $('voegToe').addEventListener('click', () => { delen.forEach(d => { d.auto = false; }); delen.push({ id: volgnr++, vorm: 'ann', bedrag: 0, looptijd: 30, rvp: '10', consumptief: false }); tekenDelen(); toon(); });
 $('print').addEventListener('click', printDocument);
 $('terug').addEventListener('click', () => naarStap(stap - 1));

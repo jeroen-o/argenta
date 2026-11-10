@@ -154,7 +154,8 @@ function kosten() {
   const levering = (doel === 'bestaand' || doel === 'nieuwbouw' || doel === 'uitkoop') ? F.notLevering : 0;
   const aankoop = ovb + levering;
   const hypKostenExcl = F.notHypotheek + F.taxKosten + F.advKosten;
-  const exclNhg = koopsom + verbouwing + aankoop + hypKostenExcl;
+  const overig = F.overig || [], overigTotaal = overig.reduce((t, o) => t + o.bedrag, 0), overigKrediet = overig.filter(o => o.kredietkosten).reduce((t, o) => t + o.bedrag, 0);
+  const exclNhg = koopsom + verbouwing + aankoop + hypKostenExcl + overigTotaal;
   const mw = F.marktwaarde == null ? koopsom : F.marktwaarde;
   /* Eigen geld niet opgegeven: minimaal benodigd bedrag, wat boven de marktwaarde uitkomt (de NHG-provisie wordt meegefinancierd) */
   const maxLening = nhg ? Math.min(mw, Math.min(NHG.grensEnergie, nhgGrens() + F.maatregelen)) : mw;
@@ -163,7 +164,7 @@ function kosten() {
   const nhgKosten = nhg ? Math.round(Math.max(0, exclNhg - eigen) * (NHG.provisiePct / 100) / (1 - NHG.provisiePct / 100)) : 0;
   const hypKosten = hypKostenExcl + nhgKosten;
   const totaal = exclNhg + nhgKosten;
-  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, hypKosten, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
+  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, hypKosten, overig, overigTotaal, overigKrediet, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
 }
 
 /* Werkelijke bruto maandlast (1e maand) van een leningdeel tegen de toetsrente */
@@ -544,7 +545,7 @@ function bereken() {
     jaren.push({ jaar: j + 1, rest, rente, afl, pm: termijnen[j * 12] });
   }
   const renteTotaal = jaren.reduce((s, j) => s + j.rente, 0);
-  const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten;
+  const kredietKosten = k.notHyp + k.tax + k.adv + k.nhgKosten + k.overigKrediet;
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
@@ -581,7 +582,8 @@ function vlak(inv) {
     doel: w.doel || 'bestaand', koopsom: getal(w.koopsom), marktwaarde: w.marktwaarde == null ? null : getal(w.marktwaarde), label: label < 0 ? 8 : label,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
     verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
-    notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
+    notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
+    overig: (k.overig || []).filter(o => getal(o.bedrag) > 0).map(o => ({ omschrijving: String(o.omschrijving || 'Overige kosten'), bedrag: getal(o.bedrag), kredietkosten: !!o.kredietkosten })), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
     ink1: getal((a[0] || {}).toetsinkomen), ink2: getal((a[1] || {}).toetsinkomen), klant2: a.length > 1, geb1: (a[0] || {}).geboortedatum || '', geb2: (a[1] || {}).geboortedatum || '',
     aftrek: getal(i.aftrekPerJaar), verplichtingen: getal(i.verplichtingenPerMaand), studie: getal(i.studieleningPerMaand), toetsrente: i.toetsrenteKort == null ? REGELS.toetsrenteStandaard : getal(i.toetsrenteKort),
     aow: !!i.aowGerechtigd, alleenstaand: !!i.alleenstaand, regeling: i.regeling || 'geen', regInkomen: getal(i.regelingInkomen), regHuidig: getal(i.huidigeMaandlast),
@@ -648,7 +650,7 @@ function resultaat(inv) {
     totalen: { hoofdsom: r.totaal, hoofdsomInclOverbrugging: r.totaalIncl, marktwaarde: r.mw, ltvPct: rond(r.ltv), tariefklasse: klasseNaam(r.idx), gemiddeldeRentePct: rond(r.gewRente, 3),
       brutoMaandlast: rond(r.maand), looptijdMaanden: r.maanden, jkpPct: rond(r.jkp), renteTotaal: rond(r.renteTotaal, 0), kredietKosten: r.kredietKosten, totaalTeBetalen: rond(r.totaalTeBetalen, 0) },
     grenzen: r.grenzen,
-    kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
+    kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     inkomenstoets: t ? { toetsinkomen: t.inkomen, toetsrentePct: rond(t.gemToets, 3), financieringslastPct: rond(t.pct * 100, 1), methode: t.werkelijk ? 'werkelijke_lasten' : 'annuitair_30_jaar',
       toegestaneMaandlast: rond(t.toegestaan), toetslast: rond(t.toetslast), maximaleHypotheek: rond(t.maxHyp, 0), ruimte: rond(t.ruimte, 0), vrijgesteld: t.vrij.map(([omschrijving, bedrag]) => ({ omschrijving, bedrag })) } : null,
     verloop: r.jaren.map(j => ({ jaar: j.jaar, restschuld: rond(j.rest, 0), rente: rond(j.rente, 0), aflossing: rond(j.afl, 0), brutoMaandlast: rond(j.pm) })),
