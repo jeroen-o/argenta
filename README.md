@@ -31,7 +31,10 @@ Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen 
 | `argenta-engine.js` | De rekenkern als module voor koppelingen (gegenereerd uit `index.html`) |
 | `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; de mapping moet nog worden ingevuld |
 | `voorbeelden/aanvraag.json` | Voorbeeldinvoer voor de API |
-| `tests/test.js` | Tests van de rekenkern en de adapter |
+| `tests/test.js`, `tests/e2e.js` | Tests van de rekenkern en de adapter, en een browsertest van de tool |
+| `tools/check_rates.py` | Tariefbewaking: controleert argenta.nl op een nieuwere tariefkaart en verwerkt die met `--update` |
+| `.github/workflows/` | Draait de tests bij elke wijziging en de tariefbewaking elke werkdag |
+| `voorbeelden/voorbeeld-conceptofferte.pdf` | Voorbeeld van de conceptofferte (fictieve cijfers) |
 | `tools/` | Scripts om tarieven, normen en de module bij te werken |
 
 ## API
@@ -48,6 +51,14 @@ python3 tools/export_engine.py
 ```bash
 node tests/test.js
 ```
+
+## Tariefbewaking en tests
+
+- De tool toont een gele balk en de API geeft `tarieven.verouderd: true` als de tariefkaart ouder is dan 14 dagen.
+- `python3 tools/check_rates.py` controleert of argenta.nl een nieuwere tariefkaart of variabele rente heeft; met `--update` wordt die verwerkt.
+- Op GitHub draait dit elke werkdag en volgt bij nieuwe tarieven een pull request. Dat vraagt de repository-instelling
+  "Allow GitHub Actions to create and approve pull requests"; anders maakt de workflow een issue aan.
+- Bij elke push en pull request draaien `tests/test.js` en `tests/e2e.js`, en wordt gecontroleerd dat `argenta-engine.js` gelijk is aan `index.html`.
 
 ## Bijzondere toetsen
 
