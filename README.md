@@ -13,11 +13,22 @@ MUNT Hypotheken (munt.hypotheekbond.nl): een wizard in vier stappen met een rapp
 2. **Kosten** – koopsom, verbouwing, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG, eigen geld → te financieren.
 3. **Kan dit bedrag geleend worden?** – leningdelen met rente uit de tariefkaart, inkomenstoets (leennormen 2027),
    overbrugging; toont financieel haalbaar bedrag, extra ruimte voor EBV, maandlast, totaal te betalen bedrag en JKP.
-4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (6 pagina's A4):
+4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (7 pagina's A4):
    voorblad, toelichting, kosten en maandlast, verloop restschuld per jaar, overzicht volgens de indeling van het ESIS,
    aandachtspunten en het vervolgtraject bij Argenta.
 
 Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`.
+
+## Bijzondere toetsen
+
+| Toets | Invoer | Bron |
+| --- | --- | --- |
+| Werkelijke lasten voor AOW-gerechtigden | stap 3, bijzondere toets | hypotheekgids 5.1.1 |
+| Senioren verhuisregeling | huidige maandlast, inkomen vanaf AOW | hypotheekgids 5.1.1 |
+| Tijdelijk-tekortregeling | geboortedata, inkomen in de tekortperiode | hypotheekgids 5.1.2 |
+| Erfpacht | uitgever, vestigingsdatum, opinie, resterende duur, canon | hypotheekgids 2.4 |
+| VvE | aanwezig, actief/slapend, onderhoud, MJOP, fondsen | stroomschema beoordeling VvE |
+| Dubbele lasten bij overbrugging | maandlast huidige hypotheek, periode, eigen middelen | hypotheekgids 1.8.1 |
 
 ## Eisen aan een hypotheekofferte
 
@@ -66,7 +77,9 @@ Productregels (`REGELS`, `VOORWAARDEN`) en NHG-parameters (`NHG`) staan als cons
 - De inkomenstoets rekent met de normen 2027 (gelden vanaf 1 januari 2027); de normen 2026 zitten er niet in.
 - De toetsrente voor rentevast korter dan 10 jaar is een invoerveld (standaard 5,00%); de AFM stelt deze per kwartaal vast.
 - De NHG-grens is vereenvoudigd getoetst op de hoofdsom, niet op de kosten voor de woning.
-- Niet getoetst: BKR, dubbele lasten bij overbrugging, werkelijke-lastentoets voor AOW-gerechtigden, tijdelijk-tekortregeling,
-  erfpacht- en VvE-beoordeling. Geen netto maandlast.
+- Niet getoetst: BKR en fraudesignalen. Geen netto maandlast.
+- Bijzondere toetsen (werkelijke lasten AOW, senioren verhuisregeling, tijdelijk-tekortregeling, erfpacht, VvE, dubbele lasten)
+  volgen de hypotheekgids en het stroomschema VvE, maar blijven indicatief: de AOW-leeftijd is vast op 67 jaar gezet, de
+  dubbele-lastentoets is een eigen uitwerking (eigen middelen of ruimte in de inkomenstoets) en erfpachtopinies beoordeelt Argenta zelf.
 - Het JKP en het verloop gaan uit van een gelijkblijvende rente over de hele looptijd; de overbrugging telt niet mee.
 - Kostenposten (notaris, taxatie, advies) zijn invulbare indicaties; overdrachtsbelasting alleen 2% of 0%.
