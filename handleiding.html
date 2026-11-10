@@ -41,7 +41,7 @@
   </div>
 </header>
 <nav><div class="in">
-  <a href="#tool">De rekentool</a><a href="#stappen">De vier stappen</a><a href="#uitkomst">De uitkomst lezen</a><a href="#offerte">De conceptofferte</a>
+  <a href="#tool">De rekentool</a><a href="#stappen">De vier stappen</a><a href="#oha">OHA</a><a href="#uitkomst">De uitkomst lezen</a><a href="#offerte">De conceptofferte</a>
   <a href="#api">De API</a><a href="#invoer">Invoer</a><a href="#uitvoer">Uitvoer</a><a href="#hdn">HDN</a><a href="#beheer">Beheer</a><a href="#grenzen">Wat de tool niet doet</a>
 </div></nav>
 <main><div class="in">
@@ -89,6 +89,30 @@
   <p>Hier staat het oordeel, de voorwaarden waaronder het geldt, de meldingen, de tips en de knop voor de conceptofferte.</p>
 </section>
 
+<section id="oha">
+  <h2>Ontslag hoofdelijke aansprakelijkheid (OHA)</h2>
+  <p>Kies in stap 1 het financieringsdoel <b>Ontslag hoofdelijke aansprakelijkheid</b> als één van de geldnemers de woning verlaat en de ander de hypotheek voortzet.</p>
+  <ol>
+    <li><b>Stap 1:</b> vul bij “Restschuld hypotheek + uitkoopsom” het totaal in dat de achterblijvende nodig heeft. Vul bij aanvragers alleen de achterblijvende in, en een nieuwe partner als die mede-schuldenaar wordt.</li>
+    <li><b>Stap 2:</b> notariskosten voor de akte van verdeling, taxatie en advies; overdrachtsbelasting is niet van toepassing.</li>
+    <li><b>Stap 3:</b> voer elk bestaand leningdeel op als “bestaand leningdeel” met de eigen rente, de resterende rentevaste periode en de resterende looptijd. De uitkoop voer je op als nieuw leningdeel tegen de rente van nu. Vul in het blok OHA de oorspronkelijke marktwaarde in en geef aan of er een achterstand is.</li>
+  </ol>
+  <h3>Hoe de tool toetst</h3>
+  <div class="tabel-wrap"><table>
+    <tr><th>Toets</th><th>Werking</th><th>Uitkomst</th></tr>
+    <tr><td>1. Reguliere leennorm</td><td>Zoals bij een nieuwe aanvraag; bestaande leningdelen op resterende looptijd en restschuld, toetsrente naar de resterende rentevaste periode.</td><td>Past: akkoord, de beheertoets is niet nodig.</td></tr>
+    <tr><td>2. Beheertoets NHG</td><td>Werkelijke maandlast tegen het percentage uit de Financieringslasttabel Beheer voor het huishouden na het ontslag (alleenstaand, paar, met of zonder inkomen uit werk, AOW). Toetsrente: de werkelijke rente als die nog minimaal 3 jaar vaststaat, anders het 3-jaarstarief als dat hoger is.</td><td>Past: voorbehoud, met het explainformulier.</td></tr>
+    <tr><td>3. Voorleggen</td><td>Past ook de beheertoets niet, dan kan het alleen na voorleggen aan Argenta, bijvoorbeeld met extra aflossen of een aflossingsvrij deel in box 3.</td><td>Past niet.</td></tr>
+  </table></div>
+  <ul>
+    <li>Aflossingsvrij is bij OHA maximaal 50% van de oorspronkelijke marktwaarde.</li>
+    <li>Een actuele betalingsachterstand maakt het ontslag onmogelijk.</li>
+    <li>De voorwaarden (geen eigenaar meer, woning verlaten, akte van verdeling, overlijdensrisicoverzekering) staan onder “Voorwaarden waaronder deze uitkomst geldt”.</li>
+    <li>De derde stap van Argenta, de toets op werkelijke lasten volgens Nibud, rekent de tool niet door.</li>
+  </ul>
+  <p>In de API: <code>woning.doel: "oha"</code>, bestaande leningdelen met <code>meegenomen: true</code> en het blok <code>oha: { zonderWerk, achterstand, oorspronkelijkeMarktwaarde, kinderen }</code>. De uitvoer bevat dan <code>beheertoets</code>.</p>
+</section>
+
 <section id="uitkomst">
   <h2>De uitkomst lezen</h2>
   <div class="tabel-wrap"><table>
@@ -119,7 +143,7 @@
 <section id="offerte">
   <h2>De conceptofferte</h2>
   <p>De knop <b>Download conceptofferte</b> opent een nieuw venster met het rapport en start het afdrukvenster. Kies daar “Opslaan als PDF” om een bestand te maken. Blokkeert de browser het venster, sta dan pop-ups toe voor de pagina.</p>
-  <p>Het rapport telt 7 pagina's: voorblad, toelichting en gegevens, kosten en maandlast, verloop van de restschuld, een overzicht volgens de indeling van het ESIS, voorwaarden en aandachtspunten, en het vervolgtraject bij Argenta.</p>
+  <p>Het rapport telt 8 pagina's: voorblad, toelichting en gegevens, kosten en maandlast, verloop van de restschuld, een overzicht volgens de indeling van het ESIS, toetsen en voorwaarden, aandachtspunten, en het vervolgtraject bij Argenta.</p>
   <div class="kader">Het rapport is geen renteaanbod, geen bindend aanbod, geen ESIS en geen adviesrapport. Het advies en de onderbouwing leg je apart vast.</div>
 </section>
 
@@ -167,7 +191,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
   <h3>Velden en toegestane waarden</h3>
   <div class="tabel-wrap"><table>
     <tr><th>Veld</th><th>Waarden</th></tr>
-    <tr><td><code>woning.doel</code></td><td><code>bestaand</code>, <code>nieuwbouw</code>, <code>oversluiten</code>, <code>verbouwing</code>, <code>uitkoop</code>, <code>erfpacht</code></td></tr>
+    <tr><td><code>woning.doel</code></td><td><code>bestaand</code>, <code>nieuwbouw</code>, <code>oversluiten</code>, <code>verbouwing</code>, <code>uitkoop</code>, <code>erfpacht</code>, <code>oha</code></td></tr>
     <tr><td><code>woning.marktwaarde</code></td><td>Bedrag; <code>null</code> = gelijk aan de koopsom</td></tr>
     <tr><td><code>woning.energielabel</code></td><td><code>A++++_EPG</code>, <code>A++++</code>, <code>A+++</code>, <code>A+_A++</code>, <code>A</code>, <code>B</code>, <code>C_D</code>, <code>E_F_G</code>, <code>GEEN</code></td></tr>
     <tr><td><code>woning.waardebepaling</code></td><td><code>nwwi</code>, <code>desktop</code>, <code>desktopplus</code></td></tr>
@@ -237,6 +261,7 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
     <tr><th>Wanneer</th><th>Wat</th></tr>
     <tr><td>Nieuwe tariefkaart (meerdere keren per maand)</td><td><code>python3 tools/update_rates.py tarief.txt</code></td></tr>
     <tr><td>Nieuwe leennormen (jaarlijks)</td><td><code>python3 tools/update_normen.py "Bijlage financieringslastnormen JJJJ.xlsx" JJJJ</code></td></tr>
+    <tr><td>Nieuwe NHG-beheertabellen (jaarlijks)</td><td><code>python3 tools/update_beheer.py "vn-nhg-JJJJ-bijlage-5-beheertabellen-excel.xlsx" JJJJ</code></td></tr>
     <tr><td>Nieuwe NHG-grens of hypotheekgids</td><td>Constanten <code>NHG</code>, <code>REGELS</code>, <code>EXTRA</code> en <code>VOORWAARDEN</code> in <code>index.html</code> nalopen</td></tr>
     <tr><td>Controleren of er een nieuwere tariefkaart is</td><td><code>python3 tools/check_rates.py</code>; met <code>--update</code> wordt de nieuwe kaart direct verwerkt. Dit draait ook elke werkdag automatisch op GitHub en maakt dan een pull request.</td></tr>
     <tr><td>Nieuwe toetsrente AFM (per kwartaal)</td><td><code>REGELS.toetsrenteStandaard</code> in <code>index.html</code>. Per dossier kan de adviseur de waarde in stap 3 aanpassen; via de API met <code>inkomen.toetsrenteKort</code>.</td></tr>

@@ -60,12 +60,24 @@ const { chromium } = require('playwright');
   assert.ok(rijen.includes('Annuïtair (meegenomen) € 200.000') && rijen.includes('2,10%'), rijen);
   assert.ok((await tekst('#inkomenBlok')).includes('korter dan 10 jaar, getoetst op de toetsrente van 5,00%'));
 
-  // Conceptofferte: 7 pagina's A4 zonder overloop
+  // Ontslag hoofdelijke aansprakelijkheid: het OHA-blok verschijnt en de toets wordt getoond
+  await stap(1);
+  await page.selectOption('#doel', 'oha');
+  await stap(3);
+  assert.ok(await page.isVisible('#ohaBlok'));
+  assert.ok((await page.locator('.deel').nth(0).innerText()).includes('Bestaand leningdeel'));
+  await stap(4);
+  assert.ok((await tekst('#inkomenBlok')).includes('OHA'));
+  await stap(1);
+  await page.selectOption('#doel', 'bestaand');
+  await stap(4);
+
+  // Conceptofferte: 8 pagina's A4 zonder overloop
   const [rapport] = await Promise.all([page.waitForEvent('popup'), page.click('#print')]);
   await rapport.waitForLoadState();
   await rapport.setViewportSize({ width: 900, height: 1200 });
   const paginas = await rapport.$$eval('.pag', e => e.map(x => Math.round(x.scrollHeight / (x.offsetWidth / 210))));
-  assert.deepStrictEqual(paginas, [297, 297, 297, 297, 297, 297, 297]);
+  assert.deepStrictEqual(paginas, [297, 297, 297, 297, 297, 297, 297, 297]);
 
   // Mobiele breedte: geen horizontale scroll
   await page.setViewportSize({ width: 390, height: 800 });

@@ -13,7 +13,7 @@ MUNT Hypotheken (munt.hypotheekbond.nl): een wizard in vier stappen met een rapp
 2. **Kosten** – koopsom, verbouwing, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG, eigen geld → te financieren.
 3. **Kan dit bedrag geleend worden?** – leningdelen met rente uit de tariefkaart, inkomenstoets (leennormen 2027),
    overbrugging; toont financieel haalbaar bedrag, extra ruimte voor EBV, maandlast, totaal te betalen bedrag en JKP.
-4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (7 pagina's A4):
+4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (8 pagina's A4):
    voorblad, toelichting, kosten en maandlast, verloop restschuld per jaar, overzicht volgens de indeling van het ESIS,
    aandachtspunten en het vervolgtraject bij Argenta.
 
@@ -69,6 +69,7 @@ node tests/test.js
 | Tijdelijk-tekortregeling | geboortedata, inkomen in de tekortperiode | hypotheekgids 5.1.2 |
 | Erfpacht | uitgever, vestigingsdatum, opinie, resterende duur, canon | hypotheekgids 2.4 |
 | VvE | aanwezig, actief/slapend, onderhoud, MJOP, fondsen | stroomschema beoordeling VvE |
+| Ontslag hoofdelijke aansprakelijkheid | doel OHA, bestaande leningdelen, oorspronkelijke marktwaarde | adviseurspagina Argenta OHA, NHG V&N 2027 D.4 en bijlage 5 |
 | Dubbele lasten bij overbrugging | maandlast huidige hypotheek, periode, eigen middelen | hypotheekgids 1.8.1 |
 
 ## Eisen aan een hypotheekofferte
@@ -91,6 +92,7 @@ Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraag
 | Acceptatie | Argenta hypotheekgids | augustus 2026 |
 | Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
 | Kredietgever, aflossen, klachten | Voorwaarden Argenta hypotheek | juli 2025 |
+| Beheertoets (OHA) | NHG Financieringslasttabel Beheer (bijlage 5) | 2027 |
 | NHG-grens, provisie | NHG Voorwaarden en normen 2027-1 (C.2, A.5.3) | 2027: € 500.000 / € 530.000, provisie 0,4% |
 
 Argenta heeft geen API; wijzigingen komen via de nieuwsbrief en de adviseurspagina. Tarieven moeten dus handmatig
