@@ -88,4 +88,18 @@ r = E.resultaat(inv);
 assert.ok(r.totalen.jkpPct > jkp0.totalen.jkpPct);
 assert.strictEqual(r.totalen.kredietKosten, jkp0.totalen.kredietKosten + 4000);
 
+// 12. Ontslag hoofdelijke aansprakelijkheid: eerst de reguliere leennorm, dan de beheertoets NHG op werkelijke lasten
+const ohaInv = ink => ({ woning: { doel: 'oha', koopsom: 300000, marktwaarde: 420000, energielabel: 'C_D' },
+  kosten: { notarisLevering: 900, notarisHypotheek: 0, taxatie: 600, advies: 1500, eigenGeld: 3000 }, aanvragers: [{ geboortedatum: '1984-02-01', toetsinkomen: ink }], inkomen: { alleenstaand: true },
+  leningdelen: [{ vorm: 'ann', bedrag: 220000, looptijd: 23, rentevast: 6, meegenomen: true, rente: 1.9 }, { vorm: 'ann', bedrag: 80000, looptijd: 30, rentevast: 10 }],
+  oha: { oorspronkelijkeMarktwaarde: 380000 }, bkr: { status: 'schoon' } });
+r = E.resultaat(ohaInv(110000)); assert.strictEqual(r.oordeel, 'past');                      // past binnen de reguliere norm
+r = E.resultaat(ohaInv(70000)); assert.strictEqual(r.oordeel, 'voorbehoud');                 // alleen via de beheertoets
+assert.strictEqual(r.beheertoets.tabel, 'alleenstaand'); assert.ok(r.beheertoets.ruimte > 0);
+assert.strictEqual(r.beheertoets.financieringslastPct, E.BEHEER.alleen.regulier.pct[70 - 31][3] / 10);   // toetsrente 2,6% valt in de kolom 2,501-3,000%
+r = E.resultaat(ohaInv(38000)); assert.strictEqual(r.oordeel, 'past_niet');                  // ook de beheertoets niet
+inv = ohaInv(110000); inv.oha.achterstand = true; assert.strictEqual(E.resultaat(inv).oordeel, 'past_niet');
+inv = ohaInv(110000); inv.leningdelen.push({ vorm: 'av', bedrag: 200000, looptijd: 30, rentevast: 10 }); inv.woning.koopsom = 500000; inv.woning.marktwaarde = 600000;
+assert.ok(E.resultaat(inv).afwijzingen.some(t => t.includes('50% van de oorspronkelijke marktwaarde')));   // 200.000 > 50% van 380.000
+
 console.log('Alle tests geslaagd');
