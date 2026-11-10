@@ -65,6 +65,8 @@
     <li><b>Marktwaarde</b> volgt de koopsom totdat je het veld zelf aanpast.</li>
     <li><b>Appartement</b> aangevinkt: je beantwoordt de vragen uit het stroomschema voor de VvE.</li>
     <li><b>Erfpacht</b> aangevinkt: je vult uitgever, vestigingsdatum, erfpachtopinie, resterende duur en canon in.</li>
+    <li><b>Desktop Taxatie:</b> kies je een Calcasa Desktop Taxatie, vul dan de betrouwbaarheidsscore in. Onder 4,0 (met NHG 5,0) is een volledig taxatierapport nodig.</li>
+    <li><b>Verkrijgen volledig eigendom:</b> kies de reden van de verdeling. Het kan alleen bij een echtscheiding, het einde van een geregistreerd partnerschap of samenlevingsverband, of erfopvolging, en zolang de akte van levering niet is ingeschreven.</li>
     <li><b>Nieuwbouw:</b> bij het doel “Aankoop nieuwbouw” vul je grond, meerwerk, minderwerk, bouwrente en aansluitkosten in. De tool telt ze bij de koop-/aanneemsom op tot de marktwaarde en neemt ze mee in de kosten. Zelfbouw zonder aannemer is niet toegestaan; bouwen in eigen beheer met een aannemer wel.</li>
     <li><b>Bouwkundig rapport:</b> vul de directe herstelkosten uit de taxatie in. Zijn die hoger dan 10% van de marktwaarde, of adviseert de taxateur nader onderzoek, dan is een bouwkundig rapport verplicht en moeten de herstelkosten als verbouwing in het bouwdepot staan (stap 2).</li>
     <li><b>Type woning:</b> reguliere woning, woning met bedrijfs- of praktijkruimte (bedrijfsgedeelte minder dan 25% van de marktwaarde), woonboerderij (bestemming Wonen), kangoeroewoning (alleen zonder NHG), garagebox (alleen bij een verhoging) of een uitgesloten type.</li>
@@ -83,6 +85,7 @@
   <h3>Stap 3 – Kan dit bedrag geleend worden?</h3>
   <ul>
     <li><b>Leningdelen:</b> aflosvorm, bedrag, looptijd en rentevaste periode. Bij één leningdeel neemt de tool het te financieren bedrag over. Voeg je een tweede deel toe, dan verdeel je de bedragen zelf.</li>
+    <li><b>Bestaande hypotheek van vóór 17 augustus 2026:</b> zodra een leningdeel als meegenomen of bestaand is aangevinkt, verschijnt dit vinkje. Staat het aan, dan geldt voor aflossingsvrij alleen de grens van 30% van de marktwaarde, zonder het maximum van € 150.000.</li>
     <li><b>Meegenomen leningdeel (verhuisregeling):</b> vink dit aan en vul de meegenomen rente, de resterende rentevaste periode en de resterende looptijd in. Staat de rente nog 10 jaar of langer vast (bijvoorbeeld 12 jaar), dan toetst de tool op de meegenomen rente. Staat de rente korter vast (bijvoorbeeld 5 jaar), dan toetst de tool op de toetsrente van de AFM. Het extra bedrag voer je op als apart leningdeel tegen de rente van nu.</li>
     <li><b>Inkomen en lasten:</b> toetsinkomen per aanvrager, alimentatie, financiële verplichtingen per maand en de studielening. Doorlopend krediet tel je mee voor 2% van de limiet per maand.</li>
     <li><b>Toetsinkomen bepalen uit inkomensbronnen:</b> klap dit blok open en voeg per aanvrager de bronnen toe. De tool berekent dan het toetsinkomen en vult het veld in; zie <a href="#inkomen">Inkomensbepaling</a>. Zonder bronnen geldt het bedrag dat je zelf invult.</li>
@@ -93,7 +96,7 @@
     <li><b>Toetsrente bij rentevast korter dan 10 jaar:</b> staat standaard op 5,00%. De AFM stelt deze elk kwartaal vast; controleer de actuele waarde.</li>
     <li><b>Bijzondere toets:</b> kies hier de toets op werkelijke lasten voor AOW-gerechtigden, de senioren verhuisregeling of de tijdelijk-tekortregeling.</li>
     <li><b>BKR en loon:</b> de uitkomst van de BKR-toets, het aantal contracten en loonbeslag.</li>
-    <li><b>Overbrugging:</b> situatie van de huidige woning, verkoopprijs, restschuld, gewenst bedrag en de gegevens voor de dubbele lasten.</li>
+    <li><b>Overbrugging:</b> situatie van de huidige woning, verkoopprijs, restschuld, gewenst bedrag en de gegevens voor de dubbele lasten. Is er een tweede te verkopen woning, vink dan de tweede overbrugging aan; de tool toetst elk maximum apart en telt de bedragen en lasten op.</li>
   </ul>
   <h3>Stap 4 – Overzicht en conceptofferte</h3>
   <p>Hier staat het oordeel, de voorwaarden waaronder het geldt, de meldingen, de tips en de knop voor de conceptofferte.</p>
@@ -247,6 +250,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>woning.waardebepaling</code></td><td><code>nwwi</code>, <code>desktop</code>, <code>desktopplus</code></td></tr>
     <tr><td><code>woning.woningtype</code></td><td><code>standaard</code>, <code>bedrijfsruimte</code> (met <code>bedrijfsdeelPct</code>), <code>woonboerderij</code> (met <code>bestemmingWonen</code>), <code>kangoeroe</code>, <code>garagebox</code>, <code>uitgesloten</code></td></tr>
     <tr><td><code>woning.herstelkosten</code>, <code>bouwkundigOnderzoekGeadviseerd</code>, <code>bouwkundigeStaatSlecht</code></td><td>Directe herstelkosten volgens de taxatie en twee vinkjes (true/false) voor het bouwkundig rapport</td></tr>
+    <tr><td><code>woning.desktopBetrouwbaarheid</code></td><td>Score van de Desktop Taxatie; 0 of weglaten = nog niet bekend (wordt dan een voorwaarde)</td></tr>
     <tr><td><code>woning.funderingsrisico</code></td><td><code>A</code> t/m <code>E</code>; <code>null</code> = nog niet bekend (wordt dan een voorwaarde)</td></tr>
     <tr><td><code>aanvragers[].verblijf</code></td><td><code>nl</code>, <code>eu</code>, <code>onbepaald</code>, <code>niettijdelijk</code>, <code>tijdelijk</code></td></tr>
     <tr><td><code>aanvragers[].inkomens</code></td><td>Lijst met inkomensbronnen; staat er minstens één, dan vervangt het berekende bedrag <code>toetsinkomen</code>. Elke bron heeft een <code>soort</code>: <code>vast</code>, <code>ibl</code>, <code>flex</code>, <code>perspectief</code>, <code>onderneming</code>, <code>pensioen</code>, <code>uitkeringBlijvend</code>, <code>uitkeringTijdelijk</code>, <code>alimentatie</code>, <code>vermogen</code>, <code>lijfrente</code>, <code>pgb</code> (met <code>bestaandeKlant</code>), <code>bijzonder</code>.<br>
@@ -268,6 +272,9 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>erfpacht</code></td><td><code>null</code> of <code>{ uitgever: overheid|particulier, vestiging: voor2013|2013|na2014, opinie: groen|oranje|rood|geen, resterendeDuur, canonPerJaar }</code></td></tr>
     <tr><td><code>vve</code></td><td><code>null</code> of <code>{ aanwezig: ja|oprichting|nee, actief, onderhoudGoed, mjopVoldoende, fondsenToereikend }</code> (laatste vier: true/false). Ontbreekt dit bij een appartement, dan volgt een voorbehoud.</td></tr>
     <tr><td><code>overbrugging</code></td><td><code>null</code> of <code>{ situatie: a|b|c|d, waarde, restschuld, bedrag, maandlastHuidig, maanden, eigenMiddelen }</code>. a = verkocht en voorwaarden verstreken, b = verkocht en voorwaarden niet verstreken, c = onverkocht met taxatie, d = onverkocht met desktoptaxatie.</td></tr>
+    <tr><td><code>overbruggingenExtra</code></td><td>Lijst met extra overbruggingen naast <code>overbrugging</code>: <code>[{ situatie, waarde, restschuld, bedrag, maandlastHuidig }]</code></td></tr>
+    <tr><td><code>bestaandeHypotheek</code></td><td><code>{ aangevraagdVoor17Augustus2026 }</code> (true/false); bepaalt de grens voor aflossingsvrij bij een verhoging of verhuisregeling</td></tr>
+    <tr><td><code>verdeling</code></td><td>Bij <code>woning.doel: "uitkoop"</code>: <code>{ reden: echtscheiding|partnerschap|samenleving|erfopvolging|anders, akteIngeschreven }</code>. Ontbreekt de reden, dan volgt een voorbehoud.</td></tr>
     <tr><td><code>bkr.status</code></td><td><code>onbekend</code>, <code>schoon</code>, <code>negatief</code>, <code>hy2</code>, <code>hy</code>, <code>herstelA2</code>, <code>herstelA0</code></td></tr>
   </table></div>
 </section>
@@ -293,7 +300,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>inkomenstoets</code></td><td><code>toetsinkomen</code>, <code>toetsrentePct</code>, <code>financieringslastPct</code>, <code>methode</code> (<code>annuitair_30_jaar</code> of <code>werkelijke_lasten</code>), <code>toegestaneMaandlast</code>, <code>toetslast</code>, <code>maximaleHypotheek</code>, <code>ruimte</code>, <code>vrijgesteld</code>. <code>null</code> als er geen inkomen is opgegeven.</td></tr>
     <tr><td><code>beheertoets</code></td><td>Alleen bij OHA: <code>tabel</code>, <code>toetsinkomen</code>, <code>toetsrentePct</code>, <code>financieringslastPct</code>, <code>toegestaneMaandlast</code>, <code>werkelijkeLast</code>, <code>ruimte</code>, <code>laagsteLast</code>, <code>ruimteLaagsteLast</code>, <code>vermogenInMindering</code>, <code>budgettoets</code></td></tr>
     <tr><td><code>tijdelijkTweeHypotheken</code></td><td><code>restschuld</code>, <code>rentePct</code>, <code>rentePerMaand</code>, <code>tariefklasse</code>; <code>null</code> als het niet van toepassing is</td></tr>
-    <tr><td><code>overbrugging</code></td><td><code>bedrag</code>, <code>maximaal</code>, <code>rentePct</code>, <code>brutoMaandlast</code>, <code>looptijdMaanden</code>; <code>null</code> zonder overbrugging</td></tr>
+    <tr><td><code>overbrugging</code></td><td><code>aantal</code>, <code>bedrag</code>, <code>maximaal</code>, <code>rentePct</code>, <code>brutoMaandlast</code>, <code>looptijdMaanden</code>; <code>null</code> zonder overbrugging</td></tr>
     <tr><td><code>verloop</code></td><td>Per jaar: <code>jaar</code>, <code>restschuld</code>, <code>rente</code>, <code>aflossing</code>, <code>brutoMaandlast</code></td></tr>
     <tr><td><code>aandachtspunten</code>, <code>tips</code></td><td>De meldingen “Let op” en de rekenkundige tips</td></tr>
     <tr><td><code>tarieven</code></td><td>Tariefbewaking: datum van de tariefkaart, <code>leeftijdDagen</code> en <code>verouderd</code> (true na 14 dagen) met een <code>melding</code>. Toon de melding in eBlinqx als <code>verouderd</code> waar is.</td></tr>

@@ -123,6 +123,36 @@ const { chromium } = require('playwright');
   await page.uncheck('#tweeHyp');
   await stap(1);
 
+  // Verkrijgen volledig eigendom: de reden is verplicht; 'anders' geeft een afwijzing
+  await page.selectOption('#doel', 'uitkoop');
+  assert.ok(await page.isVisible('#verdelingVeld'));
+  await page.selectOption('#verdelingReden', 'anders');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('Volledig eigendom'));
+  await stap(1);
+  await page.selectOption('#doel', 'bestaand');
+
+  // Desktop Taxatie: een te lage betrouwbaarheid geeft een afwijzing
+  await page.selectOption('#taxatie', 'desktop');
+  await page.fill('#desktopScore', '3,5');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('betrouwbaarheid van de Desktop Taxatie is 3,5'));
+  await stap(1);
+  await page.selectOption('#taxatie', 'nwwi');
+
+  // Tweede overbrugging: het totaal telt beide overbruggingen
+  await stap(3);
+  await page.check('#ovbAan');
+  await page.fill('#ovbWaarde', '350000'); await page.fill('#ovbRestschuld', '200000'); await page.fill('#ovbBedrag', '100000');
+  await page.check('#ovb2Aan');
+  await page.fill('#ovb2Waarde', '200000'); await page.fill('#ovb2Restschuld', '100000'); await page.fill('#ovb2Bedrag', '50000');
+  await stap(4);
+  assert.ok((await tekst('#resRijen')).replace(/\s+/g, ' ').includes('Overbrugging € 150.000'));
+  await stap(3);
+  await page.uncheck('#ovb2Aan');
+  await page.uncheck('#ovbAan');
+  await stap(1);
+
   // Bouwkundig rapport: herstelkosten boven 10% van de marktwaarde die niet in depot staan geven een afwijzing
   await page.fill('#herstelkosten', '60000');
   await stap(4);
@@ -153,6 +183,15 @@ const { chromium } = require('playwright');
   assert.ok((await tekst('#inkomenBlok')).includes('OHA'));
   await stap(1);
   await page.selectOption('#doel', 'bestaand');
+  await stap(4);
+
+  // Regressie: een meegenomen leningdeel met een looptijd korter dan 5 jaar weer uitvinken mag de tool niet laten vastlopen
+  await stap(3);
+  await page.locator('.deel').nth(0).locator('[data-veld=looptijd]').selectOption('3');
+  await page.locator('.deel').nth(0).locator('[data-veld=meegenomen]').uncheck();
+  assert.strictEqual(await page.locator('.deel').nth(0).locator('[data-veld=looptijd]').inputValue(), '5');
+  await page.locator('.deel').nth(0).locator('[data-veld=meegenomen]').check();
+  await page.locator('.deel').nth(0).locator('[data-veld=rente]').fill('2,10');
   await stap(4);
 
   // Conceptofferte: 9 pagina's A4 zonder overloop

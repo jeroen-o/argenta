@@ -222,4 +222,34 @@ r = type({ klant: { overnameStarterslening: true } }); assert.strictEqual(r.oord
 assert.strictEqual(type({ woning: { woningtype: 'garagebox' } }).oordeel, 'past_niet');             // alleen bij een verhoging
 inv = verhoging(20000); inv.woning.woningtype = 'garagebox'; assert.strictEqual(E.resultaat(inv).oordeel, 'past');
 
+// 25. Aflossingsvrij bij een bestaande hypotheek van voor 17 augustus 2026 (hypotheekgids 1.6.3): alleen 30%, zonder het maximum van 150.000
+const metAv = oud => { const i = verhoging(20000); i.woning.marktwaarde = 700000; i.woning.koopsom = 200000; i.aanvragers[0].toetsinkomen = 150000; i.woning.waardebepaling = 'nwwi';
+  i.leningdelen = [{ vorm: 'av', bedrag: 180000, looptijd: 20, rentevast: 10, meegenomen: true, rente: 3 }, { vorm: 'ann', bedrag: 20000, looptijd: 22, rentevast: 10, meegenomen: true, rente: 3 }, { vorm: 'ann', bedrag: 20000, looptijd: 30, rentevast: 10 }];
+  i.bestaandeHypotheek = { aangevraagdVoor17Augustus2026: oud }; return E.resultaat(i); };
+assert.ok(metAv(false).afwijzingen.some(t => t.includes('150.000')));        // nieuwe regel: 180.000 is meer dan 150.000
+assert.ok(!metAv(true).afwijzingen.some(t => t.includes('Aflossingsvrij')));   // oude regel: 30% van 700.000 = 210.000
+assert.strictEqual(metAv(true).grenzen.maximaalAflossingsvrij, 210000);
+
+// 26. Meerdere overbruggingen (hypotheekgids 1.8)
+inv = basis(); inv.aanvragers = [{ toetsinkomen: 250000 }];
+inv.overbrugging = { situatie: 'a', waarde: 350000, restschuld: 200000, bedrag: 100000, maandlastHuidig: 900, maanden: 12, eigenMiddelen: 60000 };
+inv.overbruggingenExtra = [{ situatie: 'c', waarde: 200000, restschuld: 100000, bedrag: 80000, maandlastHuidig: 400 }];
+r = E.resultaat(inv);
+assert.strictEqual(r.overbrugging.aantal, 2); assert.strictEqual(r.overbrugging.bedrag, 180000);
+assert.strictEqual(r.overbrugging.maximaal, 143525 + 90000);                                           // 100% - 1,85% - restschuld, plus 95% - restschuld
+inv.overbruggingenExtra[0].bedrag = 95000; assert.ok(E.resultaat(inv).afwijzingen.some(t => t.includes('Overbrugging 2 is maximaal')));
+
+// 27. Betrouwbaarheid van de Desktop Taxatie (hypotheekgids 2.1.3)
+const desktop = (score, nhg) => { const i = basis(); i.woning.waardebepaling = 'desktop'; i.woning.marktwaarde = 450000; i.woning.koopsom = 450000; i.kosten.eigenGeld = 82300; i.woning.desktopBetrouwbaarheid = score; i.woning.nhg = !!nhg; return E.resultaat(i); };
+assert.strictEqual(desktop(4.2).oordeel, 'past');
+assert.strictEqual(desktop(3.8).oordeel, 'past_niet');
+assert.ok(desktop(4.5, true).afwijzingen.some(t => t.includes('betrouwbaarheid')));                    // met NHG minimaal 5,0
+
+// 28. Verkrijgen van volledig eigendom (hypotheekgids 2.5)
+const uitkoop = v => { const i = basis(); i.woning.doel = 'uitkoop'; i.kosten.overdrachtsbelastingPct = 0; i.kosten.eigenGeld = 24300; i.verdeling = v; return E.resultaat(i); };
+assert.strictEqual(uitkoop({ reden: 'echtscheiding' }).oordeel, 'past');
+assert.strictEqual(uitkoop({ reden: 'anders' }).oordeel, 'past_niet');
+assert.strictEqual(uitkoop({ reden: 'erfopvolging', akteIngeschreven: true }).oordeel, 'past_niet');
+assert.strictEqual(uitkoop(null).oordeel, 'voorbehoud');
+
 console.log('Alle tests geslaagd');
