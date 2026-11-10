@@ -224,6 +224,11 @@
           <label class="check"><input type="checkbox" id="vergunningNodig"> Verbouwing is vergunningsplichtig</label>
           <label class="check" id="vergunningAanwezigVeld" hidden><input type="checkbox" id="vergunningAanwezig"> Omgevingsvergunning is aanwezig</label>
         </div>
+        <div id="voorzieningenBlok" hidden>
+          <h3>Energiebesparende voorzieningen</h3>
+          <div class="grid" id="voorzieningen"></div>
+          <p class="klein-tekst" style="margin:4px 0 0">De voorzieningen waarvoor de extra leenruimte en groen lenen bedoeld zijn (artikel 1 van de Tijdelijke regeling hypothecair krediet).</p>
+        </div>
         <h3>Overige kosten</h3>
         <div id="overig"></div>
         <button type="button" id="voegKosten">+ Kostenpost toevoegen</button>
@@ -784,6 +789,16 @@ function bepaalInkomens(lijst, nhg, leningrente) {
   return { per, fouten, letop, voorwaarden, voorbehoud };
 }
 
+/* Energiebesparende voorzieningen volgens artikel 1 van de Tijdelijke regeling hypothecair krediet */
+const VOORZIENINGEN = {
+  gevel: { naam: 'Gevelisolatie' }, dak: { naam: 'Dakisolatie' }, vloer: { naam: 'Vloerisolatie' }, leiding: { naam: 'Leidingisolatie' },
+  glas: { naam: 'Hoogrendementsbeglazing (ten minste HR++)' },
+  kozijnen: { naam: 'Energiezuinige deuren en kozijnen', met: 'glas', voorwaarde: 'alleen in combinatie met HR++ beglazing' },
+  douche: { naam: 'Douche-warmteterugwinning' },
+  ventilatie: { naam: 'Energiezuinig ventilatiesysteem', metAndere: true, voorwaarde: 'alleen in combinatie met andere voorzieningen' },
+  warmtepomp: { naam: 'Warmtepomp' }, zonnecellen: { naam: 'Zonnecellen' }
+};
+
 /* Maandlast van financiële verplichtingen per krediet (hypotheekgids 6.3) */
 const KREDIET_SOORTEN = {
   RK: { naam: 'Doorlopend krediet (RK)', regel: 'limiet' }, VK: { naam: 'Verzendhuiskrediet (VK)', regel: 'limiet' },
@@ -848,8 +863,9 @@ function inkomenstoets(rijen, totaal, labelIdx) {
   const toetsKort = F.toetsrente;
   const inkomen = Math.max(0, Math.max(i1, i2) * NORMEN.factorHoog + Math.min(i1, i2) * NORMEN.factorLaag - F.aftrek - (F.erfpachtgrond ? F.epCanon : 0));
   /* Rentevast korter dan 10 jaar: de AFM-toetsrente, behalve als het leningdeel aan het einde van de rentevaste periode is afgelost (hypotheekgids 1.2.2) */
-  rijen.forEach(x => { const afgelost = x.d.rvp !== 'var' && x.d.vorm !== 'av' && x.d.looptijd <= +x.d.rvp; x.afgelostBinnenRvp = afgelost && +x.d.rvp < 10; x.toets = (x.d.rvp === 'var' || (+x.d.rvp < 10 && !afgelost)) ? toetsKort : (x.rente || 0); });
-  const gemToets = rijen.reduce((s, x) => s + x.toets * x.d.bedrag, 0) / totaal;
+  rijen.forEach(x => { const afgelost = x.d.rvp !== 'var' && x.d.vorm !== 'av' && x.d.looptijd <= +x.d.rvp; x.afgelostBinnenRvp = afgelost && +x.d.rvp < 10; x.toets = (x.d.rvp === 'var' || (+x.d.rvp < 10 && !afgelost)) ? Math.max(toetsKort, x.rente || 0) : (x.rente || 0); });
+  const gewicht = x => x.d.bedrag * Math.min(30, x.d.looptijd), gewichtTotaal = rijen.reduce((s, x) => s + gewicht(x), 0);
+  const gemToets = gewichtTotaal > 0 ? rijen.reduce((s, x) => s + x.toets * gewicht(x), 0) / gewichtTotaal : 0;
   const kol = normKolom(gemToets);
   const pctBox3 = normPct(aow ? 'box3welAOW' : 'box3nietAOW', inkomen, kol);
   /* Buitenlands belastingplichtig (hypotheekgids 6.4): de tabel voor fiscaal niet-aftrekbare leningen */
@@ -962,6 +978,16 @@ function bereken() {
     else if (av > maxAv) fouten.push(avOudeRegel ? `Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde (hypotheek aangevraagd voor 17 augustus 2026): hier ${fmtEuro0(maxAv)}.` : `Aflossingsvrij is maximaal ${REGELS.avMaxPct}% van de marktwaarde en maximaal ${fmtEuro0(REGELS.avMaxBedrag)} (laagste van de 2): hier ${fmtEuro0(maxAv)}.`);
     if (avOudeRegel) letop.push(`Aflossingsvrij: omdat de bestaande hypotheek voor 17 augustus 2026 is aangevraagd geldt alleen de grens van ${REGELS.avMaxPct}% van de marktwaarde; het bestaande aflossingsvrije deel kan ongewijzigd doorlopen als de verhoging annuïtair of lineair is.`);
     if (taxatie === 'desktop') fouten.push('Bij een aflossingsvrij leningdeel is een Calcasa Desktop Taxatie Plus of volledige taxatie verplicht.');
+  }
+  /* Energiebesparende voorzieningen: de extra leenruimte en groen lenen zijn alleen voor de voorzieningen uit de regeling */
+  if (energie > 0) {
+    const gekozen = F.voorzieningen;
+    if (!gekozen.length) voorwaarden.push('Het bedrag voor energiebesparende maatregelen wordt besteed aan voorzieningen uit de Tijdelijke regeling hypothecair krediet: ' + Object.keys(VOORZIENINGEN).map(c => VOORZIENINGEN[c].naam.toLowerCase() + (VOORZIENINGEN[c].voorwaarde ? ' (' + VOORZIENINGEN[c].voorwaarde + ')' : '')).join(', ') + '.');
+    else {
+      if (gekozen.indexOf('kozijnen') !== -1 && gekozen.indexOf('glas') === -1) fouten.push('Energiebesparende voorzieningen: energiezuinige deuren en kozijnen tellen alleen mee in combinatie met HR++ beglazing.');
+      if (gekozen.indexOf('ventilatie') !== -1 && gekozen.length === 1) fouten.push('Energiebesparende voorzieningen: een energiezuinig ventilatiesysteem telt alleen mee in combinatie met andere energiebesparende voorzieningen.');
+      voorwaarden.push('De energiebesparende maatregelen bestaan uit: ' + gekozen.map(c => VOORZIENINGEN[c].naam.toLowerCase()).join(', ') + '; de kosten zijn aantoonbaar met het taxatierapport of het bouwkundig rapport.');
+    }
   }
   if (groen > 0) {
     if (groen > REGELS.groenMax) fouten.push(`Argenta groen lenen is maximaal ${fmtEuro0(REGELS.groenMax)}.`);
@@ -1122,7 +1148,8 @@ function bereken() {
     if (F.ohaPensioen > 0) inkBeheer = Math.min(inkBeheer, F.ohaPensioen);
     const inkomen = Math.max(0, inkBeheer - F.aftrek);
     if (inkomen > 0 && totaal > 0) {
-      const gem = Math.round(rijen.reduce((t, x) => t + beheerRente(x) * x.d.bedrag, 0) / totaal * 1000) / 1000, kol = normKolom(gem);
+      const gewichtB = x => x.d.bedrag * Math.min(30, x.d.looptijd), gewichtBTotaal = rijen.reduce((t, x) => t + gewichtB(x), 0);
+      const gem = Math.round(rijen.reduce((t, x) => t + beheerRente(x) * gewichtB(x), 0) / gewichtBTotaal * 1000) / 1000, kol = normKolom(gem);
       const pct = beheerPct('regulier', inkomen, kol), pct3 = beheerPct('box3', inkomen, kol), canon = erfpacht ? F.epCanon / 12 : 0;
       const weeg = x => x.d.consumptief ? pct / pct3 : 1;
       const toegestaan = inkomen * pct / 12 - F.verplichtingen - F.studie;
@@ -1466,7 +1493,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.6.0';
+const VERSIE = '1.7.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -1488,7 +1515,7 @@ function vlak(inv) {
     desktopScore: getal(w.desktopBetrouwbaarheid), oudeHypotheek: !!(inv.bestaandeHypotheek || {}).aangevraagdVoor17Augustus2026,
     verdelingReden: (inv.verdeling || {}).reden || '', verdelingIngeschreven: !!(inv.verdeling || {}).akteIngeschreven,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
-    verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
+    verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), voorzieningen: (k.energievoorzieningen || []), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
     notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
     overig: (k.overig || []).filter(o => getal(o.bedrag) > 0).map(o => ({ omschrijving: String(o.omschrijving || 'Overige kosten'), bedrag: getal(o.bedrag), kredietkosten: !!o.kredietkosten })), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
     aantalAanvragers: a.length, verblijf: [(a[0] || {}).verblijf || 'nl', (a[1] || {}).verblijf || 'nl'], woningtype: w.woningtype || 'standaard', bedrijfsdeel: getal(w.bedrijfsdeelPct), bestemmingWonen: w.bestemmingWonen !== false,
@@ -1523,6 +1550,7 @@ function controleer(inv) {
   const f = [];
   const kies = (naam, waarde, lijst) => { if (waarde != null && lijst.indexOf(waarde) === -1) f.push(`${naam}: onbekende waarde "${waarde}" (toegestaan: ${lijst.join(', ')})`); };
   const w = inv.woning || {};
+  ((inv.kosten || {}).energievoorzieningen || []).forEach((c, n) => kies(`kosten.energievoorzieningen[${n}]`, c, Object.keys(VOORZIENINGEN)));
   kies('woning.doel', w.doel, ['bestaand', 'nieuwbouw', 'oversluiten', 'verbouwing', 'uitkoop', 'erfpacht', 'oha']);
   kies('woning.energielabel', w.energielabel, LABEL_CODES);
   kies('woning.waardebepaling', w.waardebepaling, ['nwwi', 'desktop', 'desktopplus']);
@@ -1599,10 +1627,10 @@ function resultaat(inv) {
   };
 }
 
-return { VERSIE, RATES, NORMEN, BEHEER, INKOMEN_SOORTEN, KREDIET_SOORTEN, REGELS, NHG, VORMEN, LABELS, LABEL_CODES, VOORWAARDEN, OORDEEL_TEKST, fmtEuro0, fmtEuro2, fmtPct, klasseNaam, beoordeel, resultaat, tariefStatus };
+return { VERSIE, RATES, NORMEN, BEHEER, INKOMEN_SOORTEN, KREDIET_SOORTEN, VOORZIENINGEN, REGELS, NHG, VORMEN, LABELS, LABEL_CODES, VOORWAARDEN, OORDEEL_TEKST, fmtEuro0, fmtEuro2, fmtPct, klasseNaam, beoordeel, resultaat, tariefStatus };
 })();
 /*ENGINE_END*/
-const { RATES, NORMEN, REGELS, NHG, VORMEN, LABELS, VOORWAARDEN, INKOMEN_SOORTEN, KREDIET_SOORTEN, fmtEuro0, fmtEuro2, fmtPct, klasseNaam } = ArgentaEngine;
+const { RATES, NORMEN, REGELS, NHG, VORMEN, LABELS, VOORWAARDEN, INKOMEN_SOORTEN, KREDIET_SOORTEN, VOORZIENINGEN, fmtEuro0, fmtEuro2, fmtPct, klasseNaam } = ArgentaEngine;
 
 /* Kredietgever: bron voorwaarden Argenta hypotheek, juli 2025 (begrippenlijst en hoofdstuk 8) */
 const ARGENTA = {
@@ -1733,7 +1761,7 @@ function leesInvoer() {
   return {
     woning: { doel: waarde('doel'), koopsom: euro('koopsom'), marktwaarde: auto.marktwaarde ? null : euro('marktwaarde'), energielabel: ArgentaEngine.LABEL_CODES[+waarde('label')],
       waardebepaling: waarde('taxatie'), taxatiedatum: waarde('taxatiedatum') || null, marktwaardeVoorVerbouwing: euro('mwVoorVerbouwing'), verbouwingVergunningsplichtig: aan('vergunningNodig'), vergunningAanwezig: aan('vergunningAanwezig'), desktopBetrouwbaarheid: waarde('taxatie') !== 'nwwi' ? parseDec(waarde('desktopScore')) : 0, funderingsrisico: waarde('fundering') || null, woningtype: waarde('woningtype'), herstelkosten: euro('herstelkosten'), bouwkundigOnderzoekGeadviseerd: aan('bouwkundigOnderzoek'), bouwkundigeStaatSlecht: aan('bouwkundigSlecht'), bedrijfsdeelPct: parseEuro(waarde('bedrijfsdeel')), bestemmingWonen: aan('bestemmingWonen'), koopstarter: aan('starter'), appartement: aan('appartement'), nhg: aan('nhg') },
-    kosten: { verbouwing: euro('verbouwing'), energiemaatregelen: euro('maatregelen'), overdrachtsbelastingPct: +waarde('ovb_pct'), notarisLevering: euro('notLevering'), notarisHypotheek: euro('notHypotheek'),
+    kosten: { verbouwing: euro('verbouwing'), energiemaatregelen: euro('maatregelen'), energievoorzieningen: Array.from(document.querySelectorAll('#voorzieningen input:checked')).map(el => el.value), overdrachtsbelastingPct: +waarde('ovb_pct'), notarisLevering: euro('notLevering'), notarisHypotheek: euro('notHypotheek'),
       taxatie: euro('taxKosten'), advies: euro('advKosten'), eigenGeld: auto.eigenGeld ? null : euro('eigenGeld'),
       overig: overig.map(o => ({ omschrijving: o.omschrijving.trim() || 'Overige kosten', bedrag: o.bedrag, kredietkosten: o.krediet })) },
     aanvragers,
@@ -1767,6 +1795,7 @@ function toon() {
   $('desktopScoreVeld').hidden = $('taxatie').value === 'nwwi';
   $('verdelingVeld').hidden = $('doel').value !== 'uitkoop';
   $('verdelingIngeschrevenVeld').hidden = $('doel').value !== 'uitkoop';
+  $('voorzieningenBlok').hidden = !(euro('maatregelen') > 0 || delen.some(d => VORMEN[d.vorm].groen));
   $('consVelden').hidden = !delen.some(d => d.consumptief);
   $('vergunningAanwezigVeld').hidden = !$('vergunningNodig').checked;
   $('oudeHypotheekVeld').hidden = !delen.some(d => d.meegenomen) || $('doel').value === 'oha';
@@ -2182,6 +2211,7 @@ $('verder').addEventListener('click', () => naarStap(stap + 1));
 $('datumVast').textContent = RATES.datumVast;
 $('datumVar').textContent = RATES.datumVariabel;
 $('normJaar').textContent = NORMEN.jaar;
+$('voorzieningen').innerHTML = Object.entries(VOORZIENINGEN).map(([c, v]) => `<label class="check"><input type="checkbox" value="${c}"> ${esc(v.naam)}${v.voorwaarde ? ' <span class="klein-tekst">(' + esc(v.voorwaarde) + ')</span>' : ''}</label>`).join('');
 $('toetsrente').value = REGELS.toetsrenteStandaard.toLocaleString('nl-NL', { minimumFractionDigits: 2 });
 const tariefNu = ArgentaEngine.tariefStatus();
 if (tariefNu.verouderd) { $('tariefBanner').hidden = false; $('tariefBanner').textContent = tariefNu.melding; }

@@ -171,6 +171,20 @@ const { chromium } = require('playwright');
   await page.fill('#mwVoorVerbouwing', '');
   await stap(1);
 
+  // Energiebesparende voorzieningen: het blok verschijnt bij een bedrag; deuren en kozijnen zonder HR++ glas geven een afwijzing
+  await stap(2);
+  await page.fill('#verbouwing', '12000');
+  await page.fill('#maatregelen', '10000');
+  assert.ok(await page.isVisible('#voorzieningenBlok'));
+  await page.check('#voorzieningen input[value=kozijnen]');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('alleen mee in combinatie met HR++ beglazing'));
+  await stap(2);
+  await page.uncheck('#voorzieningen input[value=kozijnen]');
+  await page.fill('#verbouwing', '');
+  await page.fill('#maatregelen', '');
+  await stap(1);
+
   // Bouwkundig rapport: herstelkosten boven 10% van de marktwaarde die niet in depot staan geven een afwijzing
   await page.fill('#herstelkosten', '60000');
   await stap(4);

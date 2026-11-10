@@ -6,8 +6,8 @@ const basis = () => JSON.parse(JSON.stringify(require('../voorbeelden/aanvraag.j
 
 // 1. Nibud-rekenhulp 2027: € 75.000 inkomen, toetsrente 4,25% -> 25,9% en € 329.054 (label E/F/G, geen extra's)
 let inv = basis();
-inv.woning.energielabel = 'E_F_G'; inv.aanvragers = [{ toetsinkomen: 75000 }]; inv.inkomen.studieleningPerMaand = 0; inv.inkomen.toetsrenteKort = 4.25;
-inv.leningdelen = [{ vorm: 'ann', bedrag: 300000, looptijd: 30, rentevast: 1 }];
+inv.woning.energielabel = 'E_F_G'; inv.aanvragers = [{ toetsinkomen: 75000 }]; inv.inkomen.studieleningPerMaand = 0;
+inv.leningdelen = [{ vorm: 'ann', bedrag: 300000, looptijd: 30, rentevast: 10, meegenomen: true, rente: 4.25 }];   // rente 10 jaar vast: toets op 4,25%
 let r = E.resultaat(inv);
 assert.strictEqual(r.inkomenstoets.financieringslastPct, 25.9);
 assert.strictEqual(r.inkomenstoets.maximaleHypotheek, 329054);
@@ -287,5 +287,20 @@ assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, m
 assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, maandenInDienst: 40 }, { soort: 'vast', salaris: 15000, maandenInDienst: 18 }] }]), [75000, 0]);
 assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000 }, { soort: 'bijzonder', alfahulp: true, jaar1: 9000, jaar2: 9000, jaar3: 9000 }] }]), [60000, 9000].reduce((a, b) => [a[0] + b, 0], [0, 0]));
 assert.strictEqual(E.resultaat(metBronnen([{ inkomens: [{ soort: 'vast', salaris: 90000 }, { soort: 'bijzonder', alfahulp: true, minderDan4Dagen: false, jaar1: 9000, jaar2: 9000, jaar3: 9000 }] }])).oordeel, 'past_niet');
+
+// 34. Toetsrente volgens de regeling (art. 3 lid 9 en 11): de AFM-toetsrente of de aangeboden rente als die hoger is; gewogen naar hoofdsom en looptijd
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 30, rentevast: 5 }]; inv.inkomen.toetsrenteKort = 3;
+r = E.resultaat(inv); assert.strictEqual(r.inkomenstoets.toetsrentePct, r.leningdelen[0].rentePct);   // aangeboden rente is hoger dan 3%
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 200000, looptijd: 10, rentevast: 10, meegenomen: true, rente: 2 }, { vorm: 'ann', bedrag: 200000, looptijd: 30, rentevast: 10, meegenomen: true, rente: 4 }];
+inv.woning.marktwaarde = 500000; assert.strictEqual(E.resultaat(inv).inkomenstoets.toetsrentePct, 3.5);   // (2 x 10 + 4 x 30) / 40
+
+// 35. Energiebesparende voorzieningen (regeling art. 1): deuren en kozijnen alleen met HR++ glas, ventilatie alleen met andere voorzieningen
+const voorzieningen = lijst => { const i = basis(); i.kosten.verbouwing = 15000; i.kosten.energiemaatregelen = 10000; i.kosten.eigenGeld = 47300; i.kosten.energievoorzieningen = lijst; return E.resultaat(i); };
+assert.strictEqual(voorzieningen(['dak', 'zonnecellen']).oordeel, 'past');
+assert.strictEqual(voorzieningen(['kozijnen']).oordeel, 'past_niet');
+assert.strictEqual(voorzieningen(['kozijnen', 'glas']).oordeel, 'past');
+assert.strictEqual(voorzieningen(['ventilatie']).oordeel, 'past_niet');
+assert.strictEqual(voorzieningen(['ventilatie', 'warmtepomp']).oordeel, 'past');
+assert.ok(voorzieningen([]).voorwaarden.some(t => t.includes('gevelisolatie')));
 
 console.log('Alle tests geslaagd');
