@@ -60,6 +60,41 @@ const { chromium } = require('playwright');
   assert.ok(rijen.includes('Annuïtair (meegenomen) € 200.000') && rijen.includes('2,10%'), rijen);
   assert.ok((await tekst('#inkomenBlok')).includes('korter dan 10 jaar, getoetst op de toetsrente van 5,00%'));
 
+  // Inkomensbepaling: bronnen bepalen het toetsinkomen; flexibel inkomen telt alleen naast een hoger vast inkomen
+  await stap(3);
+  await page.click('#bronnenBlok summary');
+  await page.click('#voegBron1');
+  await page.locator('#bronnen1 [data-bveld=salaris]').fill('80000');
+  await page.locator('#bronnen1 [data-bveld=vakantietoeslag]').fill('6400');
+  assert.strictEqual(await page.inputValue('#ink1'), '86.400');
+  assert.ok(await page.locator('#ink1').evaluate(el => el.readOnly));
+  await page.click('#voegBron2');
+  await page.locator('#bronnen2 [data-bveld=soort]').selectOption('flex');
+  for (const [veld, waarde] of [['jaar1', '30000'], ['jaar2', '36000'], ['jaar3', '24000']]) await page.locator('#bronnen2 [data-bveld=' + veld + ']').fill(waarde);
+  assert.strictEqual(await page.inputValue('#ink2'), '30.000');
+  await stap(4);
+  assert.ok((await tekst('#inkomenBlok')).includes('Inkomensbepaling'));
+  assert.ok((await page.$eval('#documentenBlok', el => el.textContent)).includes('Jaaropgaven van de afgelopen 3 kalenderjaren'));
+  await stap(3);
+  await page.click('#bronnen2 [data-bweg]');
+  await page.click('#bronnen1 [data-bweg]');
+  assert.ok(!(await page.locator('#ink1').evaluate(el => el.readOnly)));
+  await page.fill('#ink1', '95000');
+  await page.fill('#ink2', '');
+
+  // Woningtype en aanvrager: een uitgesloten woningtype en een tijdelijk verblijfsdoel geven een afwijzing
+  await stap(1);
+  await page.selectOption('#woningtype', 'uitgesloten');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('Woningtype'));
+  await stap(1);
+  await page.selectOption('#woningtype', 'standaard');
+  await page.selectOption('#verblijf1', 'tijdelijk');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('tijdelijk verblijfsdoel'));
+  await stap(1);
+  await page.selectOption('#verblijf1', 'nl');
+
   // Ontslag hoofdelijke aansprakelijkheid: het OHA-blok verschijnt en de toets wordt getoond
   await stap(1);
   await page.selectOption('#doel', 'oha');
@@ -72,12 +107,12 @@ const { chromium } = require('playwright');
   await page.selectOption('#doel', 'bestaand');
   await stap(4);
 
-  // Conceptofferte: 8 pagina's A4 zonder overloop
+  // Conceptofferte: 9 pagina's A4 zonder overloop
   const [rapport] = await Promise.all([page.waitForEvent('popup'), page.click('#print')]);
   await rapport.waitForLoadState();
   await rapport.setViewportSize({ width: 900, height: 1200 });
   const paginas = await rapport.$$eval('.pag', e => e.map(x => Math.round(x.scrollHeight / (x.offsetWidth / 210))));
-  assert.deepStrictEqual(paginas, [297, 297, 297, 297, 297, 297, 297, 297]);
+  assert.deepStrictEqual(paginas, [297, 297, 297, 297, 297, 297, 297, 297, 297]);
 
   // Mobiele breedte: geen horizontale scroll
   await page.setViewportSize({ width: 390, height: 800 });

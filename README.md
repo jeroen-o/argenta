@@ -20,7 +20,7 @@ Hypotheken: een wizard in vier stappen met een rapport als resultaat.
 3. **Kan dit bedrag geleend worden?** – leningdelen met rente uit de tariefkaart, inkomenstoets (leennormen 2027),
    bijzondere toetsen, BKR, overbrugging; toont het haalbare bedrag, maandlast, totaal te betalen bedrag en JKP.
 4. **Overzicht** – het oordeel (past, past onder voorbehoud, past niet), de voorwaarden waaronder het geldt, meldingen,
-   tips voor de adviseur en de conceptofferte (8 pagina's A4).
+   tips voor de adviseur, de documentenlijst en de conceptofferte (9 pagina's A4).
 
 Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`; er wordt niets verstuurd
 of opgeslagen.
@@ -31,10 +31,13 @@ of opgeslagen.
 | --- | --- |
 | Rente per leningdeel: NHG of risicoklasse, duurzaamheidskorting, opslag consumptief, groen lenen, variabel, overbrugging | tariefkaart Argenta |
 | Hoofdsom, LTV, aflossingsvrij, koopstarters, consumptief, groen lenen, Desktop Taxatie, overbrugging | hypotheekgids, hoofdstuk 1–3 |
+| Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig pensioen | hypotheekgids hoofdstuk 5 |
 | Inkomenstoets: financieringslastpercentages, toetsrente, studielening, energielabel, alleenstaanden | Tijdelijke regeling hypothecair krediet 2027 |
 | NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |
 | Werkelijke lasten voor AOW-gerechtigden, senioren verhuisregeling, tijdelijk-tekortregeling | hypotheekgids 5.1.1 en 5.1.2 |
-| Erfpacht, VvE, funderingsrisico | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7 |
+| Erfpacht, VvE, funderingsrisico, woningtype | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7, 2.3 |
+| Aanvrager: minimumleeftijd, nationaliteit en verblijf, familieverband, borgstelling, bewind | hypotheekgids 4.1 en 4.2 |
+| Documentenlijst per dossier | hypotheekgids hoofdstuk 8 |
 | BKR-uitkomst, aantal contracten, loonbeslag | hypotheekgids 6.2 en 7.1.1 |
 | Dubbele lasten bij overbrugging | hypotheekgids 1.8.1 |
 | Verhuisregeling: meegenomen leningdeel met eigen rente en resterende rentevaste periode | hypotheekgids 1.7 |
@@ -51,7 +54,7 @@ tariefklasse), funderingsrisico, BKR, minimaal toetsinkomen, benodigd eigen geld
 | `handleiding.html` | Handleiding voor de tool en de API |
 | `argenta-engine.js` | De rekenkern als module voor koppelingen (gegenereerd uit `index.html`) |
 | `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; **de mapping moet nog worden ingevuld** |
-| `voorbeelden/aanvraag.json`, `voorbeelden/uitkomst.json` | Voorbeeld van de invoer en de uitvoer van de API |
+| `voorbeelden/aanvraag.json`, `voorbeelden/aanvraag-inkomensbronnen.json`, `voorbeelden/uitkomst.json` | Voorbeelden van de invoer en de uitvoer van de API |
 | `voorbeelden/voorbeeld-conceptofferte.pdf` | Voorbeeld van de conceptofferte (fictieve cijfers) |
 | `tests/test.js`, `tests/fuzz.js`, `tests/e2e.js` | Tests van de rekenkern en adapter, robuustheidstest met willekeurige aanvragen, browsertest van de tool |
 | `tools/` | Scripts om tarieven, normen, beheertabellen en de module bij te werken |
@@ -130,7 +133,8 @@ workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. D
 - De leennormen en NHG-bedragen zijn die van 2027; de normen 2026 zitten er niet in.
 - De toetsrente voor rentevast korter dan 10 jaar is een invoerveld (standaard 5,00%); de AFM stelt deze per kwartaal vast.
 - De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.
-- De tool voert zelf geen BKR-toets uit en stelt geen inkomen vast; beide zijn invoer. Geen netto maandlast.
+- De tool voert zelf geen BKR-toets uit; de uitkomst is invoer. Het toetsinkomen wordt berekend uit de opgegeven bronnen, maar Argenta stelt het zelf vast. Geen netto maandlast.
+- Het percentage van het CHF voor inkomen uit vermogen zit niet in de tool; de regel voor ondernemers op basis van cijfers is een eigen uitwerking.
 - Eigen uitwerkingen die Argenta nog moet bevestigen: de dubbele-lastentoets, de volgorde in het VvE-stroomschema, de toets
   bij de senioren- en tekortregeling, en welke NHG-regel bij welke stap van de OHA-toets hoort. De AOW-leeftijd staat op 67 jaar.
 - De budgettoets bij OHA rekent met bedragen van de adviseur; de tool bevat geen Nibud-normbedragen.
