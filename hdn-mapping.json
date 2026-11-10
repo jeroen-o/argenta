@@ -1,0 +1,268 @@
+{
+  "_toelichting": "Vul per veld het pad in het HDN-aanvraagbericht in (elementnamen gescheiden door /, zonder namespace-prefix; begin met // om overal te zoeken). 'codes' vertaalt HDN-codes naar de waarden van de rekenkern. 'standaard' wordt gebruikt als het element ontbreekt. De paden en codes zijn bewust leeg: ze moeten uit het HDN-schema komen.",
+  "velden": {
+    "woning.doel": {
+      "pad": "",
+      "codes": {},
+      "standaard": "bestaand",
+      "_waarden": "bestaand, nieuwbouw, oversluiten, verbouwing, uitkoop, erfpacht"
+    },
+    "woning.koopsom": {
+      "pad": "",
+      "type": "bedrag",
+      "verplicht": true
+    },
+    "woning.marktwaarde": {
+      "pad": "",
+      "type": "bedrag"
+    },
+    "woning.energielabel": {
+      "pad": "",
+      "codes": {},
+      "standaard": "GEEN",
+      "_waarden": "A++++_EPG, A++++, A+++, A+_A++, A, B, C_D, E_F_G, GEEN"
+    },
+    "woning.waardebepaling": {
+      "pad": "",
+      "codes": {},
+      "standaard": "nwwi",
+      "_waarden": "nwwi, desktop, desktopplus"
+    },
+    "woning.funderingsrisico": {
+      "pad": "",
+      "codes": {},
+      "standaard": null,
+      "_waarden": "A, B, C, D, E"
+    },
+    "woning.koopstarter": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    },
+    "woning.appartement": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    },
+    "woning.nhg": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    },
+    "kosten.verbouwing": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.energiemaatregelen": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.overdrachtsbelastingPct": {
+      "pad": "",
+      "type": "getal",
+      "standaard": 2
+    },
+    "kosten.notarisLevering": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.notarisHypotheek": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.taxatie": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.advies": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "kosten.eigenGeld": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": null
+    },
+    "inkomen.aftrekPerJaar": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "inkomen.verplichtingenPerMaand": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "inkomen.studieleningPerMaand": {
+      "pad": "",
+      "type": "bedrag",
+      "standaard": 0
+    },
+    "inkomen.toetsrenteKort": {
+      "pad": "",
+      "type": "getal",
+      "standaard": 5
+    },
+    "inkomen.aowGerechtigd": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    },
+    "inkomen.alleenstaand": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    },
+    "inkomen.regeling": {
+      "pad": "",
+      "codes": {},
+      "standaard": "geen",
+      "_waarden": "geen, aow, senioren, tekort"
+    },
+    "bkr.status": {
+      "pad": "",
+      "codes": {},
+      "standaard": "onbekend",
+      "_waarden": "onbekend, schoon, negatief, hy2, hy, herstelA2, herstelA0"
+    },
+    "bkr.aantalContracten": {
+      "pad": "",
+      "type": "getal",
+      "standaard": 0
+    },
+    "bkr.loonbeslag": {
+      "pad": "",
+      "type": "janee",
+      "standaard": false
+    }
+  },
+  "lijsten": {
+    "aanvragers": {
+      "pad": "",
+      "velden": {
+        "geboortedatum": {
+          "pad": "",
+          "type": "datum"
+        },
+        "toetsinkomen": {
+          "pad": "",
+          "type": "bedrag",
+          "verplicht": true
+        }
+      }
+    },
+    "leningdelen": {
+      "pad": "",
+      "velden": {
+        "vorm": {
+          "pad": "",
+          "codes": {},
+          "verplicht": true,
+          "_waarden": "ann, lin, av, groenAnn, groenLin"
+        },
+        "bedrag": {
+          "pad": "",
+          "type": "bedrag",
+          "verplicht": true
+        },
+        "looptijd": {
+          "pad": "",
+          "type": "getal",
+          "factor": 1,
+          "standaard": 30,
+          "_opmerking": "in jaren; zet factor op 0.0833333 als HDN de looptijd in maanden geeft"
+        },
+        "rentevast": {
+          "pad": "",
+          "type": "getal",
+          "factor": 1,
+          "standaard": 10,
+          "_opmerking": "in jaren; variabel = 'var' via codes"
+        },
+        "consumptief": {
+          "pad": "",
+          "type": "janee",
+          "standaard": false
+        }
+      }
+    }
+  },
+  "blokken": {
+    "erfpacht": {
+      "pad": "",
+      "velden": {
+        "uitgever": {
+          "pad": "",
+          "codes": {},
+          "standaard": "overheid"
+        },
+        "vestiging": {
+          "pad": "",
+          "codes": {},
+          "standaard": "voor2013"
+        },
+        "opinie": {
+          "pad": "",
+          "codes": {},
+          "standaard": "geen"
+        },
+        "resterendeDuur": {
+          "pad": "",
+          "type": "getal",
+          "standaard": 0
+        },
+        "canonPerJaar": {
+          "pad": "",
+          "type": "bedrag",
+          "standaard": 0
+        }
+      }
+    },
+    "overbrugging": {
+      "pad": "",
+      "velden": {
+        "situatie": {
+          "pad": "",
+          "codes": {},
+          "standaard": "a"
+        },
+        "waarde": {
+          "pad": "",
+          "type": "bedrag",
+          "standaard": 0
+        },
+        "restschuld": {
+          "pad": "",
+          "type": "bedrag",
+          "standaard": 0
+        },
+        "bedrag": {
+          "pad": "",
+          "type": "bedrag",
+          "verplicht": true
+        },
+        "maandlastHuidig": {
+          "pad": "",
+          "type": "bedrag",
+          "standaard": 0
+        },
+        "maanden": {
+          "pad": "",
+          "type": "getal",
+          "standaard": 12
+        },
+        "eigenMiddelen": {
+          "pad": "",
+          "type": "bedrag",
+          "standaard": 0
+        }
+      }
+    }
+  }
+}

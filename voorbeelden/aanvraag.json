@@ -1,0 +1,15 @@
+{
+  "peildatum": "2027-01-15",
+  "woning": { "doel": "bestaand", "koopsom": 400000, "marktwaarde": 400000, "energielabel": "A", "waardebepaling": "nwwi", "funderingsrisico": null, "koopstarter": false, "appartement": false, "nhg": false },
+  "kosten": { "verbouwing": 0, "energiemaatregelen": 0, "overdrachtsbelastingPct": 2, "notarisLevering": 650, "notarisHypotheek": 650, "taxatie": 500, "advies": 2500, "eigenGeld": 32300 },
+  "aanvragers": [
+    { "geboortedatum": "1988-04-12", "toetsinkomen": 62000 },
+    { "geboortedatum": "1990-09-30", "toetsinkomen": 41000 }
+  ],
+  "inkomen": { "aftrekPerJaar": 0, "verplichtingenPerMaand": 0, "studieleningPerMaand": 85, "toetsrenteKort": 5, "aowGerechtigd": false, "alleenstaand": false, "regeling": "geen" },
+  "leningdelen": [ { "vorm": "ann", "bedrag": 380000, "looptijd": 30, "rentevast": 10, "consumptief": false } ],
+  "erfpacht": null,
+  "vve": null,
+  "overbrugging": null,
+  "bkr": { "status": "onbekend", "aantalContracten": 2, "loonbeslag": false }
+}
