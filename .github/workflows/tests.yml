@@ -25,6 +25,8 @@ jobs:
           git diff --exit-code argenta-engine.js
       - name: Tests rekenkern en HDN-adapter
         run: node tests/test.js
+      - name: Robuustheidstest met willekeurige aanvragen
+        run: node tests/fuzz.js
       - name: Browsertest
         run: |
           npm install --no-save playwright

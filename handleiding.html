@@ -225,6 +225,7 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
 
 <section id="uitvoer">
   <h2>Uitvoer</h2>
+  <p>Een volledig voorbeeld van de uitvoer, met alle velden, staat in <code>voorbeelden/uitkomst.json</code>. Het hoort bij <code>voorbeelden/aanvraag.json</code>.</p>
   <div class="tabel-wrap"><table>
     <tr><th>Veld</th><th>Inhoud</th></tr>
     <tr><td><code>oordeel</code></td><td><code>past</code>, <code>voorbehoud</code>, <code>past_niet</code> of <code>ongeldige_invoer</code></td></tr>
@@ -234,9 +235,13 @@ console.log(uitkomst.oordeel, uitkomst.grenzen);</code></pre>
     <tr><td><code>voorwaarden</code></td><td>Eisen waaronder het oordeel geldt, als leesbare zinnen</td></tr>
     <tr><td><code>grenzen</code></td><td>Dezelfde eisen als getallen: <code>minimaleMarktwaarde</code>, <code>minimaleMarktwaardeTariefklasse</code>, <code>minimaalToetsinkomen</code>, <code>maximaleHoofdsomOpInkomen</code>, <code>maximaleHoofdsomOpWaarde</code>, <code>maximaalAflossingsvrij</code>, <code>benodigdEigenGeld</code>, <code>ruimteVerplichtingenPerMaand</code>, <code>nhgGrens</code></td></tr>
     <tr><td><code>bijzondereToetsen</code></td><td>Per toets: <code>naam</code>, <code>uitkomst</code> (<code>akkoord</code>, <code>voorbehoud</code>, <code>niet_mogelijk</code>) en <code>tekst</code></td></tr>
-    <tr><td><code>leningdelen</code></td><td>Per deel: rente, bruto maandlast, looptijd en rentevaste periode</td></tr>
-    <tr><td><code>totalen</code></td><td>Hoofdsom, LTV, tariefklasse, maandlast, JKP, totale rente, totaal te betalen bedrag</td></tr>
-    <tr><td><code>kosten</code>, <code>inkomenstoets</code>, <code>overbrugging</code>, <code>verloop</code></td><td>Kostenopbouw, de inkomenstoets, de overbrugging en het verloop per jaar</td></tr>
+    <tr><td><code>leningdelen</code></td><td>Per deel: <code>nr</code>, <code>vorm</code>, <code>omschrijving</code>, <code>bedrag</code>, <code>looptijdJaren</code>, <code>rentevast</code>, <code>rentePct</code>, <code>brutoMaandlast</code></td></tr>
+    <tr><td><code>totalen</code></td><td><code>hoofdsom</code>, <code>hoofdsomInclOverbrugging</code>, <code>marktwaarde</code>, <code>ltvPct</code>, <code>tariefklasse</code>, <code>gemiddeldeRentePct</code>, <code>brutoMaandlast</code>, <code>looptijdMaanden</code>, <code>jkpPct</code>, <code>renteTotaal</code>, <code>kredietKosten</code>, <code>totaalTeBetalen</code></td></tr>
+    <tr><td><code>kosten</code></td><td><code>koopsom</code>, <code>verbouwing</code>, <code>overdrachtsbelasting</code>, <code>notarisLevering</code>, <code>notarisHypotheek</code>, <code>taxatie</code>, <code>advies</code>, <code>nhgProvisie</code>, <code>overig</code>, <code>overigTotaal</code>, <code>totaal</code>, <code>eigenGeld</code>, <code>teFinancieren</code></td></tr>
+    <tr><td><code>inkomenstoets</code></td><td><code>toetsinkomen</code>, <code>toetsrentePct</code>, <code>financieringslastPct</code>, <code>methode</code> (<code>annuitair_30_jaar</code> of <code>werkelijke_lasten</code>), <code>toegestaneMaandlast</code>, <code>toetslast</code>, <code>maximaleHypotheek</code>, <code>ruimte</code>, <code>vrijgesteld</code>. <code>null</code> als er geen inkomen is opgegeven.</td></tr>
+    <tr><td><code>beheertoets</code></td><td>Alleen bij OHA: <code>tabel</code>, <code>toetsinkomen</code>, <code>toetsrentePct</code>, <code>financieringslastPct</code>, <code>toegestaneMaandlast</code>, <code>werkelijkeLast</code>, <code>ruimte</code>, <code>laagsteLast</code>, <code>ruimteLaagsteLast</code>, <code>vermogenInMindering</code>, <code>budgettoets</code></td></tr>
+    <tr><td><code>overbrugging</code></td><td><code>bedrag</code>, <code>maximaal</code>, <code>rentePct</code>, <code>brutoMaandlast</code>, <code>looptijdMaanden</code>; <code>null</code> zonder overbrugging</td></tr>
+    <tr><td><code>verloop</code></td><td>Per jaar: <code>jaar</code>, <code>restschuld</code>, <code>rente</code>, <code>aflossing</code>, <code>brutoMaandlast</code></td></tr>
     <tr><td><code>aandachtspunten</code>, <code>tips</code></td><td>De meldingen “Let op” en de rekenkundige tips</td></tr>
     <tr><td><code>tarieven</code></td><td>Tariefbewaking: datum van de tariefkaart, <code>leeftijdDagen</code> en <code>verouderd</code> (true na 14 dagen) met een <code>melding</code>. Toon de melding in eBlinqx als <code>verouderd</code> waar is.</td></tr>
     <tr><td><code>bronnen</code>, <code>versie</code></td><td>Datum van de tarieven, jaar van de normen en versie van de rekenkern. Toon deze bij het oordeel.</td></tr>
@@ -278,20 +283,20 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
     <tr><td>Nieuwe NHG-grens of hypotheekgids</td><td>Constanten <code>NHG</code>, <code>REGELS</code>, <code>EXTRA</code> en <code>VOORWAARDEN</code> in <code>index.html</code> nalopen</td></tr>
     <tr><td>Controleren of er een nieuwere tariefkaart is</td><td><code>python3 tools/check_rates.py</code>; met <code>--update</code> wordt de nieuwe kaart direct verwerkt. Dit draait ook elke werkdag automatisch op GitHub en maakt dan een pull request.</td></tr>
     <tr><td>Nieuwe toetsrente AFM (per kwartaal)</td><td><code>REGELS.toetsrenteStandaard</code> in <code>index.html</code>. Per dossier kan de adviseur de waarde in stap 3 aanpassen; via de API met <code>inkomen.toetsrenteKort</code>.</td></tr>
-    <tr><td>Na elke wijziging</td><td><code>python3 tools/export_engine.py</code> en daarna <code>node tests/test.js</code></td></tr>
+    <tr><td>Na elke wijziging</td><td><code>python3 tools/export_engine.py</code> en daarna <code>node tests/test.js</code>, <code>node tests/fuzz.js</code> en <code>node tests/e2e.js</code></td></tr>
   </table></div>
-  <p><b>Tariefbewaking.</b> Is de tariefkaart ouder dan 14 dagen, dan toont de tool een gele balk bovenaan, staat de melding op de conceptofferte en geeft de API <code>tarieven.verouderd: true</code>. Bij elke wijziging op GitHub draaien de tests automatisch (<code>tests/test.js</code> en <code>tests/e2e.js</code>).</p>
+  <p><b>Tariefbewaking.</b> Is de tariefkaart ouder dan 14 dagen, dan toont de tool een gele balk bovenaan, staat de melding op de conceptofferte en geeft de API <code>tarieven.verouderd: true</code>. Bij elke wijziging op GitHub draaien de tests automatisch: <code>tests/test.js</code> (rekenregels), <code>tests/fuzz.js</code> (3000 willekeurige aanvragen) en <code>tests/e2e.js</code> (de tool in de browser).</p>
   <p>Argenta heeft geen API voor tarieven; wijzigingen komen via de nieuwsbrief. Een verouderde tariefkaart geeft een verkeerde rente. De datum van de tarieven staat in de kop van de tool en in <code>bronnen</code>.</p>
 </section>
 
 <section id="grenzen">
   <h2>Wat de tool en de API niet doen</h2>
   <ul>
-    <li>Geen beslissing van Argenta voorspellen: Argenta mag afwijken van de gids en beoordeelt elke aanvraag aanvullend.</li>
+    <li>Geen beslissing van Argenta voorspellen: Argenta mag afwijken van de gids en beoordeelt elke aanvraag aanvullend. De tool is niet geijkt op echte uitkomsten van Argenta.</li>
     <li>Geen BKR-toets uitvoeren, geen inkomen vaststellen en geen taxatie beoordelen: de uitkomst hangt af van wat is ingevuld.</li>
     <li>Geen netto maandlast berekenen.</li>
     <li>De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.</li>
-    <li>De dubbele-lastentoets, de volgorde in het VvE-stroomschema en de toets bij de senioren- en tekortregeling zijn eigen uitwerkingen van de gids; de AOW-leeftijd staat op 67 jaar.</li>
+    <li>De dubbele-lastentoets, de volgorde in het VvE-stroomschema, de toets bij de senioren- en tekortregeling en de indeling van de OHA-toetsen zijn eigen uitwerkingen van de gids en de NHG-normen; de AOW-leeftijd staat op 67 jaar.</li>
     <li>Bij een looptijd korter dan 30 jaar rekent de toets met de werkelijke looptijd; een aflossingsvrij deel met 30 jaar.</li>
     <li>De budgettoets bij OHA rekent met bedragen van de adviseur; de tool bevat geen Nibud-normbedragen en rekent het fiscale voordeel niet mee.</li>
     <li>De leennormen zijn die van 2027.</li>
@@ -301,7 +306,7 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
 
 </div></main>
 <footer style="background:#fff;border-top:1px solid var(--lijn);padding:16px;font-size:13px;color:var(--tekst-zacht)"><div class="in" style="display:flex;flex-wrap:wrap;gap:6px 20px">
-  <a href="index.html" style="color:var(--primair);font-weight:600">Rekentool</a><a href="#api" style="color:var(--primair);font-weight:600">API</a><a href="voorbeelden/voorbeeld-conceptofferte.pdf" style="color:var(--primair);font-weight:600">Voorbeeldofferte (PDF)</a><a href="voorbeelden/aanvraag.json" style="color:var(--primair);font-weight:600">Voorbeeldaanvraag (JSON)</a><a href="argenta-engine.js" style="color:var(--primair);font-weight:600">Rekenkern (JS)</a><a href="hdn-mapping.json" style="color:var(--primair);font-weight:600">HDN-mapping</a>
+  <a href="index.html" style="color:var(--primair);font-weight:600">Rekentool</a><a href="#api" style="color:var(--primair);font-weight:600">API</a><a href="voorbeelden/voorbeeld-conceptofferte.pdf" style="color:var(--primair);font-weight:600">Voorbeeldofferte (PDF)</a><a href="voorbeelden/aanvraag.json" style="color:var(--primair);font-weight:600">Voorbeeldaanvraag (JSON)</a><a href="voorbeelden/uitkomst.json" style="color:var(--primair);font-weight:600">Voorbeelduitkomst (JSON)</a><a href="argenta-engine.js" style="color:var(--primair);font-weight:600">Rekenkern (JS)</a><a href="hdn-mapping.json" style="color:var(--primair);font-weight:600">HDN-mapping</a>
 </div></footer>
 </body>
 </html>

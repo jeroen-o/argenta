@@ -1,26 +1,47 @@
 # Conceptofferte Argenta hypotheek (indicatief)
 
-Standalone tool (`index.html`, één bestand, geen build-step, geen externe API's) waarmee hypotheekadviseurs een
-indicatieve conceptofferte voor de Argenta hypotheek opstellen en afdrukken. De opzet volgt de rekentool van
-MUNT Hypotheken (munt.hypotheekbond.nl): een wizard in vier stappen met een rapport als resultaat.
+Rekentool en API waarmee hypotheekadviseurs vooraf toetsen of een aanvraag past binnen de gepubliceerde tarieven en
+voorwaarden van de Argenta hypotheek, en waarmee ze een conceptofferte voor de klant maken.
 
 > **Geen product of document van Argenta.** De tool levert geen renteaanbod of bindende offerte; die brengt alleen
-> Argenta uit na een aanvraag via HDN. Het resultaat is ook geen adviesrapport.
+> Argenta uit na een aanvraag via HDN. Het oordeel zegt of een aanvraag past binnen de gepubliceerde regels, niet of
+> Argenta de offerte afgeeft. Het resultaat is ook geen adviesrapport.
+
+Uitleg voor gebruikers en voor de koppeling staat in **`handleiding.html`**.
 
 ## Wat de tool doet
 
-1. **Start** – woning, aanvragers en adviseur.
-2. **Kosten** – koopsom, verbouwing, overdrachtsbelasting, notaris-, taxatie- en advieskosten, NHG, eigen geld → te financieren.
+De rekentool (`index.html`) is één HTML-bestand zonder installatie of server. De opzet volgt de rekentool van MUNT
+Hypotheken: een wizard in vier stappen met een rapport als resultaat.
+
+1. **Start** – woning, aanvragers en adviseur; bij een appartement de VvE, bij erfpacht de erfpachtgegevens.
+2. **Kosten** – koopsom, verbouwing, overdrachtsbelasting, notaris-, taxatie- en advieskosten, vrije kostenposten, NHG en
+   eigen geld → te financieren.
 3. **Kan dit bedrag geleend worden?** – leningdelen met rente uit de tariefkaart, inkomenstoets (leennormen 2027),
-   overbrugging; toont financieel haalbaar bedrag, extra ruimte voor EBV, maandlast, totaal te betalen bedrag en JKP.
-4. **Overzicht** – toetsing aan de productregels uit de hypotheekgids en de conceptofferte (8 pagina's A4):
-   voorblad, toelichting, kosten en maandlast, verloop restschuld per jaar, overzicht volgens de indeling van het ESIS,
-   aandachtspunten en het vervolgtraject bij Argenta.
+   bijzondere toetsen, BKR, overbrugging; toont het haalbare bedrag, maandlast, totaal te betalen bedrag en JKP.
+4. **Overzicht** – het oordeel (past, past onder voorbehoud, past niet), de voorwaarden waaronder het geldt, meldingen,
+   tips voor de adviseur en de conceptofferte (8 pagina's A4).
 
-Stap 4 toont ook **tips voor de adviseur** (extra eigen geld voor een lagere tariefklasse, NHG, duurzaamheidskorting,
-aflossingsvrij terugbrengen, leenruimte vergroten). Dit zijn rekenkundige mogelijkheden, geen advies; ze staan niet in het rapport.
+Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`; er wordt niets verstuurd
+of opgeslagen.
 
-Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen `localStorage`.
+## Wat er wordt getoetst
+
+| Onderdeel | Bron |
+| --- | --- |
+| Rente per leningdeel: NHG of risicoklasse, duurzaamheidskorting, opslag consumptief, groen lenen, variabel, overbrugging | tariefkaart Argenta |
+| Hoofdsom, LTV, aflossingsvrij, koopstarters, consumptief, groen lenen, Desktop Taxatie, overbrugging | hypotheekgids, hoofdstuk 1–3 |
+| Inkomenstoets: financieringslastpercentages, toetsrente, studielening, energielabel, alleenstaanden | Tijdelijke regeling hypothecair krediet 2027 |
+| NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |
+| Werkelijke lasten voor AOW-gerechtigden, senioren verhuisregeling, tijdelijk-tekortregeling | hypotheekgids 5.1.1 en 5.1.2 |
+| Erfpacht, VvE, funderingsrisico | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7 |
+| BKR-uitkomst, aantal contracten, loonbeslag | hypotheekgids 6.2 en 7.1.1 |
+| Dubbele lasten bij overbrugging | hypotheekgids 1.8.1 |
+| Verhuisregeling: meegenomen leningdeel met eigen rente en resterende rentevaste periode | hypotheekgids 1.7 |
+| Ontslag hoofdelijke aansprakelijkheid: leennorm, werkelijke lasten, beheertoets | adviseurspagina Argenta OHA, NHG D.4, D.6 en bijlage 5 |
+
+De uitkomst bevat ook de **voorwaarden en grenzen** waaronder het oordeel geldt: minimale marktwaarde (ook voor de
+tariefklasse), funderingsrisico, BKR, minimaal toetsinkomen, benodigd eigen geld, maximaal aflossingsvrij.
 
 ## Bestanden
 
@@ -29,100 +50,91 @@ Afdrukken gaat via `window.open` (werkt ook in een iframe / Google Sites). Geen 
 | `index.html` | De rekentool; bevat ook de rekenkern (enige bron) |
 | `handleiding.html` | Handleiding voor de tool en de API |
 | `argenta-engine.js` | De rekenkern als module voor koppelingen (gegenereerd uit `index.html`) |
-| `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; de mapping moet nog worden ingevuld |
-| `voorbeelden/aanvraag.json` | Voorbeeldinvoer voor de API |
-| `tests/test.js`, `tests/e2e.js` | Tests van de rekenkern en de adapter, en een browsertest van de tool |
-| `tools/check_rates.py` | Tariefbewaking: controleert argenta.nl op een nieuwere tariefkaart en verwerkt die met `--update` |
-| `.github/workflows/` | Draait de tests bij elke wijziging en de tariefbewaking elke werkdag |
+| `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; **de mapping moet nog worden ingevuld** |
+| `voorbeelden/aanvraag.json`, `voorbeelden/uitkomst.json` | Voorbeeld van de invoer en de uitvoer van de API |
 | `voorbeelden/voorbeeld-conceptofferte.pdf` | Voorbeeld van de conceptofferte (fictieve cijfers) |
-| `tools/` | Scripts om tarieven, normen en de module bij te werken |
+| `tests/test.js`, `tests/fuzz.js`, `tests/e2e.js` | Tests van de rekenkern en adapter, robuustheidstest met willekeurige aanvragen, browsertest van de tool |
+| `tools/` | Scripts om tarieven, normen, beheertabellen en de module bij te werken |
+| `.github/workflows/` | Draait de tests bij elke wijziging en de tariefbewaking elke werkdag |
 
 ## API
 
-`ArgentaEngine.resultaat(aanvraag)` geeft een oordeel (`past`, `voorbehoud`, `past_niet`) met afwijzingen, voorbehouden,
-voorwaarden, grenzen (minimale marktwaarde, minimaal toetsinkomen, benodigd eigen geld en meer), rente, maandlast en JKP.
-Het is een module, geen server: de rekenkern draait in de browser of in Node en verstuurt niets. Het oordeel is geen kans
-dat Argenta de offerte afgeeft. Zie `handleiding.html` voor invoer, uitvoer en de HDN-aansluiting.
+`ArgentaEngine.resultaat(aanvraag)` krijgt een aanvraag als JSON en geeft het oordeel als JSON terug: `oordeel`,
+`afwijzingen`, `voorbehoud`, `voorwaarden`, `grenzen`, rente, maandlast, JKP, de inkomenstoets en de tariefstatus.
+Het is een module, geen server: de rekenkern draait in de browser of in Node, heeft geen afhankelijkheden en verstuurt niets.
 
-```bash
-python3 tools/export_engine.py
+```js
+const ArgentaEngine = require('./argenta-engine.js');
+const uitkomst = ArgentaEngine.resultaat(require('./voorbeelden/aanvraag.json'));
 ```
+
+## Tests
 
 ```bash
 node tests/test.js
 ```
 
-## Tariefbewaking en tests
+```bash
+node tests/fuzz.js
+```
 
-- De tool toont een gele balk en de API geeft `tarieven.verouderd: true` als de tariefkaart ouder is dan 14 dagen.
-- `python3 tools/check_rates.py` controleert of argenta.nl een nieuwere tariefkaart of variabele rente heeft; met `--update` wordt die verwerkt.
-- Op GitHub draait dit elke werkdag en volgt bij nieuwe tarieven een pull request. Dat vraagt de repository-instelling
-  "Allow GitHub Actions to create and approve pull requests"; anders maakt de workflow een issue aan.
-- Bij elke push en pull request draaien `tests/test.js` en `tests/e2e.js`, en wordt gecontroleerd dat `argenta-engine.js` gelijk is aan `index.html`.
+```bash
+node tests/e2e.js
+```
 
-## Bijzondere toetsen
+De browsertest vraagt het pakket `playwright` met Chromium. Op GitHub draaien alle drie bij elke push en pull request,
+samen met een controle dat `argenta-engine.js` gelijk is aan `index.html`.
 
-| Toets | Invoer | Bron |
-| --- | --- | --- |
-| Werkelijke lasten voor AOW-gerechtigden | stap 3, bijzondere toets | hypotheekgids 5.1.1 |
-| Senioren verhuisregeling | huidige maandlast, inkomen vanaf AOW | hypotheekgids 5.1.1 |
-| Tijdelijk-tekortregeling | geboortedata, inkomen in de tekortperiode | hypotheekgids 5.1.2 |
-| Erfpacht | uitgever, vestigingsdatum, opinie, resterende duur, canon | hypotheekgids 2.4 |
-| VvE | aanwezig, actief/slapend, onderhoud, MJOP, fondsen | stroomschema beoordeling VvE |
-| Ontslag hoofdelijke aansprakelijkheid | doel OHA, bestaande leningdelen, oorspronkelijke marktwaarde | adviseurspagina Argenta OHA, NHG V&N 2027 D.4 en bijlage 5 |
-| Dubbele lasten bij overbrugging | maandlast huidige hypotheek, periode, eigen middelen | hypotheekgids 1.8.1 |
+## Bijwerken
 
-## Eisen aan een hypotheekofferte
+`index.html` is de enige bron. Draai na elke wijziging het exportscript en de tests.
 
-Een bindend aanbod komt van de kredietgever, met een gepersonaliseerd ESIS en minimaal 14 dagen bedenktijd
-(art. 4:33 Wft, BGfo, richtlijn 2014/17/EU). De conceptofferte neemt de verplichte onderdelen over (kredietbedrag,
-looptijd, rente en rentevaste periode, JKP, totale kosten, totaal te betalen bedrag, termijnen, aanvullende
-verplichtingen, vervroegd aflossen, klachten, toezichthouder), maar is zelf geen renteaanbod, bindend aanbod of ESIS.
-Laat compliance de teksten toetsen voordat de tool naar adviseurs gaat.
+| Wanneer | Opdracht |
+| --- | --- |
+| Controleren op een nieuwe tariefkaart | `python3 tools/check_rates.py` (met `--update` wordt de kaart verwerkt) |
+| Tariefkaart handmatig verwerken | `pdftotext -layout Tariefkaart.pdf tarief.txt` en `python3 tools/update_rates.py tarief.txt` |
+| Nieuwe leennormen (jaarlijks) | `python3 tools/update_normen.py "Bijlage financieringslastnormen JJJJ.xlsx" JJJJ` |
+| Nieuwe NHG-beheertabellen (jaarlijks) | `python3 tools/update_beheer.py "vn-nhg-JJJJ-bijlage-5-beheertabellen-excel.xlsx" JJJJ` |
+| Nieuwe hypotheekgids, NHG-grens of toetsrente AFM | constanten `REGELS`, `NHG`, `EXTRA` en `VOORWAARDEN` in `index.html` |
+| Na elke wijziging | `python3 tools/export_engine.py` |
 
-## Logo
-
-Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraagt toestemming van Argenta.
+**Tariefbewaking.** Argenta heeft geen API voor tarieven en wijzigt de rente meerdere keren per maand. De tool toont een
+gele balk en de API geeft `tarieven.verouderd: true` als de tariefkaart ouder is dan 14 dagen. Op GitHub controleert een
+workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. Dat vraagt de repository-instelling
+"Allow GitHub Actions to create and approve pull requests"; anders maakt de workflow een issue aan.
 
 ## Bronnen
 
 | Onderdeel | Bron | Versie |
 | --- | --- | --- |
-| Tarieven | Tariefkaart Argenta, argenta.nl/hypotheek-argenta/hypotheekrente-overzicht | vast 28-10-2026, variabel 9-11-2026 |
+| Tarieven | Tariefkaart Argenta, argenta.nl/hypotheek-argenta/hypotheekrente-overzicht | zie de kop van de tool |
 | Acceptatie | Argenta hypotheekgids | augustus 2026 |
-| Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
 | Kredietgever, aflossen, klachten | Voorwaarden Argenta hypotheek | juli 2025 |
-| Beheertoets (OHA) | NHG Financieringslasttabel Beheer (bijlage 5) | 2027 |
-| NHG-grens, provisie | NHG Voorwaarden en normen 2027-1 (C.2, A.5.3) | 2027: € 500.000 / € 530.000, provisie 0,4% |
+| OHA | argenta.nl/adviseur/ontslag-uit-de-hoofdelijke-aansprakelijkheid-oha | geraadpleegd november 2026 |
+| Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
+| NHG-grens, provisie, beheertoets | NHG Voorwaarden en normen 2027-1 (C.2, A.5.3, D.4, D.6, bijlage 5) | 2027 |
 
-Argenta heeft geen API; wijzigingen komen via de nieuwsbrief en de adviseurspagina. Tarieven moeten dus handmatig
-worden bijgewerkt (meerdere keren per maand).
+## Compliance
 
-## Bijwerken
-
-```bash
-pdftotext -layout TariefkaartSpecialline_JJJJMMDD.pdf tarief.txt
-```
-
-```bash
-python3 tools/update_rates.py tarief.txt --variabel "4,87 4,82 4,82 4,82 5,07 5,07 5,37 5,37 5,37 5,37 5,57" --variabel-datum "9 november 2026"
-```
-
-```bash
-python3 tools/update_normen.py "Bijlage financieringslastnormen 2027.xlsx" 2027
-```
-
-Productregels (`REGELS`, `VOORWAARDEN`) en NHG-parameters (`NHG`) staan als constanten bovenin het script in
-`index.html` en moeten bij een nieuwe hypotheekgids handmatig worden nagelopen.
+- **Offerte.** Een bindend aanbod komt van de kredietgever, met een gepersonaliseerd ESIS en minimaal 14 dagen bedenktijd
+  (art. 4:33 Wft, BGfo, richtlijn 2014/17/EU). De conceptofferte neemt de verplichte onderdelen over en volgt de indeling
+  van het ESIS, maar is zelf geen renteaanbod, bindend aanbod of ESIS. De wettelijke eisen zijn niet tegen de wettekst gecontroleerd.
+- **Logo.** Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraagt toestemming van Argenta.
+- **Tips.** De tips voor de adviseur zijn rekenkundige mogelijkheden, geen advies; ze staan niet op de conceptofferte.
+- **Voorbeeldofferte.** Het voorbeeld in `voorbeelden/` bevat echte namen met fictieve gegevens.
+- Laat compliance de teksten toetsen voordat de tool naar adviseurs gaat.
 
 ## Beperkingen
 
-- De inkomenstoets rekent met de normen 2027 (gelden vanaf 1 januari 2027); de normen 2026 zitten er niet in.
+- Het oordeel is geen kans dat Argenta de offerte afgeeft; de tool is niet geijkt op echte uitkomsten van Argenta.
+- De leennormen en NHG-bedragen zijn die van 2027; de normen 2026 zitten er niet in.
 - De toetsrente voor rentevast korter dan 10 jaar is een invoerveld (standaard 5,00%); de AFM stelt deze per kwartaal vast.
-- De NHG-grens is vereenvoudigd getoetst op de hoofdsom, niet op de kosten voor de woning.
-- De tool voert zelf geen BKR-toets uit; de uitkomst van de BKR-toets is invoer. Geen netto maandlast.
-- Bijzondere toetsen (werkelijke lasten AOW, senioren verhuisregeling, tijdelijk-tekortregeling, erfpacht, VvE, dubbele lasten)
-  volgen de hypotheekgids en het stroomschema VvE, maar blijven indicatief: de AOW-leeftijd is vast op 67 jaar gezet, de
-  dubbele-lastentoets is een eigen uitwerking (eigen middelen of ruimte in de inkomenstoets) en erfpachtopinies beoordeelt Argenta zelf.
+- De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.
+- De tool voert zelf geen BKR-toets uit en stelt geen inkomen vast; beide zijn invoer. Geen netto maandlast.
+- Eigen uitwerkingen die Argenta nog moet bevestigen: de dubbele-lastentoets, de volgorde in het VvE-stroomschema, de toets
+  bij de senioren- en tekortregeling, en welke NHG-regel bij welke stap van de OHA-toets hoort. De AOW-leeftijd staat op 67 jaar.
+- De budgettoets bij OHA rekent met bedragen van de adviseur; de tool bevat geen Nibud-normbedragen.
+- Bij de verhuisregeling bepaalt Argenta de risicoklasse opnieuw; de tool rekent met de ingevulde rente.
 - Het JKP en het verloop gaan uit van een gelijkblijvende rente over de hele looptijd; de overbrugging telt niet mee.
-- Kostenposten (notaris, taxatie, advies) zijn invulbare indicaties; overdrachtsbelasting alleen 2% of 0%.
+- Notaris-, taxatie- en advieskosten zijn invulbare indicaties; overdrachtsbelasting alleen 2% of 0%.
+- De HDN-mapping is leeg; het HDN-schema is alleen voor deelnemers beschikbaar.

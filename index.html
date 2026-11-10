@@ -371,6 +371,7 @@
       <a href="handleiding.html#beheer" target="_blank" rel="noopener">Beheer</a>
       <a href="voorbeelden/voorbeeld-conceptofferte.pdf" target="_blank" rel="noopener">Voorbeeldofferte Roes en Oversteegen (PDF)</a>
       <a href="voorbeelden/aanvraag.json" target="_blank" rel="noopener">Voorbeeldaanvraag (JSON)</a>
+      <a href="voorbeelden/uitkomst.json" target="_blank" rel="noopener">Voorbeelduitkomst (JSON)</a>
       <a href="argenta-engine.js" target="_blank" rel="noopener">Rekenkern (JS)</a>
     </nav>
     <p>Rekenkern <span id="voetVersie"></span> · tarieven vast <span id="voetVast"></span>, variabel <span id="voetVar"></span> · leennormen en NHG-grens <span id="voetJaar"></span> · hypotheekgids augustus 2026.
@@ -1000,7 +1001,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.0.0';
+const VERSIE = '1.1.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -1376,7 +1377,8 @@ function printDocument() {
     ul { margin: 1mm 0 2.5mm; padding-left: 5mm; } li { margin-bottom: .8mm; }
     .kader { padding: 3mm 4mm; border: 1px solid #d5dce4; background: #f5f7f6; font-size: 8.5pt; color: #3b4753; border-radius: 2mm; }
     .verloop td, .verloop th { padding: .75mm 2mm; font-size: 8.5pt; }
-    .esis td:first-child { width: 32%; font-weight: 600; color: ${kleur('--primair')}; }
+    .esis td { font-size: 8.6pt; line-height: 1.32; padding: .95mm 2mm; }
+    .esis td:first-child { width: 30%; font-weight: 600; color: ${kleur('--primair')}; }
     .voet { position: absolute; left: 16mm; right: 16mm; bottom: 9mm; border-top: 1px solid #d5dce4; padding-top: 2mm; display: flex; justify-content: space-between; color: #5b6875; font-size: 8pt; }
     @media screen { body { background: #e9ecee; } .pag { background: #fff; margin: 6mm auto; box-shadow: 0 1px 6px rgba(0,0,0,.15); } .cover { background: ${kleur('--primair')}; } }
   </style></head><body>
