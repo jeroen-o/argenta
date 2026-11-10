@@ -1,6 +1,6 @@
 {
   "_toelichting": "Uitvoer van ArgentaEngine.resultaat() voor voorbeelden/aanvraag.json. tarieven.leeftijdDagen hangt af van de datum van uitvoeren en is hier leeg gelaten.",
-  "versie": "1.1.0",
+  "versie": "1.2.0",
   "oordeel": "past",
   "toelichting": "Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.",
   "afwijzingen": [],
@@ -83,6 +83,44 @@
     "eigenGeld": 32300,
     "teFinancieren": 380000
   },
+  "documenten": [
+    {
+      "groep": "Algemeen",
+      "items": [
+        "Geretourneerd renteaanbod",
+        "Getekende SEPA-incassomachtiging op naam van de klant(en)",
+        "Kopie van een geldig identiteitsbewijs van elke aanvrager (of digitale identificatie)"
+      ]
+    },
+    {
+      "groep": "Inkomen",
+      "items": [
+        "Loondienst: UWV-verzekeringsbericht (IBL) of werkgeversverklaring volgens het NHG-model met salarisstrook*",
+        "Ander inkomen: zie de checklist in de hypotheekgids"
+      ]
+    },
+    {
+      "groep": "Woning en waarde",
+      "items": [
+        "Kopie van de getekende koopovereenkomst",
+        "Compleet taxatierapport via het NWWI met alle bijlagen (niet ouder dan 6 maanden)",
+        "(Voorlopig) energielabel of toegekende groenverklaring"
+      ]
+    },
+    {
+      "groep": "Financiële verplichtingen",
+      "items": [
+        "Overzicht studieschuld van DUO (Mijn DUO)"
+      ]
+    },
+    {
+      "groep": "Eigen middelen",
+      "items": [
+        "Bewijsstukken voor de herkomst van eigen middelen (formulier eigen middelen, saldo-opgave, financieel jaaroverzicht)"
+      ]
+    }
+  ],
+  "inkomensbepaling": null,
   "inkomenstoets": {
     "toetsinkomen": 103000,
     "toetsrentePct": 4.52,

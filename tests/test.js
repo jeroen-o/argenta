@@ -115,4 +115,50 @@ inv = ohaInv(110000); inv.oha.achterstand = true; assert.strictEqual(E.resultaat
 inv = ohaInv(110000); inv.leningdelen.push({ vorm: 'av', bedrag: 200000, looptijd: 30, rentevast: 10 }); inv.woning.koopsom = 500000; inv.woning.marktwaarde = 600000;
 assert.ok(E.resultaat(inv).afwijzingen.some(t => t.includes('50% van de oorspronkelijke marktwaarde')));   // 200.000 > 50% van 380.000
 
+// 14. Inkomensbepaling volgens hoofdstuk 5 van de hypotheekgids
+const metBronnen = (a, nhg) => ({ woning: { doel: 'bestaand', koopsom: 350000, marktwaarde: 350000, energielabel: 'C_D', nhg: !!nhg }, kosten: { eigenGeld: 30000, overdrachtsbelastingPct: 0 }, aanvragers: a, inkomen: {},
+  leningdelen: [{ vorm: 'ann', bedrag: 320000, looptijd: 30, rentevast: 10 }], bkr: { status: 'schoon' } });
+const toetsVan = (a, nhg) => E.resultaat(metBronnen(a, nhg)).inkomensbepaling.map(b => b.toetsinkomen);
+// vast: salaris, vakantietoeslag, 13e maand, toeslagen; bedrijfsbonus gemiddeld over 3 jaar met maximaal het laatste jaar; persoonlijke bonus laatste 12 maanden
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, vakantietoeslag: 4800, vast13: 5000, variabel: 2000, bonus1: 6000, bonus2: 9000, bonus3: 3000, bonusPersoonlijk: 1000 }] }]), [78800, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, vakantietoeslag: 4800, bonus1: 6000, bonus2: 9000, bonus3: 3000 }] }], true), [64800, 0]);   // met NHG geen bonus
+// flexibel: gemiddelde van 3 jaar, maximaal het laatste jaar; zonder NHG alleen naast een hoger vast inkomen van de andere aanvrager
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'flex', jaar1: 50000, jaar2: 60000, jaar3: 55000 }] }]), [0, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000 }] }, { inkomens: [{ soort: 'flex', jaar1: 30000, jaar2: 36000, jaar3: 24000 }] }]), [70000, 30000]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 20000 }] }, { inkomens: [{ soort: 'flex', jaar1: 60000, jaar2: 60000, jaar3: 60000 }] }]), [20000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'flex', jaar1: 50000, jaar2: 60000, jaar3: 55000 }] }], true), [50000, 0]);                                        // met NHG telt het mee
+// maximaal 50 uur: 40 + 20 uur, het kleinste dienstverband telt voor de helft
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 60000, uren: 40 }, { soort: 'vast', salaris: 20000, uren: 20 }] }]), [70000, 0]);
+// ondernemer: 1 tot 3 jaar alleen met NHG en IKV; langer dan 3 jaar zonder NHG ook op cijfers
+assert.strictEqual(E.resultaat(metBronnen([{ inkomens: [{ soort: 'onderneming', jaren: 2, ikv: 80000 }] }])).oordeel, 'past_niet');
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'onderneming', jaren: 2, ikv: 80000 }] }], true), [80000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'onderneming', jaren: 5, jaar1: 90000, jaar2: 80000, jaar3: 100000 }] }]), [90000, 0]);
+// vermogen: percentage CHF, maximaal de leningrente; niet-blijvende uitkering als enig inkomen: sociaal minimum
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 80000 }, { soort: 'vermogen', vermogen: 200000, pct: 3 }] }]), [86000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'uitkeringTijdelijk', bedrag: 30000, sociaalMinimum: 16000 }] }]), [16000, 0]);
+// toekomstig pensioen binnen 10 jaar: toets ook op het inkomen na pensionering; niet ingevuld geeft een voorbehoud
+r = E.resultaat(metBronnen([{ geboortedatum: '1962-01-01', inkomens: [{ soort: 'vast', salaris: 95000 }], inkomenNaPensioen: 45000 }]));
+assert.strictEqual(r.oordeel, 'past_niet'); assert.ok(r.afwijzingen.some(t => t.includes('Toekomstig pensioen')));
+inv = metBronnen([{ geboortedatum: '1962-01-01', toetsinkomen: 95000 }]); inv.peildatum = '2026-11-10';
+assert.strictEqual(E.resultaat(inv).oordeel, 'voorbehoud');
+
+// 15. Aanvrager en woningtype
+const type = extra => { const i = basis(); Object.assign(i.woning, extra.woning || {}); if (extra.klant) i.klant = extra.klant; if (extra.verblijf) i.aanvragers[0].verblijf = extra.verblijf; return E.resultaat(i); };
+assert.strictEqual(type({ woning: { woningtype: 'uitgesloten' } }).oordeel, 'past_niet');
+assert.strictEqual(type({ woning: { woningtype: 'bedrijfsruimte', bedrijfsdeelPct: 30 } }).oordeel, 'past_niet');
+assert.strictEqual(type({ woning: { woningtype: 'bedrijfsruimte', bedrijfsdeelPct: 20 } }).oordeel, 'past');
+assert.strictEqual(type({ woning: { woningtype: 'kangoeroe' } }).oordeel, 'past');
+assert.strictEqual(type({ woning: { woningtype: 'woonboerderij', bestemmingWonen: false } }).oordeel, 'past_niet');
+assert.strictEqual(type({ verblijf: 'tijdelijk' }).oordeel, 'past_niet');
+assert.strictEqual(type({ verblijf: 'niettijdelijk' }).oordeel, 'voorbehoud');
+assert.strictEqual(type({ klant: { familieverband: true } }).oordeel, 'past_niet');
+assert.strictEqual(type({ klant: { abcConstructie: true } }).oordeel, 'voorbehoud');
+
+// 16. Documentenlijst volgt het dossier
+r = E.resultaat(basis());
+assert.ok(r.documenten.some(d => d.groep === 'Algemeen') && r.documenten.some(d => d.groep === 'Eigen middelen'));
+assert.ok(r.documenten.find(d => d.groep === 'Financiële verplichtingen').items.some(t => t.includes('DUO')));
+r = E.resultaat(metBronnen([{ inkomens: [{ soort: 'onderneming', jaren: 5, ikv: 90000 }] }]));
+assert.ok(r.documenten.find(d => d.groep === 'Inkomen').items.some(t => t.includes('Inkomensverklaring Ondernemer')));
+
 console.log('Alle tests geslaagd');
