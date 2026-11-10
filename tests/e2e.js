@@ -97,6 +97,32 @@ const { chromium } = require('playwright');
   await stap(1);
   await page.selectOption('#doel', 'bestaand');
 
+  // Nieuwbouw: het blok verschijnt, meerwerk telt mee in de kosten en zelfbouw geeft een afwijzing
+  await page.selectOption('#doel', 'nieuwbouw');
+  assert.ok(await page.isVisible('#nieuwbouwVelden'));
+  await page.fill('#nbMeerwerk', '15000');
+  await stap(2);
+  assert.ok((await tekst('#boom2')).replace(/\s+/g, ' ').includes('aansluitkosten € 15.000'));
+  await stap(1);
+  await page.selectOption('#nbBouwwijze', 'zelfbouw');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('zelf bouwen zonder aannemer'));
+  await stap(1);
+  await page.selectOption('#nbBouwwijze', 'project');
+  await page.fill('#nbMeerwerk', '');
+  await page.selectOption('#doel', 'bestaand');
+
+  // Tijdelijk twee hypotheken: de oude lening gaat naar het 1-jaarstarief
+  await stap(3);
+  await page.check('#tweeHyp');
+  await page.fill('#thRestschuld', '150000');
+  await page.fill('#thWaarde', '300000');
+  await stap(4);
+  assert.ok((await tekst('#inkomenBlok')).includes('Tijdelijk twee hypotheken'));
+  await stap(3);
+  await page.uncheck('#tweeHyp');
+  await stap(1);
+
   // Bouwkundig rapport: herstelkosten boven 10% van de marktwaarde die niet in depot staan geven een afwijzing
   await page.fill('#herstelkosten', '60000');
   await stap(4);

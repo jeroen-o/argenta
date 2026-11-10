@@ -197,4 +197,29 @@ assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000, v
 assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 70000, toekomstig: true, startMaanden: 3 }] }]), [70000, 0]);
 assert.strictEqual(E.resultaat(metBronnen([{ inkomens: [{ soort: 'vast', salaris: 90000, toekomstig: true, startMaanden: 8 }] }])).oordeel, 'past_niet');
 
+// 22. Nieuwbouw (hypotheekgids 2.2): marktwaarde uit koopsom, grond, meerwerk, bouwrente en aansluitkosten min minderwerk
+const nieuwbouw = (nb, mw) => { const i = basis(); i.woning.doel = 'nieuwbouw'; i.woning.koopsom = 360000; i.woning.marktwaarde = mw === undefined ? null : mw; i.kosten.eigenGeld = null; i.leningdelen[0].bedrag = null; i.nieuwbouw = nb; return E.resultaat(i); };
+r = nieuwbouw({ grond: 20000, meerwerk: 15000, minderwerk: 5000, bouwrente: 6000, nutsaansluiting: 4000 });
+assert.strictEqual(r.kosten.stichtingskosten, 400000); assert.strictEqual(r.totalen.marktwaarde, 400000);
+assert.strictEqual(nieuwbouw({ bouwwijze: 'zelfbouw' }).oordeel, 'past_niet');
+assert.strictEqual(nieuwbouw({ bouwwijze: 'eigenbeheer' }).oordeel, 'past');
+assert.strictEqual(nieuwbouw({ meerwerk: 10000 }, 420000).oordeel, 'voorbehoud');                   // hogere waarde dan de stichtingskosten: taxatie nodig
+
+// 23. Tijdelijk twee hypotheken (hypotheekgids 1.7.2): de oude lening gaat naar het 1-jaarstarief
+inv = basis(); inv.leningdelen = [{ vorm: 'ann', bedrag: 200000, looptijd: 22, rentevast: 12, meegenomen: true, rente: 2.1 }, { vorm: 'ann', bedrag: 180000, looptijd: 30, rentevast: 10 }];
+inv.tweeHypotheken = { restschuld: 150000, marktwaarde: 300000, vorm: 'ann', eigenMiddelen: 10000 };
+r = E.resultaat(inv);
+assert.strictEqual(r.tijdelijkTweeHypotheken.rentePct, E.RATES.annuitair['1'][1]);                   // 50% van de waarde: klasse tot en met 50%
+assert.strictEqual(r.tijdelijkTweeHypotheken.rentePerMaand, Math.round(150000 * E.RATES.annuitair['1'][1] / 12) / 100);
+
+// 24. Overige regels uit hoofdstuk 7: PGB, opschortende voorwaarde, schuldsanering, starterslening, garagebox
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 80000 }, { soort: 'pgb', bedrag: 12000, bestaandeKlant: true }] }]), [92000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 80000 }, { soort: 'pgb', bedrag: 12000 }] }]), [80000, 0]);
+assert.deepStrictEqual(toetsVan([{ inkomens: [{ soort: 'vast', salaris: 80000 }, { soort: 'pgb', bedrag: 12000, bestaandeKlant: true }] }], true), [80000, 0]);
+assert.strictEqual(type({ klant: { opschortendeVoorwaarde: true } }).oordeel, 'past_niet');
+assert.strictEqual(type({ klant: { schuldsanering: true } }).oordeel, 'past_niet');
+r = type({ klant: { overnameStarterslening: true } }); assert.strictEqual(r.oordeel, 'past'); assert.ok(r.documenten.some(d => d.groep === 'Starterslening'));
+assert.strictEqual(type({ woning: { woningtype: 'garagebox' } }).oordeel, 'past_niet');             // alleen bij een verhoging
+inv = verhoging(20000); inv.woning.woningtype = 'garagebox'; assert.strictEqual(E.resultaat(inv).oordeel, 'past');
+
 console.log('Alle tests geslaagd');
