@@ -1,6 +1,6 @@
 {
   "_toelichting": "Uitvoer van ArgentaEngine.resultaat() voor voorbeelden/aanvraag.json. tarieven.leeftijdDagen hangt af van de datum van uitvoeren en is hier leeg gelaten.",
-  "versie": "1.2.0",
+  "versie": "1.3.0",
   "oordeel": "past",
   "toelichting": "Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.",
   "afwijzingen": [],
@@ -120,6 +120,10 @@
       ]
     }
   ],
+  "verplichtingen": {
+    "perKrediet": [],
+    "totaalPerMaand": 0
+  },
   "inkomensbepaling": null,
   "inkomenstoets": {
     "toetsinkomen": 103000,

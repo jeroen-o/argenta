@@ -15,7 +15,7 @@ const REGELS = {
   consMax: 100000, consMaxLtv: 80,
   desktopMaxLtv: 90, desktopMaxHoofdsom: 1000000, desktopMaxWaarde: 1500000,
   bouwdepotVrij: 25000, eigenMiddelenBewijs: 25000,
-  ovbKosten: 250, ovbVerkoopkostenPct: 1.85,
+  ovbKosten: 250, ovbVerkoopkostenPct: 1.85, kredietPct: 2, minVerhoging: 5000, herstelPct: 10,
   /* Toetsrente voor rentevast korter dan 10 jaar: de AFM stelt deze per kwartaal vast. Pas de standaardwaarde hier aan. */
   toetsrenteStandaard: 5,
   /* Tariefbewaking: na dit aantal dagen geldt de tariefkaart als mogelijk verouderd */
@@ -199,6 +199,14 @@ function bepaalInkomens(lijst, nhg, leningrente) {
         case 'vast': {
           o.bedrag = g(b, 'salaris') + g(b, 'vakantietoeslag') + g(b, 'vast13') + g(b, 'variabel');
           o.toelichting = 'bruto jaarsalaris, vakantietoeslag, vaste 13e maand of eindejaarsuitkering en structurele toeslagen';
+          if (g(b, 'verhoging') > 0) {
+            if (g(b, 'verhogingMaanden') <= 6) { o.bedrag += g(b, 'verhoging'); o.toelichting += `; toekomstige verhoging ${fmtEuro0(g(b, 'verhoging'))}`; voorwaarden.push(`${wie}: de werkgever verklaart dat de loonsverhoging onvoorwaardelijk is en uiterlijk 6 maanden na de bindende offerte ingaat.`); }
+            else letop.push(`${wie}: de toekomstige loonsverhoging gaat later dan 6 maanden na de bindende offerte in en is niet meegeteld.`);
+          }
+          if (b.toekomstig) {
+            if (g(b, 'startMaanden') > 6) { fouten.push(`${wie}: een toekomstig dienstverband telt alleen mee als het uiterlijk 6 maanden na de bindende offerte ingaat.`); o.bedrag = 0; }
+            else { o.toelichting += '; toekomstig dienstverband'; voorwaarden.push(`${wie}: het toekomstige dienstverband is voor onbepaalde tijd zonder proeftijd en gaat uiterlijk 6 maanden na de bindende offerte in; werkgeversverklaring en arbeidsovereenkomst worden aangeleverd.`); }
+          }
           const bonus = [g(b, 'bonus1'), g(b, 'bonus2'), g(b, 'bonus3')], persoonlijk = g(b, 'bonusPersoonlijk');
           if (bonus.some(x => x > 0) || persoonlijk > 0) {
             if (nhg) letop.push(`${wie}: bonussen tellen bij een aanvraag met NHG niet mee in het toetsinkomen.`);
@@ -298,6 +306,32 @@ function bepaalInkomens(lijst, nhg, leningrente) {
   return { per, fouten, letop, voorwaarden, voorbehoud };
 }
 
+/* Maandlast van financiële verplichtingen per krediet (hypotheekgids 6.3) */
+const KREDIET_SOORTEN = {
+  RK: { naam: 'Doorlopend krediet (RK)', regel: 'limiet' }, VK: { naam: 'Verzendhuiskrediet (VK)', regel: 'limiet' },
+  AK: { naam: 'Aflopend krediet (AK)', regel: 'looptijd' }, OA: { naam: 'Operational autolease (OA)', regel: 'looptijd' },
+  RN: { naam: 'Restschuld met of zonder NHG (RN/RH)', regel: 'werkelijk' }, HO: { naam: 'Hypotheek overig onroerend goed (HO)', regel: 'werkelijk' },
+  overig: { naam: 'Overig, niet bij BKR geregistreerd', regel: 'werkelijk' }, ZK: { naam: 'Zakelijk krediet (ZK)', regel: 'zakelijk' }
+};
+function kredietlasten(lijst) {
+  const regels = [], letop = [], voorwaarden = [];
+  let totaal = 0;
+  (lijst || []).forEach(k => {
+    const soort = KREDIET_SOORTEN[k.soort], g = v => (k[v] == null || k[v] === '') ? 0 : (+k[v] || 0);
+    let last = 0, hoe = '';
+    if (k.aflossen) { hoe = 'wordt afgelost voor de bindende offerte; telt niet mee'; voorwaarden.push(`${soort.naam}: het krediet wordt afgelost uit eigen middelen; aflossingsbewijs en afmelding bij BKR zijn nodig voor de bindende offerte.`); }
+    else if (soort.regel === 'limiet') { last = g('limiet') * REGELS.kredietPct / 100; hoe = `${fmtPct(REGELS.kredietPct, 0)} van de oorspronkelijke hoofdsom ${fmtEuro0(g('limiet'))}`; }
+    else if (soort.regel === 'looptijd') {
+      if (g('bedrag') > 0 && g('looptijdMaanden') > 0) { last = g('bedrag') / g('looptijdMaanden'); hoe = `geregistreerd bedrag ${fmtEuro0(g('bedrag'))} gedeeld door ${g('looptijdMaanden')} maanden`; }
+      else { last = g('maandbedrag'); hoe = 'opgegeven maandbedrag'; if (!last) letop.push(`${soort.naam}: vul het geregistreerde bedrag en de looptijd uit BKR in, of het maandbedrag.`); }
+    } else if (soort.regel === 'werkelijk') { last = g('maandbedrag'); hoe = 'werkelijke maandlast'; }
+    else { hoe = 'telt niet mee; hoort in de inkomensverklaring of de cijfers van de onderneming'; letop.push('Zakelijk krediet: moet onderdeel zijn van de Inkomensverklaring Ondernemer of van de cijfers van de afgelopen 3 jaar.'); }
+    totaal += last;
+    regels.push({ soort: k.soort, omschrijving: soort.naam, maandlast: Math.round(last * 100) / 100, toelichting: hoe });
+  });
+  return { regels, totaal, letop, voorwaarden };
+}
+
 /* Werkelijke bruto maandlast (1e maand) van een leningdeel tegen de toetsrente */
 function werkelijkeLast(x) {
   const r = x.toets / 100 / 12, n = x.d.looptijd * 12, b = x.d.bedrag;
@@ -338,11 +372,13 @@ function inkomenstoets(rijen, totaal, labelIdx) {
   rijen.forEach(x => { x.toets = (x.d.rvp === 'var' || +x.d.rvp < 10) ? toetsKort : (x.rente || 0); });
   const gemToets = rijen.reduce((s, x) => s + x.toets * x.d.bedrag, 0) / totaal;
   const kol = normKolom(gemToets);
-  const pct = normPct(aow ? 'welAOW' : 'nietAOW', inkomen, kol);
   const pctBox3 = normPct(aow ? 'box3welAOW' : 'box3nietAOW', inkomen, kol);
+  /* Buitenlands belastingplichtig (hypotheekgids 6.4): de tabel voor fiscaal niet-aftrekbare leningen */
+  const pct = F.buitenland ? pctBox3 : normPct(aow ? 'welAOW' : 'nietAOW', inkomen, kol);
+  const box3Deel = x => x.d.consumptief || (F.verhoging && F.verhogingBox3 && x.d.vorm === 'av' && !x.d.meegenomen);
   /* Toetslast: annuïtair over 30 jaar tegen de toetsrente; niet-aftrekbare (consumptieve) delen gewogen met de box 3-tabel */
   const werkelijk = F.regeling === 'aow' && aow;
-  const toetslast = rijen.reduce((s, x) => s + (werkelijk ? werkelijkeLast(x) : x.d.bedrag * annFactor(x.toets, x.d.vorm !== 'av' ? Math.min(30, x.d.looptijd) : 30)) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
+  const toetslast = rijen.reduce((s, x) => s + (werkelijk ? werkelijkeLast(x) : x.d.bedrag * annFactor(x.toets, x.d.vorm !== 'av' ? Math.min(30, x.d.looptijd) : 30)) * (box3Deel(x) ? pct / pctBox3 : 1), 0);
   const brutering = NORMEN.brutering[kol];
   const studieBruto = F.studie * brutering;
   const toegestaan = inkomen * pct / 12 - F.verplichtingen - studieBruto;
@@ -372,7 +408,10 @@ function bereken() {
   const korting = RATES.korting[label.korting] || 0;
   const fouten = [], letop = [], voorbehoud = [], voorwaarden = [];
   const tweeAanvragersVroeg = F.aantalAanvragers > 1;
-  const isOha = doel === 'oha';
+  const isOha = doel === 'oha', isVerhoging = doel === 'verbouwing' && F.verhoging;
+  const krediet = kredietlasten(F.kredieten);
+  F.verplichtingen += krediet.totaal;
+  letop.push(...krediet.letop); voorwaarden.push(...krediet.voorwaarden);
   const maxAvBedrag = isOha ? (F.ohaWaarde || mw) * EXTRA.ohaAvPct / 100 : Math.min(mw * REGELS.avMaxPct / 100, REGELS.avMaxBedrag);
 
   const rijen = delen.map((d, i) => {
@@ -411,7 +450,9 @@ function bereken() {
   if (Math.abs(totaal - k.teFinancieren) > 1) letop.push(`De leningdelen (${fmtEuro0(totaal)}) wijken af van het te financieren bedrag uit stap 2 (${fmtEuro0(k.teFinancieren)}).`);
   if (mw > 0 && mw < REGELS.minMarktwaarde) fouten.push(`Minimale marktwaarde is ${fmtEuro0(REGELS.minMarktwaarde)}.`);
   if (mw <= 0) fouten.push('Vul de marktwaarde in.');
-  if (totaal > 0 && totaal < REGELS.minHoofdsom) fouten.push(`Minimale hoofdsom is ${fmtEuro0(REGELS.minHoofdsom)}.`);
+  const nieuwDeel = delen.filter(d => !d.meegenomen).reduce((t, d) => t + d.bedrag, 0);
+  if (isVerhoging) { if (nieuwDeel > 0 && nieuwDeel < REGELS.minVerhoging) fouten.push(`De minimale hoofdsom voor een vervolghypotheek of onderhandse verhoging is ${fmtEuro0(REGELS.minVerhoging)}.`); }
+  else if (totaal > 0 && totaal < REGELS.minHoofdsom) fouten.push(`Minimale hoofdsom is ${fmtEuro0(REGELS.minHoofdsom)}.`);
   if (totaalIncl > REGELS.maxHoofdsom) fouten.push(`Maximale hoofdsom is ${fmtEuro0(REGELS.maxHoofdsom)} (inclusief overbrugging en verhogingen).`);
   if (totaal > REGELS.grensGroot && ltv > REGELS.maxLtvGroot) fouten.push(`Bij een hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} geldt een maximale verstrekking van ${REGELS.maxLtvGroot}% van de marktwaarde.`);
   if (ovb && totaalIncl > REGELS.grensGroot && F.ovbSituatie >= 'c') { const t = `Hoofdsom boven ${fmtEuro0(REGELS.grensGroot)} inclusief overbrugging op een onverkochte woning: individuele beoordeling, langere doorlooptijd.`; letop.push(t); voorbehoud.push(t); }
@@ -624,6 +665,30 @@ function bereken() {
   else if (F.fundering) zet('Funderingsrisico', 'ok', `klasse ${F.fundering}: geen individuele beoordeling nodig.`);
   else voorwaarden.push('Het funderingsrisico volgens het taxatierapport of de desktoptaxatie is maximaal klasse C. Bij klasse D (hoog risico) of E (vastgesteld funderingsprobleem) beoordeelt Argenta het dossier individueel.');
 
+  /* Verhoging of tweede hypotheek (hypotheekgids 1.2.4 en de adviseurspagina over wijzigingen in beheer) */
+  if (isVerhoging) {
+    const naam = F.verhogingSoort === 'tweede' ? 'Tweede hypotheek' : 'Onderhandse verhoging';
+    if (!F.verhogingBijArgenta) zet(naam, 'fout', 'een vervolghypotheek of verhoging kan alleen als de eerdere hypotheek ook bij Argenta is afgesloten; achter een andere geldverstrekker is niet mogelijk.');
+    if (F.verhogingAchterstand) zet(naam, 'fout', 'bij een lopende betalingsachterstand is een onderhandse verhoging of vervolghypotheek niet mogelijk.');
+    else if (F.verhogingAchterstand12) zet(naam, 'letop', 'in de afgelopen 12 maanden was er een achterstand of onregelmatige betaling: een verklaring van de klant wordt aan Argenta voorgelegd en kan reden zijn voor afwijzing.');
+    if (!delen.some(d => d.meegenomen)) letop.push(naam + ': voer de bestaande leningdelen op als “bestaand leningdeel” met de eigen rente, resterende rentevaste periode en resterende looptijd, zodat de hele lening wordt getoetst.');
+    if (!fouten.some(t => t.indexOf(naam) === 0)) zet(naam, 'ok', `nieuw te lenen ${fmtEuro0(nieuwDeel)} naast ${fmtEuro0(totaal - nieuwDeel)} bestaande leningdelen; bestaande delen zijn getoetst op de resterende looptijd en de resterende rentevaste periode.`);
+    if (av > 0) letop.push(naam + ': bij een aflossingsvrij deel in de bestaande of nieuwe lening is een Calcasa Desktop Taxatie Plus of volledige taxatie verplicht; een nieuw aflossingsvrij deel wordt als niet-aftrekbaar (box 3) getoetst.');
+    letop.push(F.verhogingSoort === 'tweede' ? 'Tweede hypotheek: er is een nieuwe inschrijving bij de notaris nodig.' : 'Onderhandse verhoging: het renteaanbod kan niet worden verlengd.');
+    letop.push(naam + ': meerdere wijzigingen in dezelfde hypotheek tegelijk zijn niet mogelijk.');
+  }
+
+  /* Bouwkundig rapport en achterstallig onderhoud (hypotheekgids 2.1.4 en 2.1.5) */
+  const rapportNodig = (F.herstelkosten > 0 && mw > 0 && F.herstelkosten > mw * REGELS.herstelPct / 100) || F.bouwkundigOnderzoek || F.bouwkundigSlecht;
+  if (rapportNodig) {
+    const reden = F.bouwkundigSlecht ? 'de bouwkundige toestand van de woning is slecht' : F.bouwkundigOnderzoek ? 'de taxateur adviseert verder bouwkundig onderzoek' : `de directe herstelkosten (${fmtEuro0(F.herstelkosten)}) zijn meer dan ${REGELS.herstelPct}% van de marktwaarde`;
+    if (F.herstelkosten > k.verbouwing) zet('Bouwkundig rapport', 'fout', `een bouwkundig rapport is verplicht omdat ${reden}. De direct noodzakelijke herstelkosten (${fmtEuro0(F.herstelkosten)}) moeten in een bouwdepot worden opgenomen; in stap 2 staat ${fmtEuro0(k.verbouwing)} verbouwing.`);
+    else zet('Bouwkundig rapport', 'letop', `een bouwkundig rapport is verplicht omdat ${reden}. De direct noodzakelijke herstelkosten${F.herstelkosten ? ' (' + fmtEuro0(F.herstelkosten) + ')' : ''} komen in een bouwdepot en de klant moet het herstel laten uitvoeren.`);
+    voorwaarden.push('Bouwkundig rapport: opgemaakt door een gemeente, Vereniging Eigen Huis of een bij de KvK ingeschreven bouwkundig bedrijf (model NHG), onafhankelijk van koop, verkoop, taxatie en financiering, en maximaal 12 maanden oud.');
+  } else if (F.herstelkosten > 0) zet('Bouwkundig rapport', 'ok', `de directe herstelkosten (${fmtEuro0(F.herstelkosten)}) zijn niet meer dan ${REGELS.herstelPct}% van de marktwaarde; een bouwkundig rapport is niet verplicht.`);
+  if (F.buitenland) letop.push('Buitenlands belastingplichtig: de inkomenstoets rekent met de tabel voor fiscaal niet-aftrekbare leningen. Dat geldt niet als een belastingverdrag de eigen woning in Nederland fiscaal behandelt, of als de aanvrager met het hoogste inkomen in Nederland belastingplichtig is.');
+  if (F.dertig) letop.push('30%-regeling: het bruto jaarinkomen telt mee zonder ophoging; het fiscale voordeel mag niet bruto worden gemaakt.');
+
   /* Woningtype (hypotheekgids 2.3) */
   if (F.woningtype === 'uitgesloten') zet('Woningtype', 'fout', 'Argenta verstrekt geen hypotheek op dit type woning (onder meer serviceflat, studenten- of noodwoning, verhuurde woning, vruchtgebruik, recht van opstal, coöperatief eigendom, recreatiebestemming, zeecontainers, zelfbouw zonder aannemer).');
   else if (F.woningtype === 'bedrijfsruimte') {
@@ -736,6 +801,7 @@ function bereken() {
   if (!soorten.size) inkDocs.push('Loondienst: UWV-verzekeringsbericht (IBL) of werkgeversverklaring volgens het NHG-model met salarisstrook*', 'Ander inkomen: zie de checklist in de hypotheekgids');
   if (soorten.has('ibl')) inkDocs.push('UWV-verzekeringsbericht*', 'Salarisstrook* (alleen als de eigen bijdrage pensioen nodig is voor het toetsinkomen)');
   if (soorten.has('vast')) inkDocs.push('Werkgeversverklaring volgens het laatste NHG-model*', 'Salarisstrook*');
+  if ([].concat(F.bronnen[0], F.bronnen[1]).some(b => b.toekomstig || +b.verhoging > 0)) inkDocs.push('Toekomstig inkomen: verklaring van de werkgever over de onvoorwaardelijke verhoging, of de arbeidsovereenkomst van het toekomstige dienstverband');
   if (soorten.has('flex')) inkDocs.push('Werkgeversverklaring volgens het laatste NHG-model* en salarisstrook*', 'Jaaropgaven van de afgelopen 3 kalenderjaren of de inkomensverklaring van de Belastingdienst (IB60)');
   if (soorten.has('perspectief')) inkDocs.push('Perspectiefverklaring met de bijbehorende werkgeversverklaring (niet ouder dan 6 maanden)');
   if (soorten.has('onderneming')) inkDocs.push('Inkomensverklaring Ondernemer' + (nhg ? '' : ', of cijfers en aangiften inkomstenbelasting van de laatste 3 jaar met 2 recente belastingaanslagen'), 'Uitdraai van het UBO-register (niet bij een eenmanszaak)');
@@ -752,11 +818,12 @@ function bereken() {
     .concat(erfpacht ? ['Erfpachtovereenkomst' + (F.epUitgever === 'particulier' && F.epVestiging === 'voor2013' ? ' en de erfpachtopinie van de notaris of het NivE' : '')] : [])
     .concat(korting || doel === 'nieuwbouw' ? ['(Voorlopig) energielabel of toegekende groenverklaring'] : [])
     .concat(F.fundering === 'D' || F.fundering === 'E' ? ['Funderingsonderzoek en informatie over de herstelkosten'] : [])
-    .concat(k.verbouwing > 0 ? ['Specificatie van de verbouwing of het bouwkundig rapport'] : []));
+    .concat(rapportNodig ? ['Bouwkundig rapport (maximaal 12 maanden oud)'] : k.verbouwing > 0 ? ['Specificatie van de verbouwing of het bouwkundig rapport'] : []));
   if (doel === 'nieuwbouw') doc('Nieuwbouw', ['Koop-/aannemingsovereenkomst met de garantie- en waarborgregeling (keurmerk Stichting GarantieWoning) of het garantiecertificaat', 'Omgevingsvergunning (onherroepelijk bij passeren)']
     .concat(labelIdx === 0 ? ['Kopie van het EnergiePrestatieGarantie-certificaat'] : []));
   if (app && !F.vveOnbekend) { const v = extra.find(e => e[0] === 'VvE'); const stukken = v ? (v[2].match(/aanleveren: ([^.]*)\./) || [])[1] : null; if (stukken) doc('VvE', [stukken.charAt(0).toUpperCase() + stukken.slice(1)]); }
   const lasten = [];
+  if (krediet.regels.some(x => /AK|OA/.test(x.soort))) lasten.push('BKR-overzicht met het geregistreerde bedrag en de looptijd van aflopende kredieten en operational lease');
   if (F.verplichtingen > 0) lasten.push('Bewijsstukken van de overige lasten en financiële verplichtingen', 'Bij aflossen van een krediet: aflossingsbewijs, bewijs van afmelding bij BKR en bewijs van eigen middelen voor de aflossing');
   if (F.studie > 0) lasten.push('Overzicht studieschuld van DUO (Mijn DUO)');
   if (F.aftrek > 0) lasten.push('Echtscheidingsconvenant of -beschikking waaruit de alimentatieplicht blijkt');
@@ -827,7 +894,7 @@ function bereken() {
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
-    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkp(totaal - kredietKosten, termijnen), extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
     oordeel: fouten.length ? 'past_niet' : voorbehoud.length ? 'voorbehoud' : 'past' };
 }
 
@@ -841,7 +908,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.2.0';
+const VERSIE = '1.3.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -863,6 +930,9 @@ function vlak(inv) {
     notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
     overig: (k.overig || []).filter(o => getal(o.bedrag) > 0).map(o => ({ omschrijving: String(o.omschrijving || 'Overige kosten'), bedrag: getal(o.bedrag), kredietkosten: !!o.kredietkosten })), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
     aantalAanvragers: a.length, verblijf: [(a[0] || {}).verblijf || 'nl', (a[1] || {}).verblijf || 'nl'], woningtype: w.woningtype || 'standaard', bedrijfsdeel: getal(w.bedrijfsdeelPct), bestemmingWonen: w.bestemmingWonen !== false,
+    kredieten: (i.kredieten || []), buitenland: !!i.buitenlandsBelastingplichtig, dertig: !!i.dertigProcentRegeling,
+    verhoging: !!inv.verhoging, verhogingSoort: (inv.verhoging || {}).soort || 'onderhands', verhogingBijArgenta: (inv.verhoging || {}).bestaandBijArgenta !== false, verhogingAchterstand: !!(inv.verhoging || {}).achterstand, verhogingAchterstand12: !!(inv.verhoging || {}).achterstandLaatste12Maanden, verhogingBox3: true,
+    herstelkosten: getal(w.herstelkosten), bouwkundigOnderzoek: !!w.bouwkundigOnderzoekGeadviseerd, bouwkundigSlecht: !!w.bouwkundigeStaatSlecht,
     familie: !!(inv.klant || {}).familieverband, borg: !!(inv.klant || {}).borgstelling, bewind: !!(inv.klant || {}).bewind, abc: !!(inv.klant || {}).abcConstructie,
     bronnen: [(a[0] || {}).inkomens || [], (a[1] || {}).inkomens || []], naPensioen: [getal((a[0] || {}).inkomenNaPensioen), getal((a[1] || {}).inkomenNaPensioen)],
     ink1: getal((a[0] || {}).toetsinkomen), ink2: getal((a[1] || {}).toetsinkomen), klant2: a.length > 1, geb1: (a[0] || {}).geboortedatum || '', geb2: (a[1] || {}).geboortedatum || '',
@@ -892,6 +962,8 @@ function controleer(inv) {
   kies('woning.woningtype', w.woningtype, ['standaard', 'bedrijfsruimte', 'woonboerderij', 'kangoeroe', 'uitgesloten']);
   (inv.aanvragers || []).forEach((q, n) => kies(`aanvragers[${n}].verblijf`, q.verblijf, ['nl', 'eu', 'onbepaald', 'niettijdelijk', 'tijdelijk']));
   kies('woning.funderingsrisico', w.funderingsrisico, ['A', 'B', 'C', 'D', 'E']);
+  ((inv.inkomen || {}).kredieten || []).forEach((q, n) => kies(`inkomen.kredieten[${n}].soort`, q.soort || '', Object.keys(KREDIET_SOORTEN)));
+  kies('verhoging.soort', (inv.verhoging || {}).soort, ['onderhands', 'tweede']);
   kies('inkomen.regeling', (inv.inkomen || {}).regeling, ['geen', 'aow', 'senioren', 'tekort']);
   (inv.aanvragers || []).forEach((p, n) => (p.inkomens || []).forEach((b, m) => kies(`aanvragers[${n}].inkomens[${m}].soort`, b.soort || '', Object.keys(INKOMEN_SOORTEN))));
   kies('bkr.status', (inv.bkr || {}).status, ['onbekend', 'schoon', 'negatief', 'hy2', 'hy', 'herstelA2', 'herstelA0']);
@@ -940,6 +1012,7 @@ function resultaat(inv) {
     grenzen: r.grenzen,
     kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     documenten: r.documenten,
+    verplichtingen: { perKrediet: r.krediet.regels, totaalPerMaand: Math.round(F.verplichtingen * 100) / 100 },
     inkomensbepaling: r.inkBep ? r.inkBep.per.map((b, n) => ({ aanvrager: n + 1, toetsinkomen: b.toets, onderdelen: b.onderdelen.map(o => ({ soort: o.soort, omschrijving: o.omschrijving, bedrag: o.bedrag, toelichting: o.toelichting })) })) : null,
     inkomenstoets: t ? { toetsinkomen: t.inkomen, toetsrentePct: rond(t.gemToets, 3), financieringslastPct: rond(t.pct * 100, 1), methode: t.werkelijk ? 'werkelijke_lasten' : 'annuitair_30_jaar',
       toegestaneMaandlast: rond(t.toegestaan), toetslast: rond(t.toetslast), maximaleHypotheek: rond(t.maxHyp, 0), ruimte: rond(t.ruimte, 0), vrijgesteld: t.vrij.map(([omschrijving, bedrag]) => ({ omschrijving, bedrag })) } : null,
@@ -953,7 +1026,7 @@ function resultaat(inv) {
   };
 }
 
-return { VERSIE, RATES, NORMEN, BEHEER, INKOMEN_SOORTEN, REGELS, NHG, VORMEN, LABELS, LABEL_CODES, VOORWAARDEN, OORDEEL_TEKST, fmtEuro0, fmtEuro2, fmtPct, klasseNaam, beoordeel, resultaat, tariefStatus };
+return { VERSIE, RATES, NORMEN, BEHEER, INKOMEN_SOORTEN, KREDIET_SOORTEN, REGELS, NHG, VORMEN, LABELS, LABEL_CODES, VOORWAARDEN, OORDEEL_TEKST, fmtEuro0, fmtEuro2, fmtPct, klasseNaam, beoordeel, resultaat, tariefStatus };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = ArgentaEngine;

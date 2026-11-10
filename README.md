@@ -31,7 +31,7 @@ of opgeslagen.
 | --- | --- |
 | Rente per leningdeel: NHG of risicoklasse, duurzaamheidskorting, opslag consumptief, groen lenen, variabel, overbrugging | tariefkaart Argenta |
 | Hoofdsom, LTV, aflossingsvrij, koopstarters, consumptief, groen lenen, Desktop Taxatie, overbrugging | hypotheekgids, hoofdstuk 1–3 |
-| Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig pensioen | hypotheekgids hoofdstuk 5 |
+| Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig inkomen en toekomstig pensioen | hypotheekgids hoofdstuk 5 |
 | Inkomenstoets: financieringslastpercentages, toetsrente, studielening, energielabel, alleenstaanden | Tijdelijke regeling hypothecair krediet 2027 |
 | NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |
 | Werkelijke lasten voor AOW-gerechtigden, senioren verhuisregeling, tijdelijk-tekortregeling | hypotheekgids 5.1.1 en 5.1.2 |
@@ -39,6 +39,9 @@ of opgeslagen.
 | Aanvrager: minimumleeftijd, nationaliteit en verblijf, familieverband, borgstelling, bewind | hypotheekgids 4.1 en 4.2 |
 | Documentenlijst per dossier | hypotheekgids hoofdstuk 8 |
 | BKR-uitkomst, aantal contracten, loonbeslag | hypotheekgids 6.2 en 7.1.1 |
+| Maandlast per krediet, buitenlands belastingplichtig, 30%-regeling | hypotheekgids 6.3 en 6.4 |
+| Verhoging en tweede hypotheek | hypotheekgids 1.2.4 en de adviseurspagina over wijzigingen in beheer |
+| Bouwkundig rapport en herstelkosten in depot | hypotheekgids 2.1.4 en 2.1.5 |
 | Dubbele lasten bij overbrugging | hypotheekgids 1.8.1 |
 | Verhuisregeling: meegenomen leningdeel met eigen rente en resterende rentevaste periode | hypotheekgids 1.7 |
 | Ontslag hoofdelijke aansprakelijkheid: leennorm, werkelijke lasten, beheertoets | adviseurspagina Argenta OHA, NHG D.4, D.6 en bijlage 5 |
