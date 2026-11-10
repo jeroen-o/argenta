@@ -58,6 +58,7 @@ tariefklasse), funderingsrisico, BKR, minimaal toetsinkomen, benodigd eigen geld
 | --- | --- |
 | `index.html` | De rekentool; bevat ook de rekenkern (enige bron) |
 | `handleiding.html` | Handleiding voor de tool en de API |
+| `testinstructie.html` | Testinstructie voor Argenta: testdossiers, de rekenregels die bevestigd moeten worden en het terugmelden van afwijkingen |
 | `argenta-engine.js` | De rekenkern als module voor koppelingen (gegenereerd uit `index.html`) |
 | `hdn-adapter.js`, `hdn-mapping.json` | Omzetting van een HDN-aanvraagbericht naar de invoer van de rekenkern; **de mapping moet nog worden ingevuld** |
 | `voorbeelden/aanvraag.json`, `voorbeelden/aanvraag-inkomensbronnen.json`, `voorbeelden/uitkomst.json` | Voorbeelden van de invoer en de uitvoer van de API |
@@ -130,7 +131,7 @@ workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. D
   van het ESIS, maar is zelf geen renteaanbod, bindend aanbod of ESIS. De wettelijke eisen zijn niet tegen de wettekst gecontroleerd.
 - **Logo.** Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraagt toestemming van Argenta.
 - **Tips.** De tips voor de adviseur zijn rekenkundige mogelijkheden, geen advies; ze staan niet op de conceptofferte.
-- **Voorbeeldofferte.** Het voorbeeld in `voorbeelden/` bevat echte namen met fictieve gegevens.
+- **Voorbeeldofferte.** Het voorbeeld in `voorbeelden/` bevat fictieve namen en gegevens.
 - Laat compliance de teksten toetsen voordat de tool naar adviseurs gaat.
 
 ## Beperkingen
