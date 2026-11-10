@@ -212,7 +212,7 @@ function inkomenstoets(rijen, totaal, labelIdx) {
   const pctBox3 = normPct(aow ? 'box3welAOW' : 'box3nietAOW', inkomen, kol);
   /* Toetslast: annuïtair over 30 jaar tegen de toetsrente; niet-aftrekbare (consumptieve) delen gewogen met de box 3-tabel */
   const werkelijk = F.regeling === 'aow' && aow;
-  const toetslast = rijen.reduce((s, x) => s + (werkelijk ? werkelijkeLast(x) : x.d.bedrag * annFactor(x.toets, x.d.meegenomen && x.d.vorm !== 'av' ? Math.min(30, x.d.looptijd) : 30)) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
+  const toetslast = rijen.reduce((s, x) => s + (werkelijk ? werkelijkeLast(x) : x.d.bedrag * annFactor(x.toets, x.d.vorm !== 'av' ? Math.min(30, x.d.looptijd) : 30)) * (x.d.consumptief ? pct / pctBox3 : 1), 0);
   const brutering = NORMEN.brutering[kol];
   const studieBruto = F.studie * brutering;
   const toegestaan = inkomen * pct / 12 - F.verplichtingen - studieBruto;
@@ -410,20 +410,37 @@ function bereken() {
     const beheerPct = (soort, inkomen, kol) => { const t = BEHEER[tabelNaam][soort]; return t.pct[Math.max(0, Math.min(t.pct.length - 1, Math.floor((inkomen - t.start) / 1000)))][kol] / 1000; };
     /* Toetsrente beheer: werkelijke rente bij een resterende rentevaste periode van minimaal 3 jaar, anders het 3-jaarstarief als dat hoger is */
     const beheerRente = x => { const rvp = x.d.rvp === 'var' ? 0 : +x.d.rvp; if (rvp >= EXTRA.ohaMinRvp || x.rente == null) return x.rente || 0; const v = VORMEN[x.d.vorm]; const drie = v.groen ? RATES.groen['5'][nhg ? 0 : 1] : RATES[v.tabel]['3'][idx]; return Math.max(x.rente, drie); };
-    const lastVan = (x, r) => { const b = x.d.bedrag, m = r / 100 / 12, n = x.d.looptijd * 12; return x.d.vorm === 'av' ? b * m : (x.d.vorm === 'lin' || x.d.vorm === 'groenLin') ? b / n + b * m : b * annFactor(r, x.d.looptijd); };
-    const inkomen = Math.max(0, F.ink1 + F.ink2 - F.aftrek);
+    const lastVan = (x, r, b) => { const m = r / 100 / 12, n = x.d.looptijd * 12; return x.d.vorm === 'av' ? b * m : (x.d.vorm === 'lin' || x.d.vorm === 'groenLin') ? b / n + b * m : b * annFactor(r, x.d.looptijd); };
+    /* Toetsinkomen volgens de NHG-beheercriteria (D.6.3) */
+    const consumenten = alleen ? 1 : 2, jaren3 = [F.ohaJ1, F.ohaJ2, F.ohaJ3].filter(j => j > 0);
+    let inkBeheer = F.ohaEinde && jaren3.length ? Math.max(jaren3.reduce((t, j) => t + j, 0) / jaren3.length, F.ohaJ1) : (F.ohaInkBeheer || F.ink1 + F.ink2);
+    if (F.ohaPensioen > 0) inkBeheer = Math.min(inkBeheer, F.ohaPensioen);
+    const inkomen = Math.max(0, inkBeheer - F.aftrek);
     if (inkomen > 0 && totaal > 0) {
-      const gem = rijen.reduce((t, x) => t + beheerRente(x) * x.d.bedrag, 0) / totaal, kol = normKolom(gem);
-      const pct = beheerPct('regulier', inkomen, kol), pct3 = beheerPct('box3', inkomen, kol);
-      const last = rijen.reduce((t, x) => t + lastVan(x, beheerRente(x)) * (x.d.consumptief ? pct / pct3 : 1), 0) + (erfpacht ? F.epCanon / 12 : 0);
+      const gem = Math.round(rijen.reduce((t, x) => t + beheerRente(x) * x.d.bedrag, 0) / totaal * 1000) / 1000, kol = normKolom(gem);
+      const pct = beheerPct('regulier', inkomen, kol), pct3 = beheerPct('box3', inkomen, kol), canon = erfpacht ? F.epCanon / 12 : 0;
+      const weeg = x => x.d.consumptief ? pct / pct3 : 1;
       const toegestaan = inkomen * pct / 12 - F.verplichtingen - F.studie;
-      oha = { tabel: tabelTekst, inkomen, toetsrente: gem, pct, last, toegestaan, ruimte: toegestaan - last };
+      /* Werkelijke lasten (NHG D.4.2.2): rente, aflossing en erfpachtcanon */
+      const last = rijen.reduce((t, x) => t + lastVan(x, beheerRente(x), x.d.bedrag) * weeg(x), 0) + canon;
+      /* Beheertoets (NHG D.6.5): zo groot mogelijk deel aflossingsvrij en vermogen in mindering op de hoofdsom */
+      const vermogenVrij = Math.max(0, F.ohaVermogen - 0.017 * F.ohaWoz - 3550 * consumenten);
+      const factor = Math.max(0, totaal - vermogenVrij) / totaal;
+      const aflossend = rijen.filter(x => x.d.vorm !== 'av').reduce((t, x) => t + x.d.bedrag * factor, 0);
+      const avExtra = Math.max(0, Math.min(totaal * factor, maxAvBedrag) - av * factor), deel = aflossend > 0 ? Math.min(1, avExtra / aflossend) : 0;
+      const lastLaag = rijen.reduce((t, x) => { const bd = x.d.bedrag * factor, r = beheerRente(x); return t + (x.d.vorm === 'av' ? bd * r / 1200 : deel * bd * r / 1200 + lastVan(x, r, (1 - deel) * bd)) * weeg(x); }, 0) + canon;
+      oha = { tabel: tabelTekst, inkomen, toetsrente: gem, pct, last, toegestaan, ruimte: toegestaan - last, lastLaag, ruimteLaag: toegestaan - lastLaag, vermogenVrij, avExtra: avExtra * deel > 0 ? Math.min(avExtra, aflossend) : 0, budget: null };
+      /* Budgettoets met bedragen van de adviseur (netto inkomen en basisuitgaven volgens Nibud) */
+      if (F.ohaNetto > 0 && F.ohaBasis > 0) oha.budget = { netto: F.ohaNetto, basis: F.ohaBasis, overig: F.ohaOverig, ruimte: F.ohaNetto - F.ohaBasis - F.ohaOverig - F.verplichtingen - F.studie - last };
     }
     if (F.ohaAchterstand) zet('OHA', 'fout', 'bij een actuele betalingsachterstand op de lening of op andere verplichtingen is ontslag hoofdelijke aansprakelijkheid niet mogelijk.');
     if (!toets || !oha) zet('OHA', 'letop', 'vul het toetsinkomen van de achterblijvende geldnemer in; de toetsen zijn niet uitgevoerd.');
-    else if (toets.ruimte >= 0) zet('OHA – acceptatienorm', 'ok', `de lening past binnen de reguliere leennorm (maximaal ${fmtEuro0(toets.maxHyp)}); de beheertoets is niet nodig.`);
-    else if (oha.ruimte >= 0) zet('OHA – beheertoets NHG', 'letop', `de lening past niet binnen de reguliere leennorm (maximaal ${fmtEuro0(toets.maxHyp)}), maar wel binnen de beheertoets: werkelijke last ${fmtEuro2(oha.last)} tegen toegestaan ${fmtEuro2(oha.toegestaan)} per maand (tabel ${oha.tabel}, ${fmtPct(oha.pct * 100, 1)}). Onderbouw met het explainformulier waarom de lening verantwoord en bestendig is.`);
-    else zet('OHA – beheertoets NHG', 'fout', `de lening past niet binnen de reguliere leennorm en ook niet binnen de beheertoets: werkelijke last ${fmtEuro2(oha.last)} tegen toegestaan ${fmtEuro2(oha.toegestaan)} per maand (tabel ${oha.tabel}), tekort ${fmtEuro2(-oha.ruimte)}. Alleen mogelijk na voorleggen aan Argenta, bijvoorbeeld met extra aflossen of een aflossingsvrij deel in box 3 tot ${EXTRA.ohaAvPct}% van de marktwaarde.`);
+    else if (toets.ruimte >= 0) zet('OHA – acceptatienorm', 'ok', `de lening past binnen de reguliere leennorm (maximaal ${fmtEuro0(toets.maxHyp)}); verdere toetsen zijn niet nodig.`);
+    else if (oha.ruimte >= 0) zet('OHA – werkelijke lasten', 'letop', `de lening past niet binnen de reguliere leennorm (maximaal ${fmtEuro0(toets.maxHyp)}), maar wel op werkelijke lasten: ${fmtEuro2(oha.last)} tegen toegestaan ${fmtEuro2(oha.toegestaan)} per maand (beheertabel ${oha.tabel}, ${fmtPct(oha.pct * 100, 1)}, toetsinkomen ${fmtEuro0(oha.inkomen)}). Onderbouw met het explainformulier waarom de lening verantwoord en bestendig is.`);
+    else if (oha.ruimteLaag >= 0) zet('OHA – beheertoets NHG', 'letop', `de werkelijke last (${fmtEuro2(oha.last)}) is hoger dan toegestaan (${fmtEuro2(oha.toegestaan)}). Alleen met de uitgangspunten van de beheertoets past het: laagst mogelijke last ${fmtEuro2(oha.lastLaag)} per maand${oha.avExtra > 0 ? ', met ' + fmtEuro0(oha.avExtra) + ' extra aflossingsvrij' : ''}${oha.vermogenVrij > 0 ? ' en ' + fmtEuro0(oha.vermogenVrij) + ' vermogen in mindering op de hoofdsom' : ''}. Voorleggen aan Argenta; een aflossingsvrij deel kan alleen in box 3 en als woningbehoud nodig is.`);
+    else zet('OHA – beheertoets NHG', 'fout', `de lening past niet binnen de reguliere leennorm, niet op werkelijke lasten (${fmtEuro2(oha.last)} tegen toegestaan ${fmtEuro2(oha.toegestaan)} per maand, beheertabel ${oha.tabel}) en ook niet binnen de beheertoets met de laagst mogelijke last (${fmtEuro2(oha.lastLaag)}, tekort ${fmtEuro2(-oha.ruimteLaag)}). Alleen mogelijk na voorleggen aan Argenta, bijvoorbeeld met extra aflossen.`);
+    if (oha && oha.budget) zet('OHA – budgettoets', oha.budget.ruimte >= 0 ? 'ok' : 'letop', `netto inkomen ${fmtEuro0(oha.budget.netto)} min basisuitgaven ${fmtEuro0(oha.budget.basis)}, overige lasten en de bruto hypotheeklast ${fmtEuro0(oha.last)} per maand: ${oha.budget.ruimte >= 0 ? 'ruimte' : 'tekort'} ${fmtEuro0(Math.abs(oha.budget.ruimte))}. Bedragen van de adviseur; het fiscale voordeel van de rente is niet meegerekend.`);
+    if (oha && Math.abs(oha.inkomen + F.aftrek - (F.ink1 + F.ink2)) > 1) letop.push(`OHA: de beheertoets rekent met een toetsinkomen van ${fmtEuro0(oha.inkomen + F.aftrek)} volgens de NHG-beheercriteria; de reguliere leennorm met ${fmtEuro0(F.ink1 + F.ink2)}.`);
     if (F.ohaKinderen >= 4) zet('OHA – huishouden', 'letop', 'bij 4 of meer kinderen moet worden vastgesteld dat er naast de financieringslast voldoende ruimte is voor de basisuitgaven van het gezin.');
     if (F.fundering === 'D' || F.fundering === 'E') letop.push('OHA met NHG: bij funderingsrisicoklasse D of E moet een verkennend funderingsonderzoek hebben plaatsgevonden.');
     voorwaarden.push('OHA: de vertrekkende geldnemer is geen eigenaar meer van de woning; woning en financiering worden verdeeld volgens de akte van verdeling.');
@@ -632,6 +649,9 @@ function vlak(inv) {
     ovbAan: !!o, ovbSituatie: (o || {}).situatie || 'a', ovbWaarde: getal((o || {}).waarde), ovbRestschuld: getal((o || {}).restschuld), ovbBedrag: getal((o || {}).bedrag),
     dlMaandlast: getal((o || {}).maandlastHuidig), dlMaanden: (o || {}).maanden == null ? EXTRA.dlStandaard : getal(o.maanden), dlEigen: getal((o || {}).eigenMiddelen),
     ohaZonderWerk: !!(inv.oha || {}).zonderWerk, ohaAchterstand: !!(inv.oha || {}).achterstand, ohaWaarde: getal((inv.oha || {}).oorspronkelijkeMarktwaarde), ohaKinderen: getal((inv.oha || {}).kinderen),
+    ohaInkBeheer: getal((inv.oha || {}).toetsinkomenBeheer), ohaEinde: !!(inv.oha || {}).dienstverbandEindigt, ohaJ1: getal(((inv.oha || {}).jaarinkomens || [])[0]), ohaJ2: getal(((inv.oha || {}).jaarinkomens || [])[1]), ohaJ3: getal(((inv.oha || {}).jaarinkomens || [])[2]),
+    ohaPensioen: getal((inv.oha || {}).inkomenNaPensioen), ohaVermogen: getal((inv.oha || {}).vermogen), ohaWoz: getal((inv.oha || {}).wozWaarde),
+    ohaNetto: getal((inv.oha || {}).nettoInkomenPerMaand), ohaBasis: getal((inv.oha || {}).basisuitgavenPerMaand), ohaOverig: getal((inv.oha || {}).overigeLastenPerMaand),
     bkrStatus: b.status || 'onbekend', bkrContracten: getal(b.aantalContracten), loonbeslag: !!b.loonbeslag
   };
 }
@@ -693,7 +713,9 @@ function resultaat(inv) {
     kosten: { koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     inkomenstoets: t ? { toetsinkomen: t.inkomen, toetsrentePct: rond(t.gemToets, 3), financieringslastPct: rond(t.pct * 100, 1), methode: t.werkelijk ? 'werkelijke_lasten' : 'annuitair_30_jaar',
       toegestaneMaandlast: rond(t.toegestaan), toetslast: rond(t.toetslast), maximaleHypotheek: rond(t.maxHyp, 0), ruimte: rond(t.ruimte, 0), vrijgesteld: t.vrij.map(([omschrijving, bedrag]) => ({ omschrijving, bedrag })) } : null,
-    beheertoets: r.oha ? { tabel: r.oha.tabel, toetsinkomen: r.oha.inkomen, toetsrentePct: rond(r.oha.toetsrente, 3), financieringslastPct: rond(r.oha.pct * 100, 1), werkelijkeLast: rond(r.oha.last), toegestaneMaandlast: rond(r.oha.toegestaan), ruimte: rond(r.oha.ruimte) } : null,
+    beheertoets: r.oha ? { tabel: r.oha.tabel, toetsinkomen: r.oha.inkomen, toetsrentePct: r.oha.toetsrente, financieringslastPct: rond(r.oha.pct * 100, 1), toegestaneMaandlast: rond(r.oha.toegestaan),
+      werkelijkeLast: rond(r.oha.last), ruimte: rond(r.oha.ruimte), laagsteLast: rond(r.oha.lastLaag), ruimteLaagsteLast: rond(r.oha.ruimteLaag), vermogenInMindering: rond(r.oha.vermogenVrij, 0),
+      budgettoets: r.oha.budget ? { ruimte: rond(r.oha.budget.ruimte, 0) } : null } : null,
     verloop: r.jaren.map(j => ({ jaar: j.jaar, restschuld: rond(j.rest, 0), rente: rond(j.rente, 0), aflossing: rond(j.afl, 0), brutoMaandlast: rond(j.pm) })),
     tarieven: tariefStatus(inv.vandaag),
     bronnen: { tarievenVast: RATES.datumVast, tarievenVariabel: RATES.datumVariabel, leennormen: NORMEN.jaar, nhg: NHG.jaar, hypotheekgids: 'augustus 2026', voorwaarden: 'juli 2025' },

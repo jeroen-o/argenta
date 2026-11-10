@@ -100,17 +100,30 @@
   <h3>Hoe de tool toetst</h3>
   <div class="tabel-wrap"><table>
     <tr><th>Toets</th><th>Werking</th><th>Uitkomst</th></tr>
-    <tr><td>1. Reguliere leennorm</td><td>Zoals bij een nieuwe aanvraag; bestaande leningdelen op resterende looptijd en restschuld, toetsrente naar de resterende rentevaste periode.</td><td>Past: akkoord, de beheertoets is niet nodig.</td></tr>
-    <tr><td>2. Beheertoets NHG</td><td>Werkelijke maandlast tegen het percentage uit de Financieringslasttabel Beheer voor het huishouden na het ontslag (alleenstaand, paar, met of zonder inkomen uit werk, AOW). Toetsrente: de werkelijke rente als die nog minimaal 3 jaar vaststaat, anders het 3-jaarstarief als dat hoger is.</td><td>Past: voorbehoud, met het explainformulier.</td></tr>
-    <tr><td>3. Voorleggen</td><td>Past ook de beheertoets niet, dan kan het alleen na voorleggen aan Argenta, bijvoorbeeld met extra aflossen of een aflossingsvrij deel in box 3.</td><td>Past niet.</td></tr>
+    <tr><td>1. Reguliere leennorm</td><td>Zoals bij een nieuwe aanvraag; bestaande leningdelen op resterende looptijd en restschuld, toetsrente naar de resterende rentevaste periode.</td><td>Past: akkoord, verdere toetsen zijn niet nodig.</td></tr>
+    <tr><td>2. Werkelijke lasten (NHG D.4.2.2)</td><td>De werkelijke maandlast (rente, aflossing, erfpachtcanon) tegen het percentage uit de Financieringslasttabel Beheer voor het huishouden na het ontslag. Toetsrente: de werkelijke rente als die nog minimaal 3 jaar vaststaat, anders het 3-jaarstarief als dat hoger is.</td><td>Past: voorbehoud, met het explainformulier.</td></tr>
+    <tr><td>3. Beheertoets (NHG D.6.5)</td><td>De laagst mogelijke last: een zo groot mogelijk deel aflossingsvrij (tot 50% van de oorspronkelijke marktwaarde) en vermogen in mindering op de hoofdsom.</td><td>Past: voorbehoud; voorleggen aan Argenta, want het vraagt een aanpassing van de lening.</td></tr>
+    <tr><td>Geen van drie</td><td>Alleen mogelijk na voorleggen aan Argenta, bijvoorbeeld met extra aflossen.</td><td>Past niet.</td></tr>
   </table></div>
+  <h3>Toetsinkomen volgens de beheercriteria</h3>
+  <ul>
+    <li>Laat je het veld leeg, dan rekenen toets 2 en 3 met hetzelfde toetsinkomen als de reguliere norm. Wijkt het beheerinkomen af, vul het dan in.</li>
+    <li>In beheer telt inkomen uit dienstverband volledig mee, ook bij een tijdelijk contract zonder intentieverklaring.</li>
+    <li><b>Eindigend dienstverband</b> (beëindiging aangekondigd of contract korter dan 2 maanden): vink dit aan en vul drie jaarinkomens in. De tool neemt het gemiddelde, of het laatste jaar als dat hoger is.</li>
+    <li><b>Pensioen of AOW binnen 3 jaar:</b> vul het inkomen daarna in; de tool rekent met het laagste van de twee.</li>
+    <li>Een niet-blijvende uitkering telt mee als de hoogte minimaal 3 jaar vaststaat; partneralimentatie zolang er recht op bestaat.</li>
+  </ul>
+  <h3>Vermogen en budgettoets</h3>
+  <ul>
+    <li><b>Vermogen:</b> spaargeld, beleggingen en overig onroerend goed, min 1,7% van de WOZ-waarde en € 3.550 per geldnemer. Het restant gaat in toets 3 van de hoofdsom af.</li>
+    <li><b>Budgettoets (optioneel):</b> vul het netto besteedbaar inkomen, de basisuitgaven volgens Nibud en de overige vaste lasten per maand in. De tool trekt daar de bruto hypotheeklast en de verplichtingen van af en toont ruimte of tekort. De bedragen levert de adviseur; de tool bevat geen Nibud-normbedragen. De budgettoets verandert het oordeel niet, maar onderbouwt het explainformulier.</li>
+  </ul>
   <ul>
     <li>Aflossingsvrij is bij OHA maximaal 50% van de oorspronkelijke marktwaarde.</li>
     <li>Een actuele betalingsachterstand maakt het ontslag onmogelijk.</li>
     <li>De voorwaarden (geen eigenaar meer, woning verlaten, akte van verdeling, overlijdensrisicoverzekering) staan onder “Voorwaarden waaronder deze uitkomst geldt”.</li>
-    <li>De derde stap van Argenta, de toets op werkelijke lasten volgens Nibud, rekent de tool niet door.</li>
   </ul>
-  <p>In de API: <code>woning.doel: "oha"</code>, bestaande leningdelen met <code>meegenomen: true</code> en het blok <code>oha: { zonderWerk, achterstand, oorspronkelijkeMarktwaarde, kinderen }</code>. De uitvoer bevat dan <code>beheertoets</code>.</p>
+  <p>In de API: <code>woning.doel: "oha"</code>, bestaande leningdelen met <code>meegenomen: true</code> en het blok <code>oha: { zonderWerk, achterstand, oorspronkelijkeMarktwaarde, kinderen, toetsinkomenBeheer, dienstverbandEindigt, jaarinkomens, inkomenNaPensioen, vermogen, wozWaarde, nettoInkomenPerMaand, basisuitgavenPerMaand, overigeLastenPerMaand }</code>. De uitvoer bevat dan <code>beheertoets</code> met de werkelijke last, de laagst mogelijke last en de budgettoets.</p>
 </section>
 
 <section id="uitkomst">
@@ -279,6 +292,8 @@ const uitkomst = ArgentaEngine.resultaat(invoer);</code></pre>
     <li>Geen netto maandlast berekenen.</li>
     <li>De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.</li>
     <li>De dubbele-lastentoets, de volgorde in het VvE-stroomschema en de toets bij de senioren- en tekortregeling zijn eigen uitwerkingen van de gids; de AOW-leeftijd staat op 67 jaar.</li>
+    <li>Bij een looptijd korter dan 30 jaar rekent de toets met de werkelijke looptijd; een aflossingsvrij deel met 30 jaar.</li>
+    <li>De budgettoets bij OHA rekent met bedragen van de adviseur; de tool bevat geen Nibud-normbedragen en rekent het fiscale voordeel niet mee.</li>
     <li>De leennormen zijn die van 2027.</li>
   </ul>
   <div class="kader groen">Bronnen: tariefkaart Argenta, Argenta hypotheekgids (augustus 2026), voorwaarden Argenta hypotheek (juli 2025), Wijzigingsregeling hypothecair krediet 2027, NHG Voorwaarden en normen 2027.</div>

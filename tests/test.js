@@ -97,7 +97,20 @@ r = E.resultaat(ohaInv(110000)); assert.strictEqual(r.oordeel, 'past');         
 r = E.resultaat(ohaInv(70000)); assert.strictEqual(r.oordeel, 'voorbehoud');                 // alleen via de beheertoets
 assert.strictEqual(r.beheertoets.tabel, 'alleenstaand'); assert.ok(r.beheertoets.ruimte > 0);
 assert.strictEqual(r.beheertoets.financieringslastPct, E.BEHEER.alleen.regulier.pct[70 - 31][3] / 10);   // toetsrente 2,6% valt in de kolom 2,501-3,000%
-r = E.resultaat(ohaInv(38000)); assert.strictEqual(r.oordeel, 'past_niet');                  // ook de beheertoets niet
+r = E.resultaat(ohaInv(38000)); assert.strictEqual(r.oordeel, 'voorbehoud');                 // alleen met de laagst mogelijke last (beheertoets D.6.5)
+assert.ok(r.beheertoets.ruimte < 0 && r.beheertoets.ruimteLaagsteLast >= 0);
+r = E.resultaat(ohaInv(30000)); assert.strictEqual(r.oordeel, 'past_niet');                  // ook de beheertoets niet
+inv = ohaInv(70000); inv.oha.dienstverbandEindigt = true; inv.oha.jaarinkomens = [40000, 44000, 36000];
+assert.strictEqual(E.resultaat(inv).beheertoets.toetsinkomen, 40000);                        // gemiddelde van 3 jaar, of het laatste jaar als dat hoger is
+inv.oha.jaarinkomens = [50000, 44000, 36000]; assert.strictEqual(E.resultaat(inv).beheertoets.toetsinkomen, 50000);
+inv = ohaInv(48000); inv.oha.vermogen = 60000; inv.oha.wozWaarde = 400000;
+assert.strictEqual(E.resultaat(inv).beheertoets.vermogenInMindering, 60000 - 6800 - 3550);   // 1,7% van de WOZ-waarde en 3.550 per consument vrijgesteld
+inv = ohaInv(70000); inv.oha.nettoInkomenPerMaand = 3900; inv.oha.basisuitgavenPerMaand = 1700; inv.oha.overigeLastenPerMaand = 300;
+assert.ok(E.resultaat(inv).beheertoets.budgettoets.ruimte > 0);
+
+// 13. Looptijd korter dan 30 jaar: annuïtaire toetslast over de werkelijke looptijd (NHG C.7.2.3)
+inv = basis(); const max30 = E.resultaat(inv).inkomenstoets.maximaleHypotheek;
+inv.leningdelen[0].looptijd = 20; assert.ok(E.resultaat(inv).inkomenstoets.maximaleHypotheek < max30);
 inv = ohaInv(110000); inv.oha.achterstand = true; assert.strictEqual(E.resultaat(inv).oordeel, 'past_niet');
 inv = ohaInv(110000); inv.leningdelen.push({ vorm: 'av', bedrag: 200000, looptijd: 30, rentevast: 10 }); inv.woning.koopsom = 500000; inv.woning.marktwaarde = 600000;
 assert.ok(E.resultaat(inv).afwijzingen.some(t => t.includes('50% van de oorspronkelijke marktwaarde')));   // 200.000 > 50% van 380.000
