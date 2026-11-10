@@ -307,8 +307,10 @@ const REGELS = {
   bouwdepotVrij: 25000, eigenMiddelenBewijs: 25000,
   ovbKosten: 250, ovbVerkoopkostenPct: 1.85
 };
-/* NHG: bron nhg.nl/voorwaarden-en-normen (C.2), geraadpleegd 10 november 2026 – jaarlijks controleren */
-const NHG = { grens: 470000, grensEnergie: 498200, provisiePct: 0.4 };
+/* NHG: bron Voorwaarden en normen 2027-1 (hoofdstuk C.2 en A.5.3), geldig vanaf 1 januari 2027 – jaarlijks controleren */
+const NHG = { jaar: 2027, grens: 500000, grensEnergie: 530000, provisiePct: 0.4 };
+/* Nieuwbouwwoning met een A++++ label valt direct onder de hogere grens */
+const nhgGrens = () => ($('doel').value === 'nieuwbouw' && +$('label').value <= 1) ? NHG.grensEnergie : NHG.grens;
 const VORMEN = {
   ann: { naam: 'Annuïtair', tabel: 'annuitair' },
   lin: { naam: 'Lineair', tabel: 'annuitair' },
@@ -332,7 +334,7 @@ const VOORWAARDEN = [
   ['Lening en offerte', [
     'Hoofdsom € 25.000 tot € 2.000.000 (inclusief overbrugging en verhogingen); verhoging vanaf € 5.000; looptijd 5 tot 30 jaar.',
     'Verstrekking tot 100% van de marktwaarde; met NHG en EBB/EBV tot 106%. Boven € 1.250.000 hoofdsom maximaal 90%.',
-    'NHG: NHG-grens € 470.000 (met energiebesparende maatregelen € 498.200); borgtochtprovisie 0,4%.',
+    'NHG 2027: NHG-grens € 500.000, met energiebesparende voorzieningen of nieuwbouw met A++++ label € 530.000; borgtochtprovisie 0,4%.',
     'Offerte 3 maanden geldig, verlenging met 9 maanden zonder bereidstellingskosten; € 500 annuleringskosten in de verlengingsperiode.',
     'Passeren binnen 3 maanden: de laagste van offerterente en passeerrente geldt. Na 3 maanden: de laagste van offerterente en rente op het vastklikmoment.',
     'Renteaanbod binnen 3 weken retour; bindende offerte binnen 2 weken (digitaal) getekend retour.',
@@ -514,7 +516,7 @@ function kosten() {
   const mw = euro('marktwaarde');
   if (auto.eigenGeld) {
     /* Minimaal benodigd eigen geld: wat boven de marktwaarde uitkomt (de NHG-provisie wordt meegefinancierd) */
-    const maxLening = nhg ? Math.min(mw, NHG.grens) : mw;
+    const maxLening = nhg ? Math.min(mw, Math.min(NHG.grensEnergie, nhgGrens() + euro('maatregelen'))) : mw;
     const nodig = nhg ? Math.ceil(exclNhg - maxLening * (1 - NHG.provisiePct / 100)) : exclNhg - maxLening;
     $('eigenGeld').value = fmtInvoer(Math.max(0, nodig));
   }
@@ -613,7 +615,7 @@ function bereken() {
   }
   if (nhg) {
     if (totaal > NHG.grensEnergie) fouten.push(`Met NHG is de lening maximaal ${fmtEuro0(NHG.grensEnergie)} (NHG-grens inclusief energiebesparende maatregelen).`);
-    else if (totaal > NHG.grens && energie < totaal - NHG.grens) fouten.push(`De NHG-grens is ${fmtEuro0(NHG.grens)}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
+    else if (totaal > nhgGrens() && energie < totaal - nhgGrens()) fouten.push(`De NHG-grens ${NHG.jaar} is ${fmtEuro0(nhgGrens())}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
     letop.push('NHG: de NHG-grens is vereenvoudigd getoetst op de hoofdsom; NHG toetst op de kosten voor de woning. Controleer de grens die geldt op de datum van het bindend aanbod.');
   }
   if (av > 0) {

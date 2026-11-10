@@ -39,7 +39,7 @@ Het Argenta-logo staat in de tool en op het voorblad. Gebruik van het logo vraag
 | Acceptatie | Argenta hypotheekgids | augustus 2026 |
 | Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
 | Kredietgever, aflossen, klachten | Voorwaarden Argenta hypotheek | juli 2025 |
-| NHG-grens, provisie | nhg.nl/voorwaarden-en-normen | geraadpleegd 10-11-2026 |
+| NHG-grens, provisie | NHG Voorwaarden en normen 2027-1 (C.2, A.5.3) | 2027: € 500.000 / € 530.000, provisie 0,4% |
 
 Argenta heeft geen API; wijzigingen komen via de nieuwsbrief en de adviseurspagina. Tarieven moeten dus handmatig
 worden bijgewerkt (meerdere keren per maand).
