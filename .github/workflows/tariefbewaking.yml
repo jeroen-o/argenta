@@ -25,7 +25,15 @@ jobs:
         with:
           node-version: 22
       - name: Installeer pdftotext
-        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+        run: |
+          # Staat pdftotext al op de runner, dan is installeren niet nodig; anders tot 3 keer proberen
+          command -v pdftotext && exit 0
+          for poging in 1 2 3; do
+            sudo apt-get update -o Acquire::Retries=3 || true
+            sudo apt-get install -y poppler-utils && exit 0
+            sleep 20
+          done
+          exit 1
       - name: Controleer en verwerk de tariefkaart
         id: check
         run: python3 tools/check_rates.py --update
