@@ -153,6 +153,38 @@ const { chromium } = require('playwright');
   await page.uncheck('#ovbAan');
   await stap(1);
 
+  // Taxatiedatum: een taxatie van meer dan 6 maanden oud geeft een afwijzing
+  await page.fill('#taxatiedatum', '2020-01-01');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('ouder dan 6 maanden'));
+  await stap(1);
+  await page.fill('#taxatiedatum', '');
+
+  // Verbouwing onder 25.000 zonder dat de waarde na verbouwing nodig is: geen depotverplichting
+  await stap(2);
+  await page.fill('#verbouwing', '15000');
+  await page.fill('#mwVoorVerbouwing', '400000');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('geen bouwdepot verplicht'));
+  await stap(2);
+  await page.fill('#verbouwing', '');
+  await page.fill('#mwVoorVerbouwing', '');
+  await stap(1);
+
+  // Energiebesparende voorzieningen: het blok verschijnt bij een bedrag; deuren en kozijnen zonder HR++ glas geven een afwijzing
+  await stap(2);
+  await page.fill('#verbouwing', '12000');
+  await page.fill('#maatregelen', '10000');
+  assert.ok(await page.isVisible('#voorzieningenBlok'));
+  await page.check('#voorzieningen input[value=kozijnen]');
+  await stap(4);
+  assert.ok((await tekst('#meldingen')).includes('alleen mee in combinatie met HR++ beglazing'));
+  await stap(2);
+  await page.uncheck('#voorzieningen input[value=kozijnen]');
+  await page.fill('#verbouwing', '');
+  await page.fill('#maatregelen', '');
+  await stap(1);
+
   // Bouwkundig rapport: herstelkosten boven 10% van de marktwaarde die niet in depot staan geven een afwijzing
   await page.fill('#herstelkosten', '60000');
   await stap(4);

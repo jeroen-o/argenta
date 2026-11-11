@@ -32,8 +32,9 @@ of opgeslagen.
 | Rente per leningdeel: NHG of risicoklasse, duurzaamheidskorting, opslag consumptief, groen lenen, variabel, overbrugging | tariefkaart Argenta |
 | Hoofdsom, LTV, aflossingsvrij (ook de regel voor hypotheken van vóór 17 augustus 2026), koopstarters, consumptief, groen lenen, Desktop Taxatie met betrouwbaarheidsscore, een of meer overbruggingen, verkrijgen volledig eigendom | hypotheekgids, hoofdstuk 1–3 |
 | Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig inkomen en toekomstig pensioen | hypotheekgids hoofdstuk 5 |
-| Inkomenstoets: financieringslastpercentages, toetsrente, studielening, energielabel, alleenstaanden | Tijdelijke regeling hypothecair krediet 2027 |
+| Inkomenstoets: financieringslastpercentages, toetsrente (gewogen naar hoofdsom en looptijd; aangeboden rente als die hoger is), studielening, energielabel, alleenstaanden, lijst met energiebesparende voorzieningen | Tijdelijke regeling hypothecair krediet, tekst per 1 januari 2027 (wetten.overheid.nl, BWBR0032503) |
 | NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |
+| Toetsrente bij aflossing binnen de rentevaste periode, eisen aan de consumptieve hypotheek, vrijstelling van het bouwdepot, omgevingsvergunning, ouderdom van de taxatie, energielabelplicht | hypotheekgids 1.2.2, 1.5, 1.8.2, 2.1.1, 2.1.2, 3.3 |
 | Werkelijke lasten voor AOW-gerechtigden, senioren verhuisregeling, tijdelijk-tekortregeling | hypotheekgids 5.1.1 en 5.1.2 |
 | Erfpacht, VvE, funderingsrisico, woningtype | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7, 2.3 |
 | Aanvrager: minimumleeftijd, nationaliteit en verblijf, familieverband, borgstelling, bewind | hypotheekgids 4.1 en 4.2 |
