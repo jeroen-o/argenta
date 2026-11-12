@@ -15,7 +15,9 @@ assert.strictEqual(r.inkomenstoets.maximaleHypotheek, 329054);
 // 2. Voorbeeldaanvraag past; rente uit de tariefkaart met duurzaamheidskorting
 r = E.resultaat(basis());
 assert.strictEqual(r.oordeel, 'past');
-assert.strictEqual(r.leningdelen[0].rentePct, 4.52);
+// verwachte rente uit de tariefkaart: annuïtair, 10 jaar vast, klasse tot en met 95%, min de duurzaamheidskorting voor label A
+const renteVoorbeeld = Math.round((E.RATES.annuitair['10'][7] - E.RATES.korting.A) * 100) / 100;
+assert.strictEqual(r.leningdelen[0].rentePct, renteVoorbeeld);
 assert.strictEqual(r.grenzen.minimaleMarktwaarde, 380000);
 assert.ok(r.grenzen.minimaalToetsinkomen > 80000 && r.grenzen.minimaalToetsinkomen < 90000);
 
@@ -51,7 +53,7 @@ assert.strictEqual(uit.invoer.aanvragers.length, 2);
 assert.strictEqual(uit.invoer.aanvragers[0].geboortedatum, '1988-04-12');
 assert.strictEqual(uit.invoer.leningdelen[0].looptijd, 30);
 assert.strictEqual(uit.invoer.leningdelen[0].rentevast, 10);
-assert.strictEqual(E.resultaat(uit.invoer).leningdelen[0].rentePct, 4.52);
+assert.strictEqual(E.resultaat(uit.invoer).leningdelen[0].rentePct, renteVoorbeeld);
 const leeg = H.vanHdn(xml, require('../hdn-mapping.json'));
 assert.ok(leeg.ontbrekend.length > 3, 'lege mapping meldt ontbrekende paden');
 
@@ -173,7 +175,7 @@ assert.ok(r.inkomenstoets.maximaleHypotheek < jkp0.inkomenstoets.maximaleHypothe
 inv = basis(); const maxNl = E.resultaat(inv).inkomenstoets;
 inv.inkomen.buitenlandsBelastingplichtig = true; r = E.resultaat(inv);
 assert.ok(r.inkomenstoets.financieringslastPct < maxNl.financieringslastPct && r.inkomenstoets.maximaleHypotheek < maxNl.maximaleHypotheek);
-assert.strictEqual(r.inkomenstoets.financieringslastPct, E.NORMEN.box3nietAOW[103 - 31][7] / 10);    // inkomen 103.000, toetsrente 4,52% valt in de kolom 4,501-5,000%
+assert.strictEqual(r.inkomenstoets.financieringslastPct, E.NORMEN.box3nietAOW[103 - 31][E.NORMEN.grenzen.findIndex(g => renteVoorbeeld <= g)] / 10);    // inkomen 103.000, kolom van de toetsrente
 
 // 19. Verhoging of tweede hypotheek (hypotheekgids 1.2.4)
 const verhoging = (nieuw, extra) => ({ woning: { doel: 'verbouwing', koopsom: 200000, marktwaarde: 400000, energielabel: 'C_D' }, kosten: { verbouwing: nieuw, notarisLevering: 0, notarisHypotheek: 0, taxatie: 0, advies: 0, eigenGeld: 0 },
@@ -259,7 +261,9 @@ assert.strictEqual(toetsLangLopend, 5);
 inv.leningdelen = [{ vorm: 'ann', bedrag: 380000, looptijd: 7, rentevast: 7 }];
 r = E.resultaat(inv); assert.strictEqual(r.inkomenstoets.toetsrentePct, r.leningdelen[0].rentePct); // afgelost aan het einde: werkelijke rente
 inv.leningdelen = [{ vorm: 'av', bedrag: 100000, looptijd: 7, rentevast: 7 }, { vorm: 'ann', bedrag: 280000, looptijd: 30, rentevast: 10 }];
-assert.ok(E.resultaat(inv).inkomenstoets.toetsrentePct > 4.6);                                      // aflossingsvrij is niet afgelost: toetsrente blijft
+r = E.resultaat(inv);                                                                               // aflossingsvrij is niet afgelost: de toetsrente van 5% of de aangeboden rente als die hoger is
+const verwachtGewogen = (100000 * 7 * Math.max(5, r.leningdelen[0].rentePct) + 280000 * 30 * r.leningdelen[1].rentePct) / (100000 * 7 + 280000 * 30);
+assert.ok(Math.abs(r.inkomenstoets.toetsrentePct - verwachtGewogen) < 0.001);
 
 // 30. Consumptieve hypotheek (hypotheekgids 1.5)
 const consumptief = extra => { const i = basis(); i.woning.marktwaarde = 600000; i.woning.koopsom = 400000; i.kosten.eigenGeld = 12300; i.aanvragers = [{ toetsinkomen: 200000 }];

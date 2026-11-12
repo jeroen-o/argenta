@@ -11,7 +11,7 @@
     "Het funderingsrisico volgens het taxatierapport of de desktoptaxatie is maximaal klasse C. Bij klasse D (hoog risico) of E (vastgesteld funderingsprobleem) beoordeelt Argenta het dossier individueel.",
     "Uit de BKR-toets blijkt geen code 1 t/m 5, A-registratie, code SK, SH, ZO of RO en geen HY-registratie; er is geen loonbeslag of looncessie.",
     "Het taxatierapport is uitgebracht via het NWWI, gevalideerd en op de datum van de bindende offerte niet ouder dan 6 maanden.",
-    "Het gezamenlijke toetsinkomen is minimaal € 85.400 per jaar bij de opgegeven financiële verplichtingen; Argenta stelt het toetsinkomen zelf vast (IBL, werkgeversverklaring of inkomensverklaring).",
+    "Het gezamenlijke toetsinkomen is minimaal € 87.200 per jaar bij de opgegeven financiële verplichtingen; Argenta stelt het toetsinkomen zelf vast (IBL, werkgeversverklaring of inkomensverklaring).",
     "De klant brengt minimaal € 32.300 eigen geld in; de herkomst wordt met bewijsstukken aangetoond.",
     "De woning heeft een geldig geregistreerd energielabel A of beter (EP-online); zonder registratie vervalt de duurzaamheidskorting van 0,10%-punt.",
     "De woning is bestemd voor eigen, vaste bewoning in Nederland en valt niet onder de uitgesloten woningtypen (onder meer serviceflat, verhuurde woning, recht van opstal, recreatiebestemming).",
@@ -23,8 +23,8 @@
     "De duurzaamheidskorting vereist een geldig geregistreerd energielabel en geldt alleen tijdens de eerste rentevaste periode."
   ],
   "tips": [
-    "Met € 20.000 extra eigen geld daalt de verstrekking naar 90% van de marktwaarde en gaat de rente van leningdeel 1 van 4,52% naar 4,47%. De bruto maandlast daalt dan met circa € 112, waarvan € 11 door het lagere tarief.",
-    "Met NHG is de rente van leningdeel 1 4,24% in plaats van 4,52%: circa € 63 per maand lager, tegen eenmalig € 1.520 borgtochtprovisie. Controleer of de aanvraag aan de NHG-voorwaarden voldoet.",
+    "Met € 20.000 extra eigen geld daalt de verstrekking naar 90% van de marktwaarde en gaat de rente van leningdeel 1 van 4,47% naar 4,42%. De bruto maandlast daalt dan met circa € 112, waarvan € 11 door het lagere tarief.",
+    "Met NHG is de rente van leningdeel 1 4,19% in plaats van 4,47%: circa € 63 per maand lager, tegen eenmalig € 1.520 borgtochtprovisie. Controleer of de aanvraag aan de NHG-voorwaarden voldoet.",
     "Voor energiebesparende maatregelen is € 10.000 extra leenruimte beschikbaar boven de maximale hypotheek op inkomen."
   ],
   "bijzondereToetsen": [],
@@ -36,8 +36,8 @@
       "bedrag": 380000,
       "looptijdJaren": 30,
       "rentevast": 10,
-      "rentePct": 4.52,
-      "brutoMaandlast": 1929.92
+      "rentePct": 4.47,
+      "brutoMaandlast": 1918.64
     }
   ],
   "overbrugging": null,
@@ -47,25 +47,25 @@
     "marktwaarde": 400000,
     "ltvPct": 95,
     "tariefklasse": "≤ 95%",
-    "gemiddeldeRentePct": 4.52,
-    "brutoMaandlast": 1929.92,
+    "gemiddeldeRentePct": 4.47,
+    "brutoMaandlast": 1918.64,
     "looptijdMaanden": 360,
-    "jkpPct": 4.7,
-    "renteTotaal": 314772,
+    "jkpPct": 4.65,
+    "renteTotaal": 310709,
     "kredietKosten": 3650,
-    "totaalTeBetalen": 698422
+    "totaalTeBetalen": 694359
   },
   "grenzen": {
     "minimaleMarktwaarde": 380000,
     "minimaleMarktwaardeTariefklasse": 400000,
-    "minimaalToetsinkomen": 85400,
-    "maximaleHoofdsomOpInkomen": 471597,
+    "minimaalToetsinkomen": 87200,
+    "maximaleHoofdsomOpInkomen": 458154,
     "maximaleHoofdsomOpWaarde": 400000,
     "minimaleHoofdsom": 25000,
     "maximaleHoofdsom": 2000000,
     "maximaalAflossingsvrij": 120000,
     "benodigdEigenGeld": 32300,
-    "ruimteVerplichtingenPerMaand": 414,
+    "ruimteVerplichtingenPerMaand": 344,
     "nhgGrens": null
   },
   "tijdelijkTweeHypotheken": null,
@@ -130,13 +130,13 @@
   "inkomensbepaling": null,
   "inkomenstoets": {
     "toetsinkomen": 103000,
-    "toetsrentePct": 4.52,
-    "financieringslastPct": 28.6,
+    "toetsrentePct": 4.47,
+    "financieringslastPct": 27.6,
     "methode": "annuitair_30_jaar",
-    "toegestaneMaandlast": 2344.33,
-    "toetslast": 1929.92,
-    "maximaleHypotheek": 471597,
-    "ruimte": 91597,
+    "toegestaneMaandlast": 2262.75,
+    "toetslast": 1918.64,
+    "maximaleHypotheek": 458154,
+    "ruimte": 78154,
     "vrijgesteld": [
       {
         "omschrijving": "Extra leenruimte energielabel A",
@@ -148,217 +148,217 @@
   "verloop": [
     {
       "jaar": 1,
-      "restschuld": 373891,
-      "rente": 17050,
-      "aflossing": 6109,
-      "brutoMaandlast": 1929.92
+      "restschuld": 373837,
+      "rente": 16861,
+      "aflossing": 6163,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 2,
-      "restschuld": 367501,
-      "rente": 16769,
-      "aflossing": 6390,
-      "brutoMaandlast": 1929.92
+      "restschuld": 367393,
+      "rente": 16580,
+      "aflossing": 6444,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 3,
-      "restschuld": 360816,
-      "rente": 16474,
-      "aflossing": 6685,
-      "brutoMaandlast": 1929.92
+      "restschuld": 360655,
+      "rente": 16286,
+      "aflossing": 6738,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 4,
-      "restschuld": 353822,
-      "rente": 16165,
-      "aflossing": 6994,
-      "brutoMaandlast": 1929.92
+      "restschuld": 353609,
+      "rente": 15978,
+      "aflossing": 7046,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 5,
-      "restschuld": 346505,
-      "rente": 15842,
-      "aflossing": 7317,
-      "brutoMaandlast": 1929.92
+      "restschuld": 346242,
+      "rente": 15657,
+      "aflossing": 7367,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 6,
-      "restschuld": 338851,
-      "rente": 15505,
-      "aflossing": 7654,
-      "brutoMaandlast": 1929.92
+      "restschuld": 338539,
+      "rente": 15320,
+      "aflossing": 7703,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 7,
-      "restschuld": 330843,
-      "rente": 15152,
-      "aflossing": 8008,
-      "brutoMaandlast": 1929.92
+      "restschuld": 330485,
+      "rente": 14969,
+      "aflossing": 8055,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 8,
-      "restschuld": 322466,
-      "rente": 14782,
-      "aflossing": 8377,
-      "brutoMaandlast": 1929.92
+      "restschuld": 322062,
+      "rente": 14602,
+      "aflossing": 8422,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 9,
-      "restschuld": 313702,
-      "rente": 14395,
-      "aflossing": 8764,
-      "brutoMaandlast": 1929.92
+      "restschuld": 313256,
+      "rente": 14217,
+      "aflossing": 8806,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 10,
-      "restschuld": 304534,
-      "rente": 13991,
-      "aflossing": 9168,
-      "brutoMaandlast": 1929.92
+      "restschuld": 304048,
+      "rente": 13815,
+      "aflossing": 9208,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 11,
-      "restschuld": 294943,
-      "rente": 13568,
-      "aflossing": 9591,
-      "brutoMaandlast": 1929.92
+      "restschuld": 294419,
+      "rente": 13395,
+      "aflossing": 9628,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 12,
-      "restschuld": 284909,
-      "rente": 13125,
-      "aflossing": 10034,
-      "brutoMaandlast": 1929.92
+      "restschuld": 284352,
+      "rente": 12956,
+      "aflossing": 10068,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 13,
-      "restschuld": 274412,
-      "rente": 12662,
-      "aflossing": 10497,
-      "brutoMaandlast": 1929.92
+      "restschuld": 273825,
+      "rente": 12497,
+      "aflossing": 10527,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 14,
-      "restschuld": 263431,
-      "rente": 12178,
-      "aflossing": 10981,
-      "brutoMaandlast": 1929.92
+      "restschuld": 262817,
+      "rente": 12016,
+      "aflossing": 11007,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 15,
-      "restschuld": 251943,
-      "rente": 11671,
-      "aflossing": 11488,
-      "brutoMaandlast": 1929.92
+      "restschuld": 251308,
+      "rente": 11514,
+      "aflossing": 11510,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 16,
-      "restschuld": 239925,
-      "rente": 11141,
-      "aflossing": 12018,
-      "brutoMaandlast": 1929.92
+      "restschuld": 239273,
+      "rente": 10989,
+      "aflossing": 12035,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 17,
-      "restschuld": 227352,
-      "rente": 10586,
-      "aflossing": 12573,
-      "brutoMaandlast": 1929.92
+      "restschuld": 226689,
+      "rente": 10440,
+      "aflossing": 12584,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 18,
-      "restschuld": 214199,
-      "rente": 10006,
-      "aflossing": 13153,
-      "brutoMaandlast": 1929.92
+      "restschuld": 213531,
+      "rente": 9866,
+      "aflossing": 13158,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 19,
-      "restschuld": 200439,
-      "rente": 9399,
-      "aflossing": 13760,
-      "brutoMaandlast": 1929.92
+      "restschuld": 199773,
+      "rente": 9265,
+      "aflossing": 13758,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 20,
-      "restschuld": 186044,
-      "rente": 8764,
-      "aflossing": 14395,
-      "brutoMaandlast": 1929.92
+      "restschuld": 185387,
+      "rente": 8637,
+      "aflossing": 14386,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 21,
-      "restschuld": 170984,
-      "rente": 8100,
-      "aflossing": 15059,
-      "brutoMaandlast": 1929.92
+      "restschuld": 170344,
+      "rente": 7981,
+      "aflossing": 15043,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 22,
-      "restschuld": 155230,
-      "rente": 7405,
-      "aflossing": 15754,
-      "brutoMaandlast": 1929.92
+      "restschuld": 154615,
+      "rente": 7295,
+      "aflossing": 15729,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 23,
-      "restschuld": 138749,
-      "rente": 6678,
-      "aflossing": 16481,
-      "brutoMaandlast": 1929.92
+      "restschuld": 138168,
+      "rente": 6577,
+      "aflossing": 16447,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 24,
-      "restschuld": 121507,
-      "rente": 5917,
-      "aflossing": 17242,
-      "brutoMaandlast": 1929.92
+      "restschuld": 120971,
+      "rente": 5827,
+      "aflossing": 17197,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 25,
-      "restschuld": 103469,
-      "rente": 5121,
-      "aflossing": 18038,
-      "brutoMaandlast": 1929.92
+      "restschuld": 102990,
+      "rente": 5042,
+      "aflossing": 17982,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 26,
-      "restschuld": 84599,
-      "rente": 4289,
-      "aflossing": 18870,
-      "brutoMaandlast": 1929.92
+      "restschuld": 84188,
+      "rente": 4222,
+      "aflossing": 18802,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 27,
-      "restschuld": 64859,
-      "rente": 3418,
-      "aflossing": 19741,
-      "brutoMaandlast": 1929.92
+      "restschuld": 64528,
+      "rente": 3364,
+      "aflossing": 19660,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 28,
-      "restschuld": 44207,
-      "rente": 2507,
-      "aflossing": 20652,
-      "brutoMaandlast": 1929.92
+      "restschuld": 43971,
+      "rente": 2467,
+      "aflossing": 20557,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 29,
-      "restschuld": 22602,
-      "rente": 1554,
-      "aflossing": 21605,
-      "brutoMaandlast": 1929.92
+      "restschuld": 22476,
+      "rente": 1529,
+      "aflossing": 21495,
+      "brutoMaandlast": 1918.64
     },
     {
       "jaar": 30,
       "restschuld": 0,
-      "rente": 557,
-      "aflossing": 22602,
-      "brutoMaandlast": 1929.92
+      "rente": 548,
+      "aflossing": 22476,
+      "brutoMaandlast": 1918.64
     }
   ],
   "tarieven": {
-    "datumVast": "28 oktober 2026",
+    "datumVast": "11 november 2026",
     "datumVariabel": "9 november 2026",
     "leeftijdDagen": null,
     "maximaalDagen": 14,
@@ -366,7 +366,7 @@
     "melding": null
   },
   "bronnen": {
-    "tarievenVast": "28 oktober 2026",
+    "tarievenVast": "11 november 2026",
     "tarievenVariabel": "9 november 2026",
     "leennormen": 2027,
     "nhg": 2027,
