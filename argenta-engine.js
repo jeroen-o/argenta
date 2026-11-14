@@ -21,10 +21,14 @@ const REGELS = {
   /* Tariefbewaking: na dit aantal dagen geldt de tariefkaart als mogelijk verouderd */
   tariefMaxDagen: 14
 };
-/* NHG: bron Voorwaarden en normen 2027-1 (hoofdstuk C.2 en A.5.3), geldig vanaf 1 januari 2027 – jaarlijks controleren */
-const NHG = { jaar: 2027, grens: 500000, grensEnergie: 530000, provisiePct: 0.4 };
+/* NHG: bron Voorwaarden en normen 2027-1 (A.5.3, C.2, C.5.1, C.6 en D.2), geldig vanaf 1 januari 2027 – jaarlijks controleren.
+   bijkomendPct: maximaal mee te financieren bijkomende kosten (C.6.2.1); vonPct: deel van een koopsom vrij op naam dat meetelt (C.2.1.1);
+   efgMinimum: bedrag voor energiebesparende voorzieningen bij label E, F of G (C.6.1.2); avMaxPct: aflossingsvrij als deel van de marktwaarde (C.6.7.1) */
+const NHG = { jaar: 2027, grens: 500000, grensEnergie: 530000, provisiePct: 0.4, bijkomendPct: 6, vonPct: 97, efgMinimum: 20000, avMaxPct: 50 };
 /* Nieuwbouwwoning met een A++++ label valt direct onder de hogere grens */
 const nhgGrens = () => (F.doel === 'nieuwbouw' && +F.label <= 1) ? NHG.grensEnergie : NHG.grens;
+/* Koopsom die voor NHG meetelt: kosten koper zonder roerende zaken, of 97% van een koopsom vrij op naam */
+const nhgKoopsom = () => F.nhgVon ? Math.round(F.koopsom * NHG.vonPct / 100) : Math.max(0, F.koopsom - F.nhgRoerend);
 /* Bijzondere toetsen: hypotheekgids 1.8.1, 2.1.6 (stroomschema VvE), 2.4, 5.1.1 en 5.1.2. AOW-leeftijd indicatief (67 jaar). */
 const EXTRA = { aowLeeftijd: 67, erfpachtRuimte: 550, vveLtv: 80, dlStandaard: 12, ohaAvPct: 50, ohaMinRvp: 3 };
 const VORMEN = {
@@ -51,6 +55,8 @@ const VOORWAARDEN = [
     'Hoofdsom € 25.000 tot € 2.000.000 (inclusief overbrugging en verhogingen); verhoging vanaf € 5.000; looptijd 5 tot 30 jaar.',
     'Verstrekking tot 100% van de marktwaarde; met NHG en EBB/EBV tot 106%. Boven € 1.250.000 hoofdsom maximaal 90%.',
     'NHG 2027: NHG-grens € 500.000, met energiebesparende voorzieningen of nieuwbouw met A++++ label € 530.000; borgtochtprovisie 0,4%.',
+    'NHG toetst de grens op de kosten voor de woning, ook als de klant een deel zelf betaalt, en op de lening. Bijkomende kosten: maximaal 6% mee te financieren; bij nieuwbouw niet.',
+    'NHG: aflossingsvrij alleen voor een bestaande eigenwoningschuld en tot 50% van de marktwaarde; bij energielabel E, F of G minimaal € 20.000 voor energiebesparende voorzieningen.',
     'Offerte 3 maanden geldig, verlenging met 9 maanden zonder bereidstellingskosten; € 500 annuleringskosten in de verlengingsperiode.',
     'Passeren binnen 3 maanden: de laagste van offerterente en passeerrente geldt. Na 3 maanden: de laagste van offerterente en rente op het vastklikmoment.',
     'Renteaanbod binnen 3 weken retour; bindende offerte binnen 2 weken (digitaal) getekend retour.',
@@ -161,13 +167,20 @@ function kosten() {
   const exclNhg = koopsom + nb + verbouwing + aankoop + hypKostenExcl + overigTotaal;
   const mw = F.marktwaarde == null ? stichtingskosten : F.marktwaarde;
   /* Eigen geld niet opgegeven: minimaal benodigd bedrag, wat boven de marktwaarde uitkomt (de NHG-provisie wordt meegefinancierd) */
-  const maxLening = nhg ? Math.min(mw, Math.min(NHG.grensEnergie, nhgGrens() + F.maatregelen)) : mw;
-  const nodig = Math.max(0, nhg ? Math.ceil(exclNhg - maxLening * (1 - NHG.provisiePct / 100)) : exclNhg - maxLening);
+  /* NHG A.5.3: provisie over de hele hoofdsom; bij een bestaande lening met NHG alleen over de verhoging, bij zuiver oversluiten geen provisie */
+  const eigenWoning = doel !== 'bestaand' && doel !== 'nieuwbouw';
+  const nhgRestant = nhg && eigenWoning && F.nhgBestaand ? (F.nhgRestant == null ? (doel === 'oversluiten' || doel === 'verbouwing' ? koopsom : 0) : Math.min(F.nhgRestant, koopsom)) : 0;
+  const nhgZuiver = nhg && F.nhgBestaand && doel === 'oversluiten' && verbouwing === 0 && nhgRestant >= koopsom;
+  const pNhg = nhg && !nhgZuiver ? NHG.provisiePct / 100 : 0;
+  /* NHG C.6.2: bij een bestaande woning maximaal 6% bijkomende kosten in de lening; bij nieuwbouw alleen de kosten van de woning zelf */
+  const nhgLeenMax = !nhg ? Infinity : doel === 'bestaand' ? Math.floor((nhgKoopsom() + verbouwing) * (1 + NHG.bijkomendPct / 100)) : doel === 'nieuwbouw' ? stichtingskosten + verbouwing : Infinity;
+  const maxLening = nhg ? Math.min(mw, NHG.grensEnergie, nhgGrens() + F.maatregelen, nhgLeenMax) : mw;
+  const nodig = Math.max(0, nhg ? Math.ceil(exclNhg - pNhg * nhgRestant - maxLening * (1 - pNhg)) : exclNhg - maxLening);
   const eigen = F.eigenGeld == null ? nodig : F.eigenGeld;
-  const nhgKosten = nhg ? Math.round(Math.max(0, exclNhg - eigen) * (NHG.provisiePct / 100) / (1 - NHG.provisiePct / 100)) : 0;
+  const nhgKosten = nhg ? Math.round(Math.max(0, exclNhg - eigen - nhgRestant) * pNhg / (1 - pNhg)) : 0;
   const hypKosten = hypKostenExcl + nhgKosten;
   const totaal = exclNhg + nhgKosten;
-  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, hypKosten, nieuwbouwExtra: nb, stichtingskosten, overig, overigTotaal, overigKrediet, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
+  return { doel, koopsom, verbouwing, ovb, levering, aankoop, notHyp: F.notHypotheek, tax: F.taxKosten, adv: F.advKosten, nhgKosten, nhgRestant, nhgZuiver, hypKosten, nieuwbouwExtra: nb, stichtingskosten, overig, overigTotaal, overigKrediet, totaal, eigen, teFinancieren: Math.max(0, totaal - eigen) };
 }
 
 /* ---------- Inkomensbepaling (hypotheekgids hoofdstuk 5) ---------- */
@@ -500,7 +513,7 @@ function bereken() {
   if (nhg) {
     if (totaal > NHG.grensEnergie) fouten.push(`Met NHG is de lening maximaal ${fmtEuro0(NHG.grensEnergie)} (NHG-grens inclusief energiebesparende maatregelen).`);
     else if (totaal > nhgGrens() && energie < totaal - nhgGrens()) fouten.push(`De NHG-grens ${NHG.jaar} is ${fmtEuro0(nhgGrens())}; alleen het deel voor energiebesparende maatregelen mag daarboven komen (tot ${fmtEuro0(NHG.grensEnergie)}).`);
-    letop.push('NHG: de NHG-grens is vereenvoudigd getoetst op de hoofdsom; NHG toetst op de kosten voor de woning. Controleer de grens die geldt op de datum van het bindend aanbod.');
+    letop.push('NHG: bepalend is de NHG-grens die geldt op de datum van het bindend aanbod.');
   }
   if (av > 0) {
     if (starter && !isOha) fouten.push('Aflossingsvrij is niet mogelijk voor koopstarters (35 jaar of jonger, eerste koopwoning).');
@@ -586,6 +599,83 @@ function bereken() {
   /* ----- Bijzondere toetsen ----- */
   const extra = [];
   const zet = (naam, soort, tekst) => { extra.push([naam, soort, tekst]); if (soort === 'fout') fouten.push(naam + ': ' + tekst); else if (soort === 'letop') { letop.push(naam + ': ' + tekst); voorbehoud.push(naam + ': ' + tekst); } };
+
+  /* ----- NHG: Voorwaarden en normen 2027-1 ----- */
+  let nhgToets = null;
+  if (nhg) {
+    const G = nhgGrens(), GE = NHG.grensEnergie, eKosten = Math.min(k.verbouwing, energie), kwaliteit = k.verbouwing - eKosten;
+    const posten = [], post = (code, omschrijving, bedrag, isEnergie) => { if (Math.round(bedrag)) posten.push({ code, omschrijving, bedrag: Math.round(bedrag), energie: !!isEnergie }); };
+    let artikel, situatie, getoetst = true;
+    if (doel === 'bestaand') {
+      /* C.2.1.1: a laagste van koopsom en marktwaarde, b kwaliteitsverbetering, f geleende bijkomende kosten (maximaal 6%), h energiebesparende voorzieningen */
+      artikel = 'C.2.1.1'; situatie = 'Aankoop bestaande woning';
+      const kk = nhgKoopsom(), taxWaarde = F.mwVoorVerbouwing > 0 ? F.mwVoorVerbouwing : k.verbouwing === 0 ? mw : null;
+      post('a', taxWaarde != null && taxWaarde < kk ? 'Marktwaarde volgens de taxatie (lager dan de koopsom)' : F.nhgVon ? `${NHG.vonPct}% van de koopsom vrij op naam` : 'Koopsom kosten koper' + (F.nhgRoerend ? ' zonder roerende zaken' : ''), taxWaarde != null ? Math.min(kk, taxWaarde) : kk);
+      post('b', 'Kwaliteitsverbetering', kwaliteit);
+      const basisLening = kk + k.verbouwing, geleend = Math.max(0, totaal - basisLening), maxBijkomend = basisLening * NHG.bijkomendPct / 100;
+      post('f', 'Bijkomende kosten die worden geleend', Math.min(geleend, maxBijkomend));
+      post('h', 'Energiebesparende voorzieningen', eKosten, true);
+      if (geleend > maxBijkomend + 1) zet('NHG – bijkomende kosten', 'fout', `voor bijkomende kosten mag maximaal ${NHG.bijkomendPct}% van de koopsom en de verbouwing worden geleend (${fmtEuro0(maxBijkomend)}); de lening is dan maximaal ${fmtEuro0(Math.floor(basisLening + maxBijkomend))}. Nu wordt ${fmtEuro0(geleend)} voor bijkomende kosten geleend (C.6.2.1).`);
+      if (taxWaarde == null) letop.push('NHG-grens: NHG rekent met het laagste van de koopsom en de getaxeerde marktwaarde vóór verbouwing. Die marktwaarde is niet ingevuld; er is met de koopsom gerekend.');
+    } else if (doel === 'nieuwbouw') {
+      /* C.2.2.1: koop-/aanneemsom, grond, meer- en minderwerk, bouwrente, nutsaansluiting, kosten voor de bouw en aanvullende energiebesparende voorzieningen */
+      artikel = 'C.2.2.1'; situatie = 'Aankoop nieuwbouwwoning';
+      post('a', 'Koop-/aanneemsom', k.koopsom); post('b', 'Grond', F.nbGrond); post('d', 'Saldo meer- en minderwerk', F.nbMeerwerk - F.nbMinderwerk);
+      post('e', 'Bouwrente', F.nbBouwrente); post('g', 'Aansluiting op de nutsvoorzieningen', F.nbNuts); post('h', 'Kosten voor de bouw en afbouw', kwaliteit);
+      post('i', 'Aanvullende energiebesparende voorzieningen', eKosten, true);
+      if (totaal > k.stichtingskosten + k.verbouwing + 1) zet('NHG – kosten nieuwbouw', 'fout', `bij nieuwbouw mag alleen worden geleend voor de koop-/aanneemsom, grond, meerwerk, bouwrente, nutsaansluiting, afbouw en energiebesparende voorzieningen (${fmtEuro0(k.stichtingskosten + k.verbouwing)}); notaris-, advies- en andere bijkomende kosten betaalt de klant zelf (C.6.2.2).`);
+    } else {
+      /* C.2.3 en C.2.4: de klant heeft de woning al. Geen toets bij zuiver oversluiten van NHG naar NHG (C.2.3.4) */
+      const meegenomen = doel === 'erfpacht' ? delen.filter(d => d.meegenomen).reduce((t, d) => t + d.bedrag, 0) : 0;
+      const zuiver = k.nhgZuiver && totaal <= k.totaal + 1, ongewijzigd = F.nhgBestaand && k.verbouwing === 0 && k.nhgRestant > 0 && totaal <= k.nhgRestant;
+      situatie = { oversluiten: 'Oversluiten', verbouwing: 'Verhogen of verbouwen', uitkoop: 'Verkrijgen van de volledige eigendom', oha: 'Ontslag hoofdelijke aansprakelijkheid', erfpacht: 'Afkoop van de erfpacht' }[doel] + (F.nhgBestaand ? ', bestaande lening met NHG' : ', bestaande lening zonder NHG');
+      if (zuiver || ongewijzigd) { getoetst = false; artikel = 'C.2.3.4'; }
+      else {
+        artikel = F.nhgBestaand ? 'C.2.3.2' : 'C.2.4.1';
+        post('a', { oversluiten: 'Af te lossen lening', verbouwing: 'Restant van de bestaande lening', uitkoop: 'Uitkoopsom en over te nemen schuld', oha: 'Restant van de lening en uitkoopsom', erfpacht: 'Afkoopsom van de erfpacht' }[doel], k.koopsom);
+        post('a', 'Restant van de bestaande lening', meegenomen);
+        post('c', 'Kwaliteitsverbetering', kwaliteit);
+        post(F.nhgBestaand ? 'j' : 'i', 'Energiebesparende voorzieningen', eKosten, true);
+      }
+      /* C.2.4.3: zonder bestaande NHG wordt ook de marktwaarde aan de grens getoetst; waardestijging door energiebesparing telt niet mee tot 500.000 */
+      if (!F.nhgBestaand) {
+        const mwZonder = F.mwVoorVerbouwing > 0 ? F.mwVoorVerbouwing + kwaliteit : eKosten === 0 ? mw : null;
+        if (mw > GE) zet('NHG – marktwaarde', 'fout', `de marktwaarde (${fmtEuro0(mw)}) is hoger dan ${fmtEuro0(GE)}; een lening zonder NHG kan dan niet met NHG worden overgesloten of verhoogd (C.2.4.3).`);
+        else if (mwZonder != null && mwZonder > NHG.grens) zet('NHG – marktwaarde', 'fout', `de marktwaarde zonder de energiebesparende voorzieningen (${fmtEuro0(mwZonder)}) is hoger dan de NHG-grens van ${fmtEuro0(NHG.grens)}; een lening zonder NHG kan dan niet met NHG worden overgesloten of verhoogd (C.2.4.3).`);
+        else if (mwZonder == null && mw > NHG.grens) zet('NHG – marktwaarde', 'letop', `de marktwaarde na verbouwing is ${fmtEuro0(mw)}. Zonder de waardestijging door energiebesparende voorzieningen mag die maximaal ${fmtEuro0(NHG.grens)} zijn (C.2.4.3); vul de marktwaarde vóór verbouwing in.`);
+        else zet('NHG – marktwaarde', 'ok', `de marktwaarde (${fmtEuro0(mw)}) blijft binnen de NHG-grens (C.2.4.3).`);
+        if (doel === 'oversluiten' && k.verbouwing === 0) zet('NHG – doel oversluiten', 'letop', 'een lening zonder NHG kan alleen naar NHG worden overgesloten voor kwaliteitsverbetering of energiebesparende voorzieningen, als een aflossingsvrije lening (grotendeels) annuïtair of lineair wordt, of als dit nodig is om de woning te behouden (D.2.1).');
+      }
+    }
+    const kostenTotaal = posten.reduce((t, x) => t + x.bedrag, 0), kostenZonderEnergie = posten.filter(x => !x.energie).reduce((t, x) => t + x.bedrag, 0);
+    const opbouw = posten.map(x => `${x.code}. ${x.omschrijving.toLowerCase()} ${fmtEuro0(x.bedrag)}`).join('; ');
+    let uitkomst = 'niet_van_toepassing';
+    if (!getoetst) zet('NHG-grens – kosten voor de woning', 'ok', k.nhgZuiver ? 'zuiver oversluiten van NHG naar NHG: geen toets aan de NHG-grens (C.2.3.4), geen borgtochtprovisie (A.5.3.2) en een beperkte toets op documenten, aflosvorm en BKR (D.2.4).' : 'de lening met NHG wordt niet verhoogd: geen toets aan de NHG-grens (C.2.3.4).');
+    else if (kostenTotaal > GE) { uitkomst = 'niet_mogelijk'; zet('NHG-grens – kosten voor de woning', 'fout', `de kosten voor de woning zijn ${fmtEuro0(kostenTotaal)} en dat is meer dan ${fmtEuro0(GE)} (${artikel}). Opbouw: ${opbouw}. De kosten tellen ook mee als de klant ze zelf betaalt.`); }
+    else if (kostenZonderEnergie > G) { uitkomst = 'niet_mogelijk'; zet('NHG-grens – kosten voor de woning', 'fout', `de kosten voor de woning zonder energiebesparende voorzieningen zijn ${fmtEuro0(kostenZonderEnergie)} en dat is meer dan de NHG-grens van ${fmtEuro0(G)} (${artikel}). Opbouw: ${opbouw}. De kosten tellen ook mee als de klant ze zelf betaalt.`); }
+    else { uitkomst = 'akkoord'; zet('NHG-grens – kosten voor de woning', 'ok', `${fmtEuro0(kostenZonderEnergie)}${kostenTotaal > kostenZonderEnergie ? ' en ' + fmtEuro0(kostenTotaal) + ' met energiebesparende voorzieningen' : ''}; binnen de NHG-grens van ${fmtEuro0(G)}${G < GE ? ' (' + fmtEuro0(GE) + ' met energiebesparende voorzieningen)' : ''} (${artikel}). Opbouw: ${opbouw}.`); }
+    /* C.6.1.2: energielabel E, F of G (geen appartement) */
+    if (doel === 'bestaand' && labelIdx === 7 && !app && eKosten < NHG.efgMinimum) {
+      if (F.nhgGeenEbv) voorwaarden.push('NHG: de klant verklaart met het formulier van NHG niet te willen lenen voor energiebesparende voorzieningen (energielabel E, F of G).');
+      else zet('NHG – energielabel E, F of G', 'letop', `de lening mag alleen met NHG worden aangeboden als de klant minimaal ${fmtEuro0(NHG.efgMinimum)} leent voor energiebesparende voorzieningen (nu ${fmtEuro0(eKosten)}), een lager bedrag als meer lenen niet kan, of met het formulier van NHG verklaart dit niet te willen (C.6.1.2).`);
+    }
+    /* C.6.7.1: aflossingsvrij alleen voor een bestaande eigenwoningschuld en tot 50% van de marktwaarde */
+    if (av > 0) {
+      if (av > mw * NHG.avMaxPct / 100) zet('NHG – aflossingsvrij', 'fout', `het aflossingsvrije deel (${fmtEuro0(av)}) is hoger dan ${NHG.avMaxPct}% van de marktwaarde (${fmtEuro0(mw * NHG.avMaxPct / 100)}) (C.6.7.1).`);
+      else if (F.nhgEws == null) zet('NHG – aflossingsvrij', 'letop', `aflossingsvrij kan met NHG alleen voor een bestaande eigenwoningschuld (overgangsrecht, artikel 10bis.1 Wet IB 2001) en tot ${NHG.avMaxPct}% van de marktwaarde (C.6.7.1). Vul de bestaande eigenwoningschuld in.`);
+      else if (av > F.nhgEws) zet('NHG – aflossingsvrij', 'fout', `het aflossingsvrije deel (${fmtEuro0(av)}) is hoger dan de bestaande eigenwoningschuld (${fmtEuro0(F.nhgEws)}); met NHG kan alleen dat deel aflossingsvrij (C.6.7.1).`);
+      else zet('NHG – aflossingsvrij', 'ok', `het aflossingsvrije deel (${fmtEuro0(av)}) valt binnen de bestaande eigenwoningschuld en ${NHG.avMaxPct}% van de marktwaarde (C.6.7.1).`);
+    }
+    /* C.5.1: geen modelmatige taxatie voor de waarde na verbouwing of bij een hoog funderingsrisico */
+    if (taxatie !== 'nwwi' && k.verbouwing > 0) zet('NHG – taxatie', 'fout', 'voor de marktwaarde na kwaliteitsverbetering of energiebesparende voorzieningen is met NHG een fysieke, gevalideerde taxatie nodig (C.5.1).');
+    if (taxatie !== 'nwwi' && (F.fundering === 'D' || F.fundering === 'E')) zet('NHG – taxatie', 'letop', 'bij een hoog funderingsrisico is met NHG een fysieke taxatie nodig; een modelmatige taxatie volstaat dan niet (C.5.1).');
+    if (doel === 'nieuwbouw' && F.nbBouwwijze === 'project' && !F.nbCorporatie) voorwaarden.push('NHG: voor de nieuwbouwwoning is een waarborgcertificaat onder het Keurmerk GarantieWoning afgegeven en de waarborgregeling staat in de koop-/aannemingsovereenkomst (C.4.3).');
+    if (k.verbouwing > 0 || doel === 'nieuwbouw') voorwaarden.push('NHG: het geleende bedrag voor de bouw of de aanpassingen staat in een bouwdepot; eigen middelen voor die kosten worden eerst besteed (C.6.5).');
+    if (!k.nhgZuiver && k.nhgRestant > 0) letop.push(`NHG: de borgtochtprovisie is berekend over de verhoging: de hoofdsom min het restant van de bestaande lening met NHG (${fmtEuro0(k.nhgRestant)}) (A.5.3.1).`);
+    if (F.starterslening) letop.push('NHG: over het deel waarmee een SVn Starterslening wordt afgelost is geen borgtochtprovisie verschuldigd (A.5.3.2); dat is in de berekende provisie niet verrekend.');
+    nhgToets = { artikel, situatie, getoetst, uitkomst, posten: posten.map(({ code, omschrijving, bedrag }) => ({ code, omschrijving, bedrag })), kostenZonderEnergie, grens: G, kostenTotaal, grensMetEnergie: GE,
+      provisie: k.nhgKosten, provisieGrondslag: k.nhgZuiver ? 0 : Math.max(0, totaal - k.nhgRestant) };
+  }
   const regeling = F.regeling;
   const l1 = leeftijd('geb1'), l2 = leeftijd('geb2');
   /* Toekomstig pensioen (hypotheekgids 5.3.7): binnen 10 jaar AOW telt het inkomen na pensionering mee */
@@ -1009,7 +1099,7 @@ function bereken() {
   if (jkpWaarde == null && totaal > 0 && termijnen.length) letop.push(`Het jaarlijks kostenpercentage is niet te berekenen: de kosten van het krediet (${fmtEuro0(kredietKosten)}) zijn hoger dan of gelijk aan de lening (${fmtEuro0(totaal)}).`);
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
-  return { k, mw, nhg, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
+  return { k, mw, nhg, nhgToets, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
     totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkpWaarde, extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, tweeHyp, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
     oordeel: fouten.length ? 'past_niet' : voorbehoud.length ? 'voorbehoud' : 'past' };
 }
@@ -1024,7 +1114,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.7.0';
+const VERSIE = '1.8.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -1046,6 +1136,9 @@ function vlak(inv) {
     desktopScore: getal(w.desktopBetrouwbaarheid), oudeHypotheek: !!(inv.bestaandeHypotheek || {}).aangevraagdVoor17Augustus2026,
     verdelingReden: (inv.verdeling || {}).reden || '', verdelingIngeschreven: !!(inv.verdeling || {}).akteIngeschreven,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
+    nhgBestaand: !!(inv.nhgGegevens || {}).bestaandeLeningMetNhg, nhgRestant: (inv.nhgGegevens || {}).restantBestaandeLening == null ? null : getal(inv.nhgGegevens.restantBestaandeLening),
+    nhgVon: !!(inv.nhgGegevens || {}).koopsomVrijOpNaam, nhgRoerend: getal((inv.nhgGegevens || {}).roerendeZaken), nhgGeenEbv: !!(inv.nhgGegevens || {}).verklaringGeenEnergiebesparing,
+    nhgEws: (inv.nhgGegevens || {}).bestaandeEigenwoningschuld == null ? null : getal(inv.nhgGegevens.bestaandeEigenwoningschuld),
     verbouwing: getal(k.verbouwing), maatregelen: getal(k.energiemaatregelen), voorzieningen: (k.energievoorzieningen || []), ovb_pct: String(k.overdrachtsbelastingPct == null ? 2 : k.overdrachtsbelastingPct),
     notLevering: getal(k.notarisLevering), notHypotheek: getal(k.notarisHypotheek), taxKosten: getal(k.taxatie), advKosten: getal(k.advies),
     overig: (k.overig || []).filter(o => getal(o.bedrag) > 0).map(o => ({ omschrijving: String(o.omschrijving || 'Overige kosten'), bedrag: getal(o.bedrag), kredietkosten: !!o.kredietkosten })), eigenGeld: k.eigenGeld == null ? null : getal(k.eigenGeld),
@@ -1141,6 +1234,7 @@ function resultaat(inv) {
     totalen: { hoofdsom: r.totaal, hoofdsomInclOverbrugging: r.totaalIncl, marktwaarde: r.mw, ltvPct: rond(r.ltv), tariefklasse: klasseNaam(r.idx), gemiddeldeRentePct: rond(r.gewRente, 3),
       brutoMaandlast: rond(r.maand), looptijdMaanden: r.maanden, jkpPct: rond(r.jkp), renteTotaal: rond(r.renteTotaal, 0), kredietKosten: r.kredietKosten, totaalTeBetalen: rond(r.totaalTeBetalen, 0) },
     grenzen: r.grenzen,
+    nhgToets: r.nhgToets,
     tijdelijkTweeHypotheken: r.tweeHyp ? { restschuld: r.tweeHyp.restschuld, rentePct: r.tweeHyp.rente, rentePerMaand: rond(r.tweeHyp.pm), tariefklasse: r.tweeHyp.klasse } : null,
     kosten: { stichtingskosten: r.k.stichtingskosten, nieuwbouwExtra: r.k.nieuwbouwExtra, koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     documenten: r.documenten,
