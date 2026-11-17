@@ -307,4 +307,71 @@ assert.strictEqual(voorzieningen(['ventilatie']).oordeel, 'past_niet');
 assert.strictEqual(voorzieningen(['ventilatie', 'warmtepomp']).oordeel, 'past');
 assert.ok(voorzieningen([]).voorwaarden.some(t => t.includes('gevelisolatie')));
 
+// 36. NHG Voorwaarden en normen 2027-1: de grens op de kosten voor de woning (C.2), bijkomende kosten (C.6.2), provisie (A.5.3), aflossingsvrij (C.6.7.1), label E/F/G (C.6.1.2)
+const nhgInv = (w, k, extra) => Object.assign({ peildatum: '2027-01-15',
+  woning: Object.assign({ doel: 'bestaand', koopsom: 480000, marktwaarde: 480000, energielabel: 'A', nhg: true }, w),
+  kosten: Object.assign({ overdrachtsbelastingPct: 2, notarisLevering: 650, notarisHypotheek: 650, taxatie: 500, advies: 2500 }, k),
+  aanvragers: [{ toetsinkomen: 250000 }], inkomen: {}, leningdelen: [{ vorm: 'ann', bedrag: null, looptijd: 30, rentevast: 10 }], bkr: { status: 'schoon' } }, extra);
+const nhgToetsVan = (w, k, extra) => E.resultaat(nhgInv(w, k, extra));
+const heeft = (res, tekst) => res.afwijzingen.some(t => t.includes(tekst));
+// lening onder de grens, maar de kosten voor de woning erboven: koopsom 480.000 + verbouwing 40.000, ook al betaalt de klant 70.000 zelf
+r = nhgToetsVan({ marktwaarde: 520000, marktwaardeVoorVerbouwing: 480000 }, { verbouwing: 40000, eigenGeld: 70000 });
+assert.ok(r.totalen.hoofdsom < 500000);
+assert.strictEqual(r.nhgToets.uitkomst, 'niet_mogelijk');
+assert.strictEqual(r.nhgToets.kostenZonderEnergie, 520000);
+assert.ok(heeft(r, 'NHG-grens – kosten voor de woning'));
+// dezelfde verbouwing, waarvan 30.000 energiebesparende voorzieningen: 490.000 zonder en 520.000 met -> binnen 500.000 en 530.000
+r = nhgToetsVan({ marktwaarde: 520000, marktwaardeVoorVerbouwing: 480000 }, { verbouwing: 40000, energiemaatregelen: 30000, eigenGeld: 70000 });
+assert.strictEqual(r.nhgToets.uitkomst, 'akkoord');
+assert.deepStrictEqual([r.nhgToets.kostenZonderEnergie, r.nhgToets.kostenTotaal, r.nhgToets.artikel], [490000, 520000, 'C.2.1.1']);
+assert.ok(!heeft(r, 'NHG'));
+// laagste van koopsom en marktwaarde; koopsom vrij op naam telt voor 97%; roerende zaken gaan eraf
+assert.strictEqual(nhgToetsVan({ koopsom: 480000, marktwaarde: 470000 }, { eigenGeld: 30000 }).nhgToets.posten[0].bedrag, 470000);
+assert.strictEqual(nhgToetsVan({}, { eigenGeld: 40000 }, { nhgGegevens: { koopsomVrijOpNaam: true } }).nhgToets.posten[0].bedrag, 465600);
+assert.strictEqual(nhgToetsVan({}, { eigenGeld: 40000 }, { nhgGegevens: { roerendeZaken: 5000 } }).nhgToets.posten[0].bedrag, 475000);
+// geleende bijkomende kosten tellen mee in de kosten (post f)
+r = nhgToetsVan({ koopsom: 300000, marktwaarde: 320000 }, { eigenGeld: 0 });
+assert.strictEqual(r.nhgToets.posten.find(x => x.code === 'f').bedrag, r.totalen.hoofdsom - 300000);
+// bijkomende kosten: maximaal 6% mee te financieren
+r = nhgToetsVan({ koopsom: 300000, marktwaarde: 330000 }, { eigenGeld: 0 }, { leningdelen: [{ vorm: 'ann', bedrag: 325000, looptijd: 30, rentevast: 10 }] });
+assert.ok(heeft(r, 'NHG – bijkomende kosten') && heeft(r, '318.000'));
+// automatisch eigen geld houdt rekening met de 6%
+r = nhgToetsVan({ koopsom: 300000, marktwaarde: 330000 }, { advies: 12000 });
+assert.ok(r.totalen.hoofdsom <= 318000 && !heeft(r, 'NHG'));
+// nieuwbouw: alleen de kosten van de woning zelf in de lening
+r = nhgToetsVan({ doel: 'nieuwbouw', koopsom: 400000, marktwaarde: 420000 }, { eigenGeld: 0 }, { leningdelen: [{ vorm: 'ann', bedrag: 404000, looptijd: 30, rentevast: 10 }] });
+assert.ok(heeft(r, 'NHG – kosten nieuwbouw'));
+r = nhgToetsVan({ doel: 'nieuwbouw', koopsom: 400000, marktwaarde: null }, {}, { nieuwbouw: { meerwerk: 20000, bouwrente: 5000 } });
+assert.deepStrictEqual([r.nhgToets.artikel, r.nhgToets.kostenTotaal, r.nhgToets.uitkomst, r.totalen.hoofdsom], ['C.2.2.1', 425000, 'akkoord', 425000]);
+// nieuwbouw met A++++: 530.000
+assert.strictEqual(nhgToetsVan({ doel: 'nieuwbouw', koopsom: 520000, marktwaarde: null, energielabel: 'A++++' }, {}).nhgToets.uitkomst, 'akkoord');
+assert.strictEqual(nhgToetsVan({ doel: 'nieuwbouw', koopsom: 520000, marktwaarde: null, energielabel: 'A' }, {}).nhgToets.uitkomst, 'niet_mogelijk');
+// provisie: 0,4% over de hele hoofdsom bij aankoop
+r = nhgToetsVan({ koopsom: 300000, marktwaarde: 320000 }, { eigenGeld: 0 });
+assert.ok(Math.abs(r.kosten.nhgProvisie - r.totalen.hoofdsom * 0.004) <= 1);
+// zuiver oversluiten van NHG naar NHG: geen provisie en geen toets aan de grens
+r = nhgToetsVan({ doel: 'oversluiten', koopsom: 250000, marktwaarde: 400000 }, { eigenGeld: 0 }, { nhgGegevens: { bestaandeLeningMetNhg: true } });
+assert.deepStrictEqual([r.kosten.nhgProvisie, r.nhgToets.getoetst, r.nhgToets.artikel], [0, false, 'C.2.3.4']);
+// verhoging van een lening met NHG: provisie alleen over de verhoging
+r = nhgToetsVan({ doel: 'oversluiten', koopsom: 250000, marktwaarde: 400000 }, { verbouwing: 50000, eigenGeld: 0 }, { nhgGegevens: { bestaandeLeningMetNhg: true } });
+assert.ok(Math.abs(r.kosten.nhgProvisie - (r.totalen.hoofdsom - 250000) * 0.004) <= 1);
+assert.deepStrictEqual([r.nhgToets.artikel, r.nhgToets.kostenTotaal], ['C.2.3.2', 300000]);
+// van zonder NHG naar NHG: provisie over de hele hoofdsom en toets van de marktwaarde (C.2.4.3)
+r = nhgToetsVan({ doel: 'oversluiten', koopsom: 250000, marktwaarde: 400000 }, { verbouwing: 50000, eigenGeld: 0 });
+assert.ok(Math.abs(r.kosten.nhgProvisie - r.totalen.hoofdsom * 0.004) <= 1);
+assert.strictEqual(r.nhgToets.artikel, 'C.2.4.1');
+assert.ok(heeft(nhgToetsVan({ doel: 'oversluiten', koopsom: 250000, marktwaarde: 520000 }, { verbouwing: 50000, eigenGeld: 0 }), 'NHG – marktwaarde'));
+assert.ok(!heeft(nhgToetsVan({ doel: 'oversluiten', koopsom: 250000, marktwaarde: 520000 }, { verbouwing: 50000, eigenGeld: 0 }, { nhgGegevens: { bestaandeLeningMetNhg: true } }), 'NHG – marktwaarde'));
+// aflossingsvrij met NHG: alleen voor een bestaande eigenwoningschuld
+const nhgMetAv = ews => nhgToetsVan({ koopsom: 400000, marktwaarde: 400000 }, { eigenGeld: 30000 }, { leningdelen: [{ vorm: 'ann', bedrag: 300000, looptijd: 30, rentevast: 10 }, { vorm: 'av', bedrag: 80000, looptijd: 30, rentevast: 10 }], nhgGegevens: { bestaandeEigenwoningschuld: ews } });
+assert.strictEqual(nhgMetAv(undefined).oordeel, 'voorbehoud');
+assert.ok(heeft(nhgMetAv(50000), 'NHG – aflossingsvrij'));
+assert.strictEqual(nhgMetAv(100000).oordeel, 'past');
+// energielabel E, F of G: voorbehoud tot er 20.000 voor energiebesparing wordt geleend of de klant het formulier tekent
+assert.ok(nhgToetsVan({ koopsom: 300000, marktwaarde: 300000, energielabel: 'E_F_G' }, {}).voorbehoud.some(t => t.includes('E, F of G')));
+assert.ok(!nhgToetsVan({ koopsom: 300000, marktwaarde: 300000, energielabel: 'E_F_G' }, {}, { nhgGegevens: { verklaringGeenEnergiebesparing: true } }).voorbehoud.some(t => t.includes('E, F of G')));
+assert.ok(!nhgToetsVan({ koopsom: 300000, marktwaarde: 300000, energielabel: 'E_F_G', appartement: true }, {}, { vve: {} }).voorbehoud.some(t => t.includes('E, F of G')));
+// zonder NHG geen NHG-toets
+assert.strictEqual(nhgToetsVan({ nhg: false, koopsom: 300000, marktwaarde: 300000 }, {}).nhgToets, null);
+
 console.log('Alle tests geslaagd');

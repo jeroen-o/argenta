@@ -33,7 +33,7 @@ of opgeslagen.
 | Hoofdsom, LTV, aflossingsvrij (ook de regel voor hypotheken van vóór 17 augustus 2026), koopstarters, consumptief, groen lenen, Desktop Taxatie met betrouwbaarheidsscore, een of meer overbruggingen, verkrijgen volledig eigendom | hypotheekgids, hoofdstuk 1–3 |
 | Inkomensbepaling: vast, IBL, flexibel, perspectiefverklaring, ondernemer, pensioen, uitkering, alimentatie, vermogen, lijfrente, 50-urengrens, toekomstig inkomen en toekomstig pensioen | hypotheekgids hoofdstuk 5 |
 | Inkomenstoets: financieringslastpercentages, toetsrente (gewogen naar hoofdsom en looptijd; aangeboden rente als die hoger is), studielening, energielabel, alleenstaanden, lijst met energiebesparende voorzieningen | Tijdelijke regeling hypothecair krediet, tekst per 1 januari 2027 (wetten.overheid.nl, BWBR0032503) |
-| NHG-grens en borgtochtprovisie | NHG Voorwaarden en normen 2027 |
+| NHG-grens op de kosten voor de woning en op de lening, bijkomende kosten (6%), borgtochtprovisie, aflossingsvrij, label E/F/G, taxatie | NHG Voorwaarden en normen 2027-1 (A.5.3, C.2, C.5.1, C.6, D.2) |
 | Toetsrente bij aflossing binnen de rentevaste periode, eisen aan de consumptieve hypotheek, vrijstelling van het bouwdepot, omgevingsvergunning, ouderdom van de taxatie, energielabelplicht | hypotheekgids 1.2.2, 1.5, 1.8.2, 2.1.1, 2.1.2, 3.3 |
 | Werkelijke lasten voor AOW-gerechtigden, senioren verhuisregeling, tijdelijk-tekortregeling | hypotheekgids 5.1.1 en 5.1.2 |
 | Erfpacht, VvE, funderingsrisico, woningtype | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7, 2.3 |
@@ -123,7 +123,7 @@ workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. D
 | Kredietgever, aflossen, klachten | Voorwaarden Argenta hypotheek | juli 2025 |
 | OHA | argenta.nl/adviseur/ontslag-uit-de-hoofdelijke-aansprakelijkheid-oha | geraadpleegd november 2026 |
 | Leennormen | Wijzigingsregeling hypothecair krediet 2027 (Stcrt. 2026, 38415) + Nibud-bijlage | 2027 |
-| NHG-grens, provisie, beheertoets | NHG Voorwaarden en normen 2027-1 (C.2, A.5.3, D.4, D.6, bijlage 5) | 2027 |
+| NHG-grens, kosten, provisie, beheertoets | NHG Voorwaarden en normen 2027-1 (A.5.3, C.2, C.5.1, C.6, D.2, D.4, D.6, bijlage 5) | 2027 |
 
 ## Compliance
 
@@ -140,7 +140,7 @@ workflow elke werkdag of er een nieuwe kaart is en maakt dan een pull request. D
 - Het oordeel is geen kans dat Argenta de offerte afgeeft; de tool is niet geijkt op echte uitkomsten van Argenta.
 - De leennormen en NHG-bedragen zijn die van 2027; de normen 2026 zitten er niet in.
 - De toetsrente voor rentevast korter dan 10 jaar is een invoerveld (standaard 5,00%); de AFM stelt deze per kwartaal vast.
-- De NHG-grens is getoetst op de hoofdsom, niet op de kosten voor de woning.
+- De NHG-toets dekt de NHG-grens, de mee te financieren kosten, de provisie, aflossingsvrij, energielabel E, F of G en de taxatie. Niet doorgerekend: restschuldfinanciering (C.6.3), koop via een veiling, erfpachtconstructies en koperssteun met aanvullend vermogensrisico, drijvende woningen en opbouwproducten.
 - De tool voert zelf geen BKR-toets uit; de uitkomst is invoer. Het toetsinkomen wordt berekend uit de opgegeven bronnen, maar Argenta stelt het zelf vast. Geen netto maandlast.
 - Het percentage van het CHF voor inkomen uit vermogen zit niet in de tool; de regel voor ondernemers op basis van cijfers is een eigen uitwerking.
 - Eigen uitwerkingen die Argenta nog moet bevestigen: de dubbele-lastentoets, de volgorde in het VvE-stroomschema, de toets
