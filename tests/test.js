@@ -406,4 +406,43 @@ assert.ok(docs(r).includes('Afschrift van mijnpensioenoverzicht.nl*'));
 // brondata verandert het oordeel niet
 assert.strictEqual(E.resultaat(bdInv({ identiteit: true, ibl: true, pensioen: false }, iblBron)).oordeel, E.resultaat(bdInv(undefined, iblBron)).oordeel);
 
+// 38. OHA met de beheertoets: nieuwe financiering alleen voor overbedeling en kosten (proceskaart OHA); toevoegen van een schuldenaar (adviseurspagina OHA)
+const toetsNaam = (res, naam) => res.bijzondereToetsen.find(t => t.naam === naam);
+// via de beheertoets en overbedeling niet ingevuld: voorbehoud met de vraag om de overbedeling
+r = E.resultaat(ohaInv(70000));
+assert.strictEqual(toetsNaam(r, 'OHA – overbedeling').uitkomst, 'voorbehoud');
+// overbedeling 78.000 + kosten 3.000 dekt de nieuwe 80.000
+inv = ohaInv(70000); inv.oha.overbedeling = 78000; r = E.resultaat(inv);
+assert.strictEqual(toetsNaam(r, 'OHA – overbedeling').uitkomst, 'akkoord');
+assert.strictEqual(r.oordeel, 'voorbehoud');
+// overbedeling 50.000: de nieuwe 80.000 is te hoog
+inv = ohaInv(70000); inv.oha.overbedeling = 50000; r = E.resultaat(inv);
+assert.strictEqual(toetsNaam(r, 'OHA – overbedeling').uitkomst, 'niet_mogelijk');
+assert.strictEqual(r.oordeel, 'past_niet');
+// past de lening binnen de reguliere norm, dan geldt de beperking niet
+inv = ohaInv(110000); inv.oha.overbedeling = 50000;
+assert.strictEqual(toetsNaam(E.resultaat(inv), 'OHA – overbedeling'), undefined);
+// toevoegen schuldenaar: niet aanwezig zonder invoer
+assert.strictEqual(toetsNaam(E.resultaat(ohaInv(110000)), 'Toevoegen schuldenaar'), undefined);
+const metSa = (sa, wijzig) => { const i = ohaInv(110000); i.schuldenaarToevoegen = sa; if (wijzig) wijzig(i); return E.resultaat(i); };
+// gemeenschap van goederen, inkomen niet nodig: akkoord, zonder akte van levering
+r = metSa({ gemeenschapVanGoederen: true });
+assert.strictEqual(toetsNaam(r, 'Toevoegen schuldenaar').uitkomst, 'akkoord');
+let saDocs = r.documenten.find(g => g.groep === 'Toevoegen schuldenaar').items.join(' | ');
+assert.ok(!saDocs.includes('akte van levering') && saDocs.includes('burgerlijke stand'));
+assert.ok(r.voorwaarden.some(t => t.includes('huwelijksgoederenregister')));
+// niet in gemeenschap: akte van levering nodig
+assert.ok(metSa({}).documenten.find(g => g.groep === 'Toevoegen schuldenaar').items.join(' | ').includes('Concept akte van levering'));
+// geen eigenaar en bewoner, of geregistreerd bij SFH: niet mogelijk
+assert.strictEqual(metSa({ wordtEigenaarEnBewoner: false }).oordeel, 'past_niet');
+assert.strictEqual(metSa({ inkomenNodig: true, sfhRegistratie: true }, i => i.aanvragers.push({ toetsinkomen: 30000 })).oordeel, 'past_niet');
+assert.strictEqual(metSa({ inkomenNodig: true, achterstand: true }, i => i.aanvragers.push({ toetsinkomen: 30000 })).oordeel, 'past_niet');
+// inkomen nodig maar geen tweede aanvrager ingevuld: voorbehoud
+r = metSa({ inkomenNodig: true });
+assert.ok(r.voorbehoud.some(t => t.includes('aanvrager 2')));
+// inkomen nodig, niet in gemeenschap en lopende kredieten: beheertoets
+r = metSa({ inkomenNodig: true }, i => { i.aanvragers.push({ toetsinkomen: 30000 }); i.inkomen.verplichtingenPerMaand = 150; i.inkomen.alleenstaand = false; });
+assert.ok(r.voorbehoud.some(t => t.includes('NHG-beheertoets')));
+assert.ok(r.documenten.find(g => g.groep === 'Toevoegen schuldenaar').items.join(' | ').includes('zoals bij een nieuwe hypotheek'));
+
 console.log('Alle tests geslaagd');

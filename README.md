@@ -40,6 +40,7 @@ of opgeslagen.
 | Aanvrager: minimumleeftijd, nationaliteit en verblijf, familieverband, borgstelling, bewind | hypotheekgids 4.1 en 4.2 |
 | Documentenlijst per dossier | hypotheekgids hoofdstuk 8 |
 | Brondata via Ockto: OcktoID, IBL, MijnPensioenoverzicht; vervallen documenten | hypotheekgids 4.4 |
+| Toevoegen van een schuldenaar; financiering bij de beheertoets alleen voor overbedeling en kosten | adviseurspagina Argenta OHA en proceskaart OHA |
 | BKR-uitkomst, aantal contracten, loonbeslag | hypotheekgids 6.2 en 7.1.1 |
 | Maandlast per krediet, buitenlands belastingplichtig, 30%-regeling | hypotheekgids 6.3 en 6.4 |
 | Verhoging en tweede hypotheek | hypotheekgids 1.2.4 en de adviseurspagina over wijzigingen in beheer |
