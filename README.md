@@ -39,6 +39,7 @@ of opgeslagen.
 | Erfpacht, VvE, funderingsrisico, woningtype | hypotheekgids 2.4, 2.1.6 (stroomschema VvE), 2.1.7, 2.3 |
 | Aanvrager: minimumleeftijd, nationaliteit en verblijf, familieverband, borgstelling, bewind | hypotheekgids 4.1 en 4.2 |
 | Documentenlijst per dossier | hypotheekgids hoofdstuk 8 |
+| Brondata via Ockto: OcktoID, IBL, MijnPensioenoverzicht; vervallen documenten | hypotheekgids 4.4 |
 | BKR-uitkomst, aantal contracten, loonbeslag | hypotheekgids 6.2 en 7.1.1 |
 | Maandlast per krediet, buitenlands belastingplichtig, 30%-regeling | hypotheekgids 6.3 en 6.4 |
 | Verhoging en tweede hypotheek | hypotheekgids 1.2.4 en de adviseurspagina over wijzigingen in beheer |

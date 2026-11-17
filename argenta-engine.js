@@ -73,6 +73,7 @@ const VOORWAARDEN = [
   ['Woning en taxatie', [
     'Eigen bewoning, vaste bewoning in Nederland; minimale marktwaarde (na verbouwing) € 100.000.',
     'Taxatierapport via NWWI, op datum bindende offerte maximaal 6 maanden oud.',
+    'Brondata via een erkende dataleverancier zoals Ockto: digitale identificatie (OcktoID), IBL en MijnPensioenoverzicht vervangen de losse documenten; bij nieuwbouw haalt Argenta het definitieve energielabel op uit EP-online.',
     'Calcasa Desktop Taxatie: tot 90% LTV, hoofdsom maximaal € 1.000.000, woningwaarde maximaal € 1.500.000, betrouwbaarheid ≥ 4,0 (NHG 5,0); niet bij nieuwbouw of erfpacht. Bij aflossingsvrij: Desktop Taxatie Plus of volledige taxatie.',
     'Nieuwbouw: waarborgcertificaat (keurmerk Stichting GarantieWoning) en bij passeren een onherroepelijke omgevingsvergunning.',
     'Uitgesloten onder meer: serviceflat, studenten- of noodwoning, (deels) verhuurde woning, recht van opstal, coöperatief eigendom, recreatiebestemming, zelfbouw zonder aannemer.',
@@ -996,18 +997,50 @@ function bereken() {
   /* ----- Documentenlijst per dossier (hypotheekgids hoofdstuk 8) ----- */
   const documenten = [];
   const doc = (groep, items) => { if (items.length) documenten.push({ groep, items }); };
-  doc('Algemeen', ['Geretourneerd renteaanbod', 'Getekende SEPA-incassomachtiging op naam van de klant(en)', 'Kopie van een geldig identiteitsbewijs van elke aanvrager (of digitale identificatie)']
+  /* Brondata (hypotheekgids 4.4): gevalideerde gegevens via een erkende dataleverancier zoals Ockto vervangen losse documenten */
+  const bd = F.brondata, brondata = { gebruikt: [], vervallenDocumenten: [], aandachtspunten: [] };
+  const alleBronnen = [].concat(F.bronnen[0], F.bronnen[1]), heeftSoort = c => alleBronnen.some(b => b.soort === c);
+  const bdPensioen = bd.pensioen && (heeftSoort('pensioen') || F.naPensioen.some(x => x > 0) || !alleBronnen.length);
+  const bdIbl = bd.ibl && (heeftSoort('ibl') || !alleBronnen.length);
+  if (bd.identiteit) {
+    brondata.gebruikt.push('Digitale identificatie via OcktoID (BRP en iDIN)'); brondata.vervallenDocumenten.push('Kopie legitimatiebewijs');
+    voorwaarden.push('Brondata: de gegevens in de aanvraag komen overeen met de overheidsgegevens en iDIN; bij een afwijking is alsnog een kopie van het legitimatiebewijs nodig.');
+  }
+  if (bd.ibl) {
+    if (!bdIbl) { const t = 'Brondata: IBL via het UWV-verzekeringsbericht geldt alleen voor de inkomensbron Inkomensbepaling Loondienst (IBL); die bron is niet ingevuld, dus de gewone inkomensdocumenten blijven nodig.'; letop.push(t); brondata.aandachtspunten.push(t); }
+    else {
+      brondata.gebruikt.push('Inkomensbepaling Loondienst (IBL) via het UWV-verzekeringsbericht');
+      brondata.vervallenDocumenten.push('Werkgeversverklaring', 'UWV-verzekeringsbericht');
+      if (!bd.eigenBijdrage) brondata.vervallenDocumenten.push('Salarisstrook');
+      const t = bd.eigenBijdrage ? 'Brondata IBL: de eigen bijdrage pensioen is nodig voor het toetsinkomen, dus de salarisstrook blijft verplicht.' : 'Brondata IBL: vul in de HDN-aanvraag bij eigen bijdrage pensioen € 0,00 in; dan vraagt Argenta geen salarisstrook op.';
+      const t2 = 'Brondata IBL: financiële verplichtingen en looncessie of loonbeslag moeten in de aanvraag staan als die er zijn.';
+      letop.push(t, t2); brondata.aandachtspunten.push(t, t2);
+    }
+  }
+  if (bd.pensioen) {
+    if (!bdPensioen) { const t = 'Brondata: MijnPensioenoverzicht is aangevinkt, maar er is geen AOW- of pensioeninkomen ingevuld.'; letop.push(t); brondata.aandachtspunten.push(t); }
+    else {
+      brondata.gebruikt.push('Pensioen en AOW via MijnPensioenoverzicht.nl'); brondata.vervallenDocumenten.push('Pensioenoverzicht');
+      const t = 'Brondata pensioen: de gegevens van MijnPensioenoverzicht.nl zijn leidend in de toets; ontbreken ze, dan blijven de pensioendocumenten nodig.';
+      letop.push(t); brondata.aandachtspunten.push(t);
+    }
+  }
+  if (doel === 'nieuwbouw') brondata.aandachtspunten.push('Nieuwbouw: Argenta haalt het definitieve energielabel bij oplevering zelf op uit EP-online.');
+  doc('Algemeen', ['Geretourneerd renteaanbod', 'Getekende SEPA-incassomachtiging op naam van de klant(en)', bd.identiteit ? 'Digitale identificatie via OcktoID (BRP en iDIN) van elke aanvrager; een kopie legitimatiebewijs alleen als de gegevens niet overeenkomen' : 'Kopie van een geldig identiteitsbewijs van elke aanvrager (of digitale identificatie)']
     .concat(F.verblijf.some(v => v !== 'nl' && v !== 'eu') ? ['Vreemdelingendocument van de IND'] : []));
   const soorten = new Set([].concat(F.bronnen[0], F.bronnen[1]).map(b => b.soort)), inkDocs = [];
-  if (!soorten.size) inkDocs.push('Loondienst: UWV-verzekeringsbericht (IBL) of werkgeversverklaring volgens het NHG-model met salarisstrook*', 'Ander inkomen: zie de checklist in de hypotheekgids');
-  if (soorten.has('ibl')) inkDocs.push('UWV-verzekeringsbericht*', 'Salarisstrook* (alleen als de eigen bijdrage pensioen nodig is voor het toetsinkomen)');
+  if (!soorten.size) inkDocs.push(bdIbl ? 'Loondienst: IBL via brondata (Ockto)' + (bd.eigenBijdrage ? ' en de salarisstrook*' : '') : 'Loondienst: UWV-verzekeringsbericht (IBL) of werkgeversverklaring volgens het NHG-model met salarisstrook*', 'Ander inkomen: zie de checklist in de hypotheekgids');
+  if (soorten.has('ibl')) { if (!bdIbl) inkDocs.push('UWV-verzekeringsbericht*', 'Salarisstrook* (alleen als de eigen bijdrage pensioen nodig is voor het toetsinkomen)'); else inkDocs.push('IBL via brondata (Ockto): geen werkgeversverklaring of UWV-verzekeringsbericht nodig'); if (bdIbl && bd.eigenBijdrage) inkDocs.push('Salarisstrook* (de eigen bijdrage pensioen is nodig voor het toetsinkomen)'); }
   if (soorten.has('vast')) inkDocs.push('Werkgeversverklaring volgens het laatste NHG-model*', 'Salarisstrook*');
   if ([].concat(F.bronnen[0], F.bronnen[1]).some(b => b.toekomstig || +b.verhoging > 0)) inkDocs.push('Toekomstig inkomen: verklaring van de werkgever over de onvoorwaardelijke verhoging, of de arbeidsovereenkomst van het toekomstige dienstverband');
   if (soorten.has('flex')) inkDocs.push('Werkgeversverklaring volgens het laatste NHG-model* en salarisstrook*', 'Jaaropgaven van de afgelopen 3 kalenderjaren of de inkomensverklaring van de Belastingdienst (IB60)');
   if (soorten.has('perspectief')) inkDocs.push('Perspectiefverklaring met de bijbehorende werkgeversverklaring (niet ouder dan 6 maanden)');
   if (soorten.has('onderneming')) inkDocs.push('Inkomensverklaring Ondernemer' + (nhg ? '' : ', of cijfers en aangiften inkomstenbelasting van de laatste 3 jaar met 2 recente belastingaanslagen'), 'Uitdraai van het UBO-register (niet bij een eenmanszaak)');
-  if (soorten.has('pensioen')) inkDocs.push('Afschrift van mijnpensioenoverzicht.nl*');
-  if (F.naPensioen.some(x => x > 0)) inkDocs.push('Toekomstig pensioen: Uniform Pensioenoverzicht, de meest recente pensioenopgave en een opgave van de AOW-uitkering*');
+  if (bdPensioen && (soorten.has('pensioen') || F.naPensioen.some(x => x > 0))) inkDocs.push('Pensioen en AOW via brondata (MijnPensioenoverzicht.nl): geen losse pensioendocumenten nodig');
+  else {
+    if (soorten.has('pensioen')) inkDocs.push('Afschrift van mijnpensioenoverzicht.nl*');
+    if (F.naPensioen.some(x => x > 0)) inkDocs.push('Toekomstig pensioen: Uniform Pensioenoverzicht, de meest recente pensioenopgave en een opgave van de AOW-uitkering*');
+  }
   if (soorten.has('uitkeringBlijvend') || soorten.has('uitkeringTijdelijk')) inkDocs.push('Toekenningsbesluit of verklaring van de uitkerende instantie', 'Meest recente maandspecificatie van de uitkering*');
   if (soorten.has('alimentatie')) inkDocs.push('Rechterlijke uitspraak of overeenkomst waaruit de partneralimentatie en de duur blijken');
   if (soorten.has('lijfrente')) inkDocs.push('Bankafschrift met de lijfrentestorting*', 'Verklaring van de uitkerende instantie met de hoogte en duur van de lijfrente-uitkering');
@@ -1100,7 +1133,7 @@ function bereken() {
   const maand = rijen.reduce((s, r) => s + r.pm, 0);
   const gewRente = totaal > 0 ? rijen.reduce((s, r) => s + (r.rente || 0) * r.d.bedrag, 0) / totaal : 0;
   return { k, mw, nhg, nhgToets, label, labelIdx, doel, taxatie, totaal, totaalIncl, ltv, idx, rijen, ovb, toets, fouten, letop, maand, gewRente, jaren, maanden, renteTotaal, kredietKosten,
-    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkpWaarde, extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, tweeHyp, documenten, extra, tips, voorbehoud, voorwaarden, grenzen,
+    totaalTeBetalen: totaal + renteTotaal + kredietKosten, jkp: jkpWaarde, extraEbv: NORMEN.verbouwExtra[label.norm], oha, inkBep, krediet, tweeHyp, documenten, brondata, extra, tips, voorbehoud, voorwaarden, grenzen,
     oordeel: fouten.length ? 'past_niet' : voorbehoud.length ? 'voorbehoud' : 'past' };
 }
 
@@ -1114,7 +1147,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.8.0';
+const VERSIE = '1.9.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -1136,6 +1169,7 @@ function vlak(inv) {
     desktopScore: getal(w.desktopBetrouwbaarheid), oudeHypotheek: !!(inv.bestaandeHypotheek || {}).aangevraagdVoor17Augustus2026,
     verdelingReden: (inv.verdeling || {}).reden || '', verdelingIngeschreven: !!(inv.verdeling || {}).akteIngeschreven,
     taxatie: w.waardebepaling || 'nwwi', starter: !!w.koopstarter, appartement: !!w.appartement, nhg: !!w.nhg, fundering: w.funderingsrisico || null,
+    brondata: { identiteit: !!(inv.brondata || {}).identiteit, ibl: !!(inv.brondata || {}).ibl, eigenBijdrage: !!(inv.brondata || {}).eigenBijdragePensioenNodig, pensioen: !!(inv.brondata || {}).pensioen },
     nhgBestaand: !!(inv.nhgGegevens || {}).bestaandeLeningMetNhg, nhgRestant: (inv.nhgGegevens || {}).restantBestaandeLening == null ? null : getal(inv.nhgGegevens.restantBestaandeLening),
     nhgVon: !!(inv.nhgGegevens || {}).koopsomVrijOpNaam, nhgRoerend: getal((inv.nhgGegevens || {}).roerendeZaken), nhgGeenEbv: !!(inv.nhgGegevens || {}).verklaringGeenEnergiebesparing,
     nhgEws: (inv.nhgGegevens || {}).bestaandeEigenwoningschuld == null ? null : getal(inv.nhgGegevens.bestaandeEigenwoningschuld),
@@ -1238,6 +1272,7 @@ function resultaat(inv) {
     tijdelijkTweeHypotheken: r.tweeHyp ? { restschuld: r.tweeHyp.restschuld, rentePct: r.tweeHyp.rente, rentePerMaand: rond(r.tweeHyp.pm), tariefklasse: r.tweeHyp.klasse } : null,
     kosten: { stichtingskosten: r.k.stichtingskosten, nieuwbouwExtra: r.k.nieuwbouwExtra, koopsom: r.k.koopsom, verbouwing: r.k.verbouwing, overdrachtsbelasting: r.k.ovb, notarisLevering: r.k.levering, notarisHypotheek: r.k.notHyp, taxatie: r.k.tax, advies: r.k.adv, nhgProvisie: r.k.nhgKosten, overig: r.k.overig, overigTotaal: r.k.overigTotaal, totaal: r.k.totaal, eigenGeld: r.k.eigen, teFinancieren: r.k.teFinancieren },
     documenten: r.documenten,
+    brondata: r.brondata,
     verplichtingen: { perKrediet: r.krediet.regels, totaalPerMaand: Math.round(F.verplichtingen * 100) / 100 },
     inkomensbepaling: r.inkBep ? r.inkBep.per.map((b, n) => ({ aanvrager: n + 1, toetsinkomen: b.toets, onderdelen: b.onderdelen.map(o => ({ soort: o.soort, omschrijving: o.omschrijving, bedrag: o.bedrag, toelichting: o.toelichting })) })) : null,
     inkomenstoets: t ? { toetsinkomen: t.inkomen, toetsrentePct: rond(t.gemToets, 3), financieringslastPct: rond(t.pct * 100, 1), methode: t.werkelijk ? 'werkelijke_lasten' : 'annuitair_30_jaar',
