@@ -374,4 +374,36 @@ assert.ok(!nhgToetsVan({ koopsom: 300000, marktwaarde: 300000, energielabel: 'E_
 // zonder NHG geen NHG-toets
 assert.strictEqual(nhgToetsVan({ nhg: false, koopsom: 300000, marktwaarde: 300000 }, {}).nhgToets, null);
 
+// 37. Brondata (hypotheekgids 4.4): OcktoID, IBL en MijnPensioenoverzicht vervangen losse documenten
+const bdInv = (bd, inkomens, extra) => Object.assign({ peildatum: '2027-01-15', woning: { doel: 'bestaand', koopsom: 300000, marktwaarde: 300000, energielabel: 'A' }, kosten: { eigenGeld: 30000 },
+  aanvragers: [Object.assign({ inkomens }, extra)], inkomen: {}, leningdelen: [{ vorm: 'ann', bedrag: 270000, looptijd: 30, rentevast: 10 }], bkr: { status: 'schoon' }, brondata: bd });
+const docs = res => [].concat(...res.documenten.map(g => g.items)).join(' | ');
+const iblBron = [{ soort: 'ibl', bedrag: 80000 }];
+// zonder brondata: de gewone documenten
+r = E.resultaat(bdInv(undefined, iblBron));
+assert.ok(docs(r).includes('Kopie van een geldig identiteitsbewijs') && docs(r).includes('UWV-verzekeringsbericht*'));
+assert.deepStrictEqual(r.brondata, { gebruikt: [], vervallenDocumenten: [], aandachtspunten: [] });
+// OcktoID vervangt de kopie legitimatiebewijs
+r = E.resultaat(bdInv({ identiteit: true }, iblBron));
+assert.ok(docs(r).includes('OcktoID') && !docs(r).includes('Kopie van een geldig identiteitsbewijs'));
+assert.ok(r.voorwaarden.some(t => t.includes('iDIN')));
+// IBL: werkgeversverklaring en verzekeringsbericht vervallen; salarisstrook alleen bij eigen bijdrage pensioen
+r = E.resultaat(bdInv({ ibl: true }, iblBron));
+assert.ok(!docs(r).includes('UWV-verzekeringsbericht*') && !docs(r).includes('Salarisstrook'));
+assert.deepStrictEqual(r.brondata.vervallenDocumenten, ['Werkgeversverklaring', 'UWV-verzekeringsbericht', 'Salarisstrook']);
+assert.ok(r.aandachtspunten.some(t => t.includes('€ 0,00')));
+r = E.resultaat(bdInv({ ibl: true, eigenBijdragePensioenNodig: true }, iblBron));
+assert.ok(docs(r).includes('Salarisstrook*') && !r.brondata.vervallenDocumenten.includes('Salarisstrook'));
+// IBL-brondata zonder de inkomensbron IBL: de gewone documenten blijven
+r = E.resultaat(bdInv({ ibl: true }, [{ soort: 'vast', salaris: 80000 }]));
+assert.ok(docs(r).includes('Werkgeversverklaring') && r.brondata.gebruikt.length === 0 && r.brondata.aandachtspunten.length === 1);
+// pensioen via MijnPensioenoverzicht
+r = E.resultaat(bdInv({ pensioen: true }, [{ soort: 'pensioen', bedrag: 60000 }]));
+assert.ok(!docs(r).includes('Afschrift van mijnpensioenoverzicht.nl*') && docs(r).includes('MijnPensioenoverzicht.nl'));
+assert.deepStrictEqual(r.brondata.vervallenDocumenten, ['Pensioenoverzicht']);
+r = E.resultaat(bdInv({}, [{ soort: 'pensioen', bedrag: 60000 }]));
+assert.ok(docs(r).includes('Afschrift van mijnpensioenoverzicht.nl*'));
+// brondata verandert het oordeel niet
+assert.strictEqual(E.resultaat(bdInv({ identiteit: true, ibl: true, pensioen: false }, iblBron)).oordeel, E.resultaat(bdInv(undefined, iblBron)).oordeel);
+
 console.log('Alle tests geslaagd');
