@@ -994,6 +994,39 @@ function bereken() {
     }
   }
 
+  /* OHA met de beheertoets (proceskaart OHA): de gevraagde financiering dekt alleen de overbedeling en de kosten voor woningbehoud */
+  if (isOha && toets && oha && toets.ruimte < 0 && oha.ruimteLaag >= 0 && nieuwDeel > 0) {
+    const bijkomend = k.totaal - k.koopsom - k.verbouwing, maxNieuw = F.ohaOverbedeling + bijkomend;
+    if (!delen.some(d => d.meegenomen)) zet('OHA – overbedeling', 'letop', 'voer de bestaande leningdelen op als bestaand leningdeel; dan toetst de tool of de nieuwe financiering alleen de overbedeling en de kosten dekt. Dat is verplicht als de beheertoets wordt gebruikt.');
+    else if (!F.ohaOverbedeling) zet('OHA – overbedeling', 'letop', `de lening past alleen met de beheertoets. De nieuwe financiering (${fmtEuro0(nieuwDeel)}) mag dan alleen de overbedeling en de kosten voor woningbehoud dekken; vul de overbedeling in.`);
+    else if (nieuwDeel > maxNieuw + 1) zet('OHA – overbedeling', 'fout', `de lening past alleen met de beheertoets. De nieuwe financiering (${fmtEuro0(nieuwDeel)}) is dan hoger dan de overbedeling (${fmtEuro0(F.ohaOverbedeling)}) en de kosten (${fmtEuro0(bijkomend)}); samen maximaal ${fmtEuro0(maxNieuw)}.`);
+    else zet('OHA – overbedeling', 'ok', `de nieuwe financiering (${fmtEuro0(nieuwDeel)}) dekt alleen de overbedeling (${fmtEuro0(F.ohaOverbedeling)}) en de kosten (${fmtEuro0(bijkomend)}).`);
+    if (k.verbouwing > 0) zet('OHA – verbouwing', 'letop', 'bij gebruik van de beheertoets kan alleen worden geleend voor de overbedeling en kosten voor woningbehoud; een verbouwing moet daarvoor nodig zijn.');
+  }
+  /* Toevoegen van een schuldenaar (adviseurspagina Argenta OHA) */
+  const sa = F.schuldenaar;
+  if (sa) {
+    const naam = 'Toevoegen schuldenaar';
+    if (doel === 'bestaand' || doel === 'nieuwbouw') zet(naam, 'letop', 'het toevoegen van een schuldenaar is een wijziging van een bestaande hypotheek; bij een aankoop is de partner gewoon mede-aanvrager.');
+    if (!sa.eigenaar) zet(naam, 'fout', 'de nieuwe schuldenaar moet ook eigenaar, hoofdelijk schuldenaar en bewoner van de woning worden.');
+    if (F.bewind) zet(naam, 'fout', 'de nieuwe schuldenaar is een handelingsbekwaam natuurlijk persoon van minimaal 18 jaar en staat niet onder curatele of bewind.');
+    if (sa.sfh) zet(naam, 'fout', 'de nieuwe schuldenaar is opgenomen in het systeem van de Stichting Fraudebestrijding Hypotheken (SFH) en wordt niet geaccepteerd.');
+    if (sa.inkomenNodig) {
+      if (sa.achterstand) zet(naam, 'fout', 'de nieuwe schuldenaar heeft een actuele betalingsachterstand op financiële verplichtingen.');
+      if (!F.klant2) zet(naam, 'letop', 'voer de nieuwe schuldenaar op als aanvrager 2 met het inkomen; dat inkomen is nu niet meegeteld.');
+      if (!sa.gemeenschap && F.verplichtingen > 0) zet(naam, 'letop', isOha ? 'niet gehuwd in gemeenschap van goederen en er zijn lopende kredieten: Argenta rekent met de NHG-beheertoets (zie de OHA-toetsen); is het inkomen niet toereikend, dan wordt het verzoek aan Argenta voorgelegd.' : 'niet gehuwd in gemeenschap van goederen en er zijn lopende kredieten: Argenta rekent met de NHG-beheertoets. Die is hier niet uitgevoerd; kies het doel ontslag hoofdelijke aansprakelijkheid of leg het verzoek voor.');
+      voorwaarden.push('Toevoegen schuldenaar: de BKR-toets voldoet aan de NHG-norm; een herstelde of afgeloste code 2 blijft buiten beschouwing. De uitkomst wordt in het dossier vastgelegd.');
+      voorwaarden.push('Toevoegen schuldenaar: de nieuwe schuldenaar komt niet voor in het systeem van de Stichting Fraudebestrijding Hypotheken (SFH).');
+      letop.push('Toevoegen schuldenaar: omdat het inkomen nodig is, vraagt Argenta van de nieuwe schuldenaar dezelfde documenten als bij een nieuwe hypotheek.');
+    } else {
+      voorwaarden.push('Toevoegen schuldenaar: in het huwelijksgoederenregister is gecontroleerd of er huwelijkse voorwaarden of partnerschapsvoorwaarden zijn geregistreerd.');
+      voorwaarden.push('Toevoegen schuldenaar: er is een BKR-toets uitgevoerd en de uitkomst is in het dossier vastgelegd.');
+    }
+    if (sa.gemeenschap && !extra.some(e => e[0] === naam && e[1] === 'fout')) zet(naam, 'ok', 'gehuwd in gemeenschap van goederen of op huwelijkse voorwaarden waarbij de woning op beide namen komt: de nieuwe schuldenaar wordt toegevoegd' + (sa.inkomenNodig ? '.' : '; de akte van toevoeging hoeft niet gelegaliseerd te worden.'));
+    else if (!extra.some(e => e[0] === naam)) zet(naam, 'ok', 'de voorwaarden voor het toevoegen van de schuldenaar zijn ingevuld; Argenta beoordeelt het verzoek.');
+    letop.push('Toevoegen schuldenaar: het verzoek loopt via de adviseur, die de verdeling beschrijft zoals die in de akte of de huwelijkse voorwaarden staat; houd rekening met het huwelijksvermogensrecht van voor en na 1 januari 2018.');
+  }
+
   /* ----- Documentenlijst per dossier (hypotheekgids hoofdstuk 8) ----- */
   const documenten = [];
   const doc = (groep, items) => { if (items.length) documenten.push({ groep, items }); };
@@ -1072,6 +1105,10 @@ function bereken() {
   if (isOha || doel === 'uitkoop') doc(isOha ? 'Ontslag hoofdelijke aansprakelijkheid' : 'Verdeling', ['(Concept) akte van verdeling', 'Echtscheidingsbeschikking of -uitspraak en echtscheidingsconvenant', 'Inschrijvingsbewijs burgerlijke stand']
     .concat(isOha ? ['Aanvraagformulier OHA en het explainformulier'] : []));
   if (cons > 0) doc('Consumptieve hypotheek', ['Ingevulde en ondertekende informatie- en afsprakenkaart met het bestedingsdoel']);
+  if (sa) doc('Toevoegen schuldenaar', ['Geldig identiteitsbewijs van de toe te voegen schuldenaar']
+    .concat(sa.gemeenschap ? [] : ['Concept akte van levering'])
+    .concat(['Uittreksel van de burgerlijke stand (huwelijksakte of akte van partnerschapsregistratie) of het overzicht Familie uit de Basisregistratie Personen via MijnOverheid', 'Kopie van de huwelijkse voorwaarden of partnerschapsvoorwaarden (als die er zijn)'])
+    .concat(sa.inkomenNodig ? ['Inkomens- en overige stukken van de nieuwe schuldenaar zoals bij een nieuwe hypotheek'] : []));
 
   /* ----- Optimalisatietips voor de adviseur (niet in het rapport voor de klant) ----- */
   const tips = [];
@@ -1147,7 +1184,7 @@ function tariefStatus(vandaag) {
 }
 
 /* ---------- Publieke API ---------- */
-const VERSIE = '1.9.0';
+const VERSIE = '1.10.0';
 const LABEL_CODES = ['A++++_EPG', 'A++++', 'A+++', 'A+_A++', 'A', 'B', 'C_D', 'E_F_G', 'GEEN'];
 const OORDEEL_TEKST = {
   past: 'Past binnen de gepubliceerde regels van Argenta die getoetst zijn, onder de genoemde voorwaarden.',
@@ -1195,6 +1232,9 @@ function vlak(inv) {
     ovbExtra: (inv.overbruggingenExtra || []).map(x => ({ situatie: x.situatie || 'a', waarde: getal(x.waarde), rest: getal(x.restschuld), bedrag: getal(x.bedrag) })),
     ovbAan: !!o, ovbSituatie: (o || {}).situatie || 'a', ovbWaarde: getal((o || {}).waarde), ovbRestschuld: getal((o || {}).restschuld), ovbBedrag: getal((o || {}).bedrag),
     dlMaandlast: getal((o || {}).maandlastHuidig) + (inv.overbruggingenExtra || []).reduce((t, x) => t + getal(x.maandlastHuidig), 0), dlMaanden: (o || {}).maanden == null ? EXTRA.dlStandaard : getal(o.maanden), dlEigen: getal((o || {}).eigenMiddelen),
+    ohaOverbedeling: getal((inv.oha || {}).overbedeling),
+    schuldenaar: inv.schuldenaarToevoegen ? { inkomenNodig: !!inv.schuldenaarToevoegen.inkomenNodig, gemeenschap: !!inv.schuldenaarToevoegen.gemeenschapVanGoederen, eigenaar: inv.schuldenaarToevoegen.wordtEigenaarEnBewoner !== false,
+      achterstand: !!inv.schuldenaarToevoegen.achterstand, sfh: !!inv.schuldenaarToevoegen.sfhRegistratie } : null,
     ohaZonderWerk: !!(inv.oha || {}).zonderWerk, ohaAchterstand: !!(inv.oha || {}).achterstand, ohaWaarde: getal((inv.oha || {}).oorspronkelijkeMarktwaarde), ohaKinderen: getal((inv.oha || {}).kinderen),
     ohaInkBeheer: getal((inv.oha || {}).toetsinkomenBeheer), ohaEinde: !!(inv.oha || {}).dienstverbandEindigt, ohaJ1: getal(((inv.oha || {}).jaarinkomens || [])[0]), ohaJ2: getal(((inv.oha || {}).jaarinkomens || [])[1]), ohaJ3: getal(((inv.oha || {}).jaarinkomens || [])[2]),
     ohaPensioen: getal((inv.oha || {}).inkomenNaPensioen), ohaVermogen: getal((inv.oha || {}).vermogen), ohaWoz: getal((inv.oha || {}).wozWaarde),
